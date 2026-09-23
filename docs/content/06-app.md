@@ -28,4 +28,4 @@
 
 **View.** *Tags on graph* shows or hides every tag pill. Pivotick's *View* and *Physics* tools change the layout; the minimap and zoom controls sit on the right.
 
-**Saving.** The map is kept in the browser automatically. *Export → Graph data (JSON)* downloads it (with positions, unless *positions* is unticked in the JSON tab). The other *Export* entries are described in [Reports](#reports).
+**Saving.** A map you create is kept automatically **in your browser only** (local storage): nothing is sent to GitHub or to any server, and other visitors never see it. The Rulezet example and imported descriptors are locked: they can be explored and exported, not edited. *Export → Graph data (JSON)* downloads it (with positions, unless *positions* is unticked in the JSON tab). The other *Export* entries are described in [Reports](#reports).

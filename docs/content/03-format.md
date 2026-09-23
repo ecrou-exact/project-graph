@@ -23,7 +23,7 @@ A Pivograph document is a JSON object. All top-level keys are optional; unknown 
 | `title` | string | Shown in the app's header and the browser tab. |
 | `description` | string | What the map shows, the arrow convention, when facts were checked. |
 | `linkDistance` | number | Edge length in the layout. Default `150`; raise it (200–350) for big nodes or long edge labels. |
-| `readOnly` | boolean | Opens the map without editing tools until *Enable editing*. Set automatically on imported descriptors. |
+| `readOnly` | boolean | Opens the map locked: it can be explored and exported, not edited. Set automatically on imported descriptors and on the bundled example. To change a locked map, edit its JSON file. |
 | `source` | object | Where the map came from, e.g. `{ "format": "ocd", "domain": "misp-project.org" }`. Set by imports. |
 
 ### nodes

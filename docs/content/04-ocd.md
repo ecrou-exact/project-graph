@@ -14,7 +14,7 @@ Pivograph recognizes an OCD file wherever a JSON file is accepted (*Graph → Op
 
 Because each item keeps its OCD structure in `details`, the details panel reads section by section like OCD Viewer, and nothing is lost — unknown or future fields included.
 
-An imported descriptor opens **read-only**: no creation, editing or deletion (Pivotick's *Create* tools, context-menu entries, double-click, the app's buttons and the JSON editor are off). Browsing, filtering and exporting still work. *Enable editing* in the header lifts it.
+An imported descriptor opens **read-only**: no creation, editing or deletion (Pivotick's *Create* tools, context-menu entries, double-click, the app's buttons and the JSON editor are off). Browsing, filtering and exporting still work. The lock can't be lifted in the app: the graph stays a faithful view of the descriptor. To build your own map around it, start a *New graph*, or export the JSON and edit it.
 
 *Graph → Import an organization…* accepts a local file, a domain (`misp-project.org` becomes `https://misp-project.org/.well-known/open-contributions.json`), or a URL, and offers the official samples (MISP, AIL, flowintel). A remote file must be served with CORS headers; otherwise download it and open it.
 

@@ -65,7 +65,7 @@ Pivograph recognizes an OCD file wherever a JSON file is accepted (*Graph → Op
 
 Each item keeps its OCD structure in the node's `details` (status, repository { url, license, type, clone }, links, participate, governance, release, custom fields…), so the details panel reads section by section like OCD Viewer, and unknown or future fields are kept. The details form edits nested fields by path (`repository.url`).
 
-An imported descriptor opens **read-only**: no creation, editing or deletion (Pivotick's Create tools, context-menu entries, double-click, the app's buttons and the JSON editor are all off), while browsing, filtering and exporting still work. *Enable editing* in the header lifts it.
+An imported descriptor opens **read-only**: no creation, editing or deletion (Pivotick's Create tools, context-menu entries, double-click, the app's buttons and the JSON editor are all off), while browsing, filtering and exporting still work. The lock can't be lifted in the app; the Rulezet example is locked the same way. A graph you create with *New graph* is saved in your browser only, never on a server.
 
 The result is an ordinary Pivograph graph: it can be edited, restyled and exported like any other. Under a node, at most three tag pills are drawn plus a “+N” pill; the details panel lists them all.
 

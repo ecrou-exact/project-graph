@@ -438,11 +438,16 @@ function pickFile() {
 async function newDocument() {
   if (view.nodes().length && !(await confirmModal('Clear the current graph?', { confirmLabel: 'New graph' }))) return
   loadDocument(starterDocument())
+  toast('New graph. It is saved in this browser only: export it to keep a copy.')
 }
+
+// The bundled example is shown locked: on the public site, it is a demo to
+// look at. To make a graph, start a new one (kept in the visitor's browser only).
+const EXAMPLE = { ...rulezetExample, meta: { ...rulezetExample.meta, readOnly: true, source: { format: 'example' } } }
 
 async function loadExample() {
   if (view.nodes().length && !(await confirmModal('Replace the current graph with the Rulezet example?', { confirmLabel: 'Load', danger: false }))) return
-  loadRaw(rulezetExample, 'example')
+  loadRaw(EXAMPLE, 'example')
 }
 
 // --- rendering ------------------------------------------------------------------
@@ -452,24 +457,22 @@ function renderHeader() {
   title.value = state.meta.title ?? ''
   title.readOnly = !editable()
   document.title = `${state.meta.title || 'Graph'} · Pivograph`
-  document.getElementById('btn-add').disabled = !editable()
-  document.getElementById('footer-hint').textContent = editable() ? 'Double-click an item to edit it' : 'Click a tag or a type to filter'
-  // Read-only badge, with the way to unlock editing.
+  // Locked graphs show no way to add anything: the Add menu is hidden, not just disabled.
+  const add = document.getElementById('btn-add')
+  add.disabled = !editable()
+  add.closest('.pg-menu-wrap').hidden = !editable()
+  document.getElementById('footer-hint').textContent = editable() ? 'Saved in this browser only · double-click to edit' : 'Click a tag or a type to filter'
+  // Read-only graphs (the example, imported descriptors, files marked
+  // readOnly) can't be unlocked: to make a graph, start a new one.
   const badge = document.getElementById('readonly-badge')
   badge.hidden = editable()
-  const source = state.meta.source?.format === 'ocd' ? ` · well-known of ${state.meta.source.domain ?? 'an organization'}` : ''
+  const format = state.meta.source?.format
+  const what = format === 'example' ? 'Example'
+    : format === 'ocd' ? `Well-known of ${state.meta.source.domain ?? 'an organization'}`
+    : 'This graph'
   badge.replaceChildren(
-    h('span', { title: 'Editing is turned off for this graph' }, `🔒 Read-only${source}`),
-    h('button', { class: 'pg-btn pg-btn-ghost', onclick: enableEditing }, 'Enable editing'))
-}
-
-async function enableEditing() {
-  const ok = await confirmModal('Enable editing? The graph stops being a faithful view of the imported descriptor as soon as you change it.', { confirmLabel: 'Enable editing', danger: false })
-  if (!ok) return
-  const doc = view.toDocument(state, true) // keep the current layout
-  state.meta.readOnly = false
-  loadDocument({ ...doc, meta: { ...doc.meta, readOnly: false } })
-  toast('Editing enabled.')
+    h('span', { title: 'This graph can be explored and exported, not edited' }, `🔒 ${what} · read-only`),
+    h('button', { class: 'pg-btn pg-btn-ghost', title: 'Start your own graph, saved in this browser only', onclick: newDocument }, 'New graph'))
 }
 
 function swatch(attrs) {
@@ -779,7 +782,7 @@ function bindHeader() {
       id: 'btn-graph',
       label: 'Graph',
       items: [
-        { label: 'New graph', hint: 'Start empty, with ready-made types', onclick: newDocument },
+        { label: 'New graph', hint: 'Start empty; saved in this browser only', onclick: newDocument },
         { label: 'Open a file…', hint: 'Pivograph JSON or open-contributions.json', onclick: pickFile },
         { label: 'Import an organization…', hint: 'From its .well-known/open-contributions.json', onclick: importWellKnown },
         'separator',
@@ -862,7 +865,7 @@ if (EMBED.enabled) {
 } else {
   const saved = restore()
   if (saved) loadDocument(saved)
-  else loadRaw(rulezetExample, 'example')
+  else loadRaw(EXAMPLE, 'example')
   if (EMBED.src) loadSrc(EMBED.src)
 }
 tellHost({ type: 'pivograph:ready' })
