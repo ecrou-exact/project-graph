@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import {
   MARKER_END, MARKER_START, NO_MARKER,
-  edgeLabel, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, parseDetails, parseDocument, parseGithub, parseLinks, parseTags, readableOn, tagLook, resolveNode, slugify, starterDocument, toRawEdge, toRawNode, uniqueId,
+  edgeLabel, edgeLabelLook, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, parseDetails, parseDocument, parseGithub, parseLinks, parseTags, readableOn, tagLook, resolveNode, slugify, starterDocument, toRawEdge, toRawNode, uniqueId,
 } from '../src/model.js'
 import { flattenDetails, unflattenDetails } from '../src/ui/forms.js'
 
@@ -225,5 +225,26 @@ describe('saved GitHub details', () => {
     const { doc } = parseDocument({ nodes: [{ id: 'a', github: 'MISP/MISP', githubInfo: info }, { id: 'b', githubInfo: info }] })
     expect(doc.nodes[0].githubInfo).toEqual(info)
     expect(doc.nodes[1].githubInfo).toBeUndefined()
+  })
+})
+
+describe('edge look', () => {
+  it('maps shape and animation to Pivotick, inheriting from the edge type', () => {
+    const types = { flow: { curve: 'curved', animated: true, labelFont: 'mono', hideLabel: false } }
+    expect(edgeStyle({ type: 'flow' }, types).edge).toMatchObject({ curveStyle: 'curved', dashed: true, animateDash: true })
+    expect(edgeStyle({ type: 'flow', curve: 'straight', animated: false }, types).edge).toMatchObject({ curveStyle: 'straight', dashed: false, animateDash: false })
+    expect(edgeStyle({}, {}).edge.curveStyle).toBe('bidirectional') // "auto": curved only for parallel edges
+  })
+
+  it('resolves the label look, hidden or styled', () => {
+    expect(edgeLabelLook({ hideLabel: true }, {}).hidden).toBe(true)
+    const look = edgeLabelLook({ type: 't', labelColor: '#fff', labelBackground: 'none', labelSize: 14 }, { t: { labelFont: 'mono' } })
+    expect(look).toMatchObject({ hidden: false, color: '#fff', background: 'none', size: 14 })
+    expect(look.font).toContain('monospace')
+  })
+
+  it('keeps the new fields when reading a document', () => {
+    const { doc } = parseDocument({ nodes: [{ id: 'a' }, { id: 'b' }], edges: [{ from: 'a', to: 'b', curve: 'curved', animated: true, labelColor: '#f00' }] })
+    expect(doc.edges[0]).toMatchObject({ curve: 'curved', animated: true, labelColor: '#f00' })
   })
 })

@@ -634,3 +634,15 @@ body.pg-resizing .pg-graph { pointer-events: none; }
 
 body.pg-embed .pg-header { display: none; }
 body.pg-no-sidebar .pg-sidebar, body.pg-no-sidebar .pg-resizer { display: none; }
+.pg-edge-label.pg-edge-label-bare { background: transparent; border-color: transparent; }
+
+/* --- edge form preview ----------------------------------------------------- */
+
+.pg-edge-preview-field { flex-direction: row; align-items: center; gap: 8px; }
+.pg-edge-preview { flex: 1; min-width: 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); }
+.pg-edge-preview-svg { display: block; width: 100%; height: auto; }
+.pg-edge-preview-node { fill: var(--surface); stroke: var(--border); }
+.pg-edge-preview-text { fill: var(--text); font: 600 12px system-ui, sans-serif; }
+.pg-edge-preview-animated { animation: pg-dash 0.8s linear infinite; }
+@keyframes pg-dash { to { stroke-dashoffset: -12; } }
+@media (prefers-reduced-motion: reduce) { .pg-edge-preview-animated { animation: none; } }

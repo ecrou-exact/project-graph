@@ -5,7 +5,7 @@ import { Pivotick, Node, Edge } from 'pivotick'
 import 'pivotick/dist/pivotick.css'
 import {
   MARKER_END, MARKER_START, NODE_FIELDS, EDGE_FIELDS,
-  compact, edgeLabel, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, toRawEdge, toRawNode,
+  compact, edgeLabel, edgeLabelLook, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, toRawEdge, toRawNode,
 } from './model.js'
 import { badgeIconSvg } from './badgeIcons.js'
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons'
@@ -83,11 +83,19 @@ export class GraphView {
         // Custom renderer so a label inherited from the edge type shows too
         // (Pivotick's default one only reads `data.label`).
         renderLabel: (edge) => {
-          const text = edgeLabel(edge.getData(), this.hooks.getTypes().edgeTypes)
-          if (!text) return undefined
+          const { edgeTypes } = this.hooks.getTypes()
+          const text = edgeLabel(edge.getData(), edgeTypes)
+          const look = edgeLabelLook(edge.getData(), edgeTypes)
+          if (!text || look.hidden) return undefined
           const span = document.createElement('span')
           span.className = 'pg-edge-label'
           span.textContent = text
+          // Per-edge label style (inherited from the edge type when unset).
+          if (look.color) span.style.color = look.color
+          if (look.background === 'none') span.classList.add('pg-edge-label-bare')
+          else if (look.background) span.style.background = look.background
+          if (look.size) span.style.fontSize = `${look.size}px`
+          if (look.font) span.style.fontFamily = look.font
           return span
         },
       },

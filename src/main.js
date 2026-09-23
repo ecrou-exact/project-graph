@@ -202,8 +202,14 @@ function nodeIds() {
 }
 
 function edgeContext() {
+  // Relationship wordings already used in this graph, suggested first.
+  const labels = [
+    ...view.edges().map((e) => e.getData().label),
+    ...Object.values(state.edgeTypes).map((t) => t.label),
+  ].filter(Boolean)
   return {
     edgeTypes: state.edgeTypes,
+    labels: [...new Set(labels)].sort(),
     nodes: view.nodes()
       .map((n) => ({ id: String(n.id), label: n.getData().label ?? String(n.id) }))
       .sort((a, b) => a.label.localeCompare(b.label)),

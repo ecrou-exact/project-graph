@@ -7,7 +7,7 @@ Bundled example: projects linked to **Rulezet** (`examples/rulezet.json`).
 ## Features
 
 - **Nodes**: label, type, description, link, colour, shape (circle, square, triangle, hexagon), size, image (URL, relative path, embedded local file, or one of the bundled icons), border (colour, width or none), and label (shown or hidden, text colour, background or none, size, font). The node form is split into tabs: Content, Links, Appearance, Border, Label, Badges.
-- **Edges**: label, type, colour, width, solid/dashed line, and **arrow direction**: `→`, `←`, `↔` or no arrow.
+- **Edges**, edited like nodes (tabs Content, Line, Label, Details, with a live preview): how the two are related (label, with suggestions from the graph and common relationship words), type, **arrow direction** (`→`, `←`, `↔` or none), source/target swap; colour, width, solid/dashed, shape (auto, straight, curved), moving dashes; label shown or hidden, text colour, background or none, size, font. Edge types provide all of these as defaults.
 - **Tags**: `#tags` on a node become coloured pills under it, with a colour and an optional icon (a curated set of Font Awesome Free icons, picked from a grid) per tag, shared by every node with that tag. Existing tags are suggested when typing; pills can be hidden per node or per type. A Tags tab lists and edits them.
 - **Links**: a website, a GitHub repository and any number of other links per node. The GitHub API (60 unauthenticated requests per hour) is only called from the node form — when a repository is entered, or with *Refresh* — and the summary (description, stars, forks, open issues, language, licence, topics, last update) is saved with the node (`githubInfo`) and shown from there: displaying or importing a graph, a well-known file included, never calls it.
 - **Details**: any extra key / value fields on a node or an edge (license, maintainers, formats…), shown in the details panel and tooltip, edited in the Details tab.
@@ -173,6 +173,9 @@ Icons are Font Awesome Free names (`src/badgeIcons.js` lists the bundled ones).
 | `type` | key in `edgeTypes` |
 | `direction` | `forward` (from → to, default), `backward` (to → from), `both`, `none` |
 | `color`, `width`, `dashed` | line appearance |
+| `curve` | `auto` (default), `straight`, `curved` |
+| `animated` | `true`: moving dashes along the edge |
+| `hideLabel`, `labelColor`, `labelBackground`, `labelSize`, `labelFont` | label look, as for nodes |
 | `description` | free text |
 | `details` | extra fields, as for nodes |
 

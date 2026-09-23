@@ -1,8 +1,8 @@
 // Declarative forms for nodes, edges and types.
 import { h } from './dom.js'
 import {
-  DEFAULT_EDGE, DEFAULT_NODE, DIRECTIONS, IMAGE_FITS, LABEL_FONTS, SHAPES,
-  parseDetails, parseGithub, parseLinks, parseTags, resolveEdge, resolveNode, slugify, tagLook, uniqueId,
+  CURVES, DEFAULT_EDGE, DEFAULT_NODE, DIRECTIONS, IMAGE_FITS, LABEL_FONTS, SHAPES,
+  edgeLabelLook, parseDetails, parseGithub, parseLinks, parseTags, resolveEdge, resolveNode, slugify, tagLook, uniqueId,
 } from '../model.js'
 import { fetchRepo } from '../github.js'
 import { repoCard, repoError } from './githubCard.js'
@@ -22,7 +22,14 @@ function textInput(field, value) {
     ? h('textarea', { rows: 3, placeholder: field.placeholder })
     : h('input', { type: field.inputType ?? 'text', placeholder: field.placeholder, readonly: field.readonly })
   input.value = value ?? ''
-  return { el: input, input, get: () => input.value.trim() || undefined, set: (v) => (input.value = v ?? '') }
+  let el = input
+  if (field.suggestions?.length && !field.multiline) {
+    // Suggested values, still free text.
+    const listId = `pg-suggest-${Math.random().toString(36).slice(2)}`
+    input.setAttribute('list', listId)
+    el = h('div', {}, input, h('datalist', { id: listId }, field.suggestions.map((v) => h('option', { value: v }))))
+  }
+  return { el, input, get: () => input.value.trim() || undefined, set: (v) => (input.value = v ?? '') }
 }
 
 function numberInput(field, value) {
@@ -651,6 +658,84 @@ export function nodeFields(container, init, ctx) {
 
 // --- edge form -----------------------------------------------------------------
 
+// --- edge look: line and label (edge form and edge type form) -----------------------
+
+const LINE_WORD = (v) => (isTrue(v) ? 'dashed' : 'solid')
+
+function edgeLookSpecs(inherited, word = 'inherited', currentFont) {
+  const curve = CURVES[inherited.curve] ?? CURVES.auto
+  return [
+    { section: 'Line' },
+    { key: 'color', label: 'Colour', type: 'color', inherited: inherited.color ?? DEFAULT_EDGE.color },
+    { key: 'width', label: 'Width', type: 'number', min: 1, max: 12, placeholder: `${word} (${inherited.width ?? DEFAULT_EDGE.width})` },
+    {
+      key: 'dashed', label: 'Line', type: 'select',
+      options: [['', `${word} (${LINE_WORD(inherited.dashed)})`], ['false', 'Solid'], ['true', 'Dashed']],
+    },
+    {
+      key: 'curve', label: 'Shape', type: 'select',
+      options: [['', `${word} (${curve.label})`], ...Object.entries(CURVES).map(([k, c]) => [k, c.label])],
+      hint: 'Auto: straight, curved only when two nodes have several edges.',
+    },
+    {
+      key: 'animated', label: 'Animation', type: 'select',
+      options: [['', `${word} (${isTrue(inherited.animated) ? 'animated' : 'still'})`], ['false', 'Still'], ['true', 'Moving dashes']],
+      hint: 'Moving dashes show the direction of the flow.',
+    },
+    { section: 'Label' },
+    {
+      key: 'hideLabel', label: 'Show label', type: 'select',
+      options: [['', `${word} (${isTrue(inherited.hideLabel) ? 'hidden' : 'shown'})`], ['false', 'Show'], ['true', 'Hide']],
+    },
+    { key: 'labelSize', label: 'Text size', type: 'number', min: 6, max: 32, placeholder: `${word} (${inherited.labelSize ?? 11})` },
+    { key: 'labelFont', label: 'Font', type: 'select', options: fontOptions(inherited.labelFont, word, currentFont) },
+    { key: 'labelColor', label: 'Text colour', type: 'color', inherited: inherited.labelColor ?? '#677084' },
+    {
+      key: 'labelBackground', label: 'Background', type: 'colorChoice',
+      inheritedLabel: `${word} (${inherited.labelBackground ?? 'default'})`, fallback: '#ffffff',
+    },
+  ]
+}
+
+function refreshEdgeHints(widgets, next) {
+  const dir = DIRECTIONS[next.direction] ?? DIRECTIONS[DEFAULT_EDGE.direction]
+  widgets.label.input.placeholder = next.label ? `inherited: ${next.label}` : 'e.g. uses, depends on, maintains…'
+  widgets.direction.el.querySelector('span').textContent = `inherited ${dir.symbol}`
+  widgets.color.setInherited(next.color)
+  widgets.width.input.placeholder = `inherited (${next.width})`
+  widgets.dashed.input.options[0].textContent = `inherited (${LINE_WORD(next.dashed)})`
+  widgets.curve.input.options[0].textContent = `inherited (${(CURVES[next.curve] ?? CURVES.auto).label})`
+  widgets.animated.input.options[0].textContent = `inherited (${isTrue(next.animated) ? 'animated' : 'still'})`
+  widgets.hideLabel.input.options[0].textContent = `inherited (${isTrue(next.hideLabel) ? 'hidden' : 'shown'})`
+  widgets.labelSize.input.placeholder = `inherited (${next.labelSize ?? 11})`
+  widgets.labelFont.input.options[0].textContent = fontOptions(next.labelFont, 'inherited')[0][1]
+  widgets.labelColor.setInherited(next.labelColor ?? '#677084')
+  widgets.labelBackground.setInherited(`inherited (${next.labelBackground ?? 'default'})`)
+}
+
+const EDGE_BOOLS = ['dashed', 'animated', 'hideLabel']
+
+/** Tri-state selects are rendered from strings, and saved as booleans. */
+function edgeInitial(values) {
+  const out = {}
+  for (const key of EDGE_BOOLS) out[key] = values[key] === undefined ? '' : String(values[key])
+  return out
+}
+
+function edgeBoolValues(v) {
+  for (const key of EDGE_BOOLS) if (v[key] !== undefined) v[key] = v[key] === 'true'
+  return v
+}
+
+// --- edge form -----------------------------------------------------------------
+
+/** Words that describe how two things are related (suggested for edge labels). */
+export const RELATION_WORDS = [
+  'uses', 'depends on', 'integrates with', 'exports to', 'imports from', 'develops', 'maintains',
+  'co-maintains', 'supports', 'contributes to', 'sponsors', 'upstream of', 'downstream of',
+  'member of', 'affiliated with', 'publishes', 'participates in', 'feeds', 'replaces', 'extends',
+]
+
 export function edgeFields(container, init, ctx) {
   const values = { direction: '', ...init.values }
   if (!values.from && ctx.nodes.length) values.from = ctx.nodes[0].id
@@ -659,61 +744,142 @@ export function edgeFields(container, init, ctx) {
   const nodeOptions = ctx.nodes.map((n) => [n.id, n.label === n.id ? n.id : `${n.label} (${n.id})`])
   const typeOptions = [['', '(none)'], ...Object.entries(ctx.edgeTypes).map(([k, t]) => [k, t.label || k])]
   const inheritedDir = DIRECTIONS[inherited.direction] ?? DIRECTIONS[DEFAULT_EDGE.direction]
+  const suggestions = [...new Set([...(ctx.labels ?? []), ...RELATION_WORDS])]
 
   const form = renderFields(container, [
     { key: 'from', label: 'Source', type: 'select', options: nodeOptions, required: true, readonly: init.lockEnds },
     { key: 'to', label: 'Target', type: 'select', options: nodeOptions, required: true, readonly: init.lockEnds },
-    { key: 'label', label: 'Label', type: 'text', placeholder: inherited.label ? `inherited: ${inherited.label}` : 'e.g. uses, exports to…' },
     {
-      key: 'type', label: 'Type', type: 'select', options: typeOptions,
-      hint: Object.keys(ctx.edgeTypes).length ? undefined : 'No edge types yet: add some in the Types tab.',
+      key: 'label', label: 'How are they related?', type: 'text', wide: true, suggestions,
+      placeholder: inherited.label ? `inherited: ${inherited.label}` : 'e.g. uses, depends on, maintains…',
+      hint: 'The text on the edge. Pick a suggestion or write your own.',
     },
     {
-      key: 'direction', label: 'Arrow direction', type: 'segmented', wide: true,
+      key: 'type', label: 'Type', type: 'select', options: typeOptions,
+      hint: Object.keys(ctx.edgeTypes).length ? 'The type provides default style, direction and label.' : 'No edge types yet: add some in the Types tab.',
+    },
+    {
+      key: 'direction', label: 'Arrow direction', type: 'segmented',
       options: [
         ['', `inherited ${inheritedDir.symbol}`, 'Direction set by the type'],
         ...Object.entries(DIRECTIONS).map(([k, d]) => [k, d.symbol, d.label]),
       ],
     },
-    { section: 'Appearance' },
-    { key: 'color', label: 'Colour', type: 'color', inherited: inherited.color },
-    { key: 'width', label: 'Width', type: 'number', min: 1, max: 12, placeholder: `inherited (${inherited.width})` },
-    {
-      key: 'dashed', label: 'Line', type: 'select',
-      options: [['', `inherited (${inherited.dashed ? 'dashed' : 'solid'})`], ['false', 'Solid'], ['true', 'Dashed']],
-    },
+    ...edgeLookSpecs(inherited, 'inherited', values.labelFont),
     { section: 'Details' },
     { key: 'description', label: 'Description', type: 'text', multiline: true, wide: true },
     { key: 'details', label: 'Extra fields', type: 'details', wide: true },
-  ], { ...values, dashed: values.dashed === undefined ? '' : String(values.dashed) }, { firstTab: 'Content' })
+  ], { ...values, ...edgeInitial(values) }, { firstTab: 'Content' })
 
   if (!editing && !values.to && ctx.nodes.length > 1) {
     form.widgets.to.input.selectedIndex = 1
   }
 
+  const current = () => {
+    const v = edgeBoolValues(form.values())
+    v.id = values.id
+    return v
+  }
+
+  // Live preview of the edge, at the top of the first tab, plus a swap button.
+  const preview = h('div', { class: 'pg-edge-preview' })
+  const swap = h('button', {
+    type: 'button', class: 'pg-btn pg-btn-ghost', title: 'Swap source and target', disabled: Boolean(init.lockEnds),
+    onclick: () => {
+      const { from, to } = form.widgets
+      const a = from.input.value
+      from.input.value = to.input.value
+      to.input.value = a
+      refresh()
+    },
+  }, '⇄ Swap')
+  const nodeLabel = (id) => ctx.nodes.find((n) => n.id === id)?.label ?? id ?? '?'
+  const refresh = () => {
+    const v = current()
+    preview.replaceChildren(edgePreviewSvg(nodeLabel(v.from), nodeLabel(v.to), v, ctx.edgeTypes))
+  }
+  container.querySelector('.pg-form-panel')?.prepend(h('div', { class: 'pg-field pg-field-wide pg-edge-preview-field' }, preview, swap))
+  container.addEventListener('input', refresh)
+  container.addEventListener('change', refresh)
+  refresh()
+
   // Inherited values follow the chosen type.
   form.widgets.type.input.addEventListener('change', () => {
-    const next = resolveEdge({ type: form.widgets.type.get() }, ctx.edgeTypes)
-    const dir = DIRECTIONS[next.direction] ?? DIRECTIONS[DEFAULT_EDGE.direction]
-    form.widgets.label.input.placeholder = next.label ? `inherited: ${next.label}` : 'e.g. uses, exports to…'
-    form.widgets.direction.el.querySelector('span').textContent = `inherited ${dir.symbol}`
-    form.widgets.color.setInherited(next.color)
-    form.widgets.width.input.placeholder = `inherited (${next.width})`
-    form.widgets.dashed.input.options[0].textContent = `inherited (${next.dashed ? 'dashed' : 'solid'})`
+    refreshEdgeHints(form.widgets, resolveEdge({ type: form.widgets.type.get() }, ctx.edgeTypes))
+    refresh()
   })
 
   return {
     ...form,
-    values() {
-      const v = form.values()
-      if (v.dashed !== undefined) v.dashed = v.dashed === 'true'
-      v.id = values.id
-      return v
-    },
+    values: current,
     validate() {
       return form.missingRequired()
     },
   }
+}
+
+// --- edge preview (SVG built with the DOM: labels are user text) -----------------
+
+const SVG = 'http://www.w3.org/2000/svg'
+
+function svgEl(tag, attrs = {}, text) {
+  const el = document.createElementNS(SVG, tag)
+  for (const [k, v] of Object.entries(attrs)) if (v !== undefined && v !== null) el.setAttribute(k, v)
+  if (text !== undefined) el.textContent = text
+  return el
+}
+
+function edgePreviewSvg(fromLabel, toLabel, values, edgeTypes) {
+  const a = resolveEdge(values, edgeTypes)
+  const look = edgeLabelLook(values, edgeTypes)
+  const direction = DIRECTIONS[a.direction] ? a.direction : DEFAULT_EDGE.direction
+  const color = a.color
+  const width = Number(a.width) || DEFAULT_EDGE.width
+  const dashed = isTrue(a.dashed) || isTrue(a.animated)
+  const svg = svgEl('svg', { viewBox: '0 0 460 80', class: 'pg-edge-preview-svg', role: 'img', 'aria-label': `${fromLabel} to ${toLabel}` })
+  const defs = svgEl('defs')
+  const arrow = (id, orient) => {
+    const m = svgEl('marker', { id, viewBox: '0 -5 10 10', refX: 8, refY: 0, markerWidth: 8, markerHeight: 8, orient, markerUnits: 'strokeWidth' })
+    m.append(svgEl('path', { d: 'M0,-5L10,0L0,5', fill: color }))
+    return m
+  }
+  const uid = Math.random().toString(36).slice(2)
+  defs.append(arrow(`pe-${uid}`, 'auto'), arrow(`ps-${uid}`, 'auto-start-reverse'))
+  svg.append(defs)
+  const box = (x, label) => {
+    const g = svgEl('g')
+    g.append(svgEl('rect', { x, y: 22, width: 120, height: 36, rx: 10, class: 'pg-edge-preview-node' }))
+    const shown = label.length > 16 ? `${label.slice(0, 15)}…` : label
+    g.append(svgEl('text', { x: x + 60, y: 45, 'text-anchor': 'middle', class: 'pg-edge-preview-text' }, shown))
+    return g
+  }
+  const curved = a.curve === 'curved'
+  const path = svgEl('path', {
+    d: curved ? 'M 134 40 Q 230 0 326 40' : 'M 134 40 L 326 40',
+    fill: 'none', stroke: color, 'stroke-width': width,
+    'stroke-dasharray': dashed ? '7 5' : undefined,
+    class: isTrue(a.animated) ? 'pg-edge-preview-animated' : undefined,
+    'marker-end': direction === 'forward' || direction === 'both' ? `url(#pe-${uid})` : undefined,
+    'marker-start': direction === 'backward' || direction === 'both' ? `url(#ps-${uid})` : undefined,
+  })
+  svg.append(path, box(10, fromLabel), box(330, toLabel))
+  if (a.label && !look.hidden) {
+    const size = look.size ?? 11
+    const text = svgEl('text', {
+      x: 230, y: curved ? 22 : 40, 'text-anchor': 'middle', 'dominant-baseline': 'central',
+      'font-size': size, 'font-family': look.font ?? 'system-ui, sans-serif',
+      fill: look.color ?? 'var(--muted)',
+    }, a.label)
+    const approx = Math.min(180, a.label.length * size * 0.6 + 12)
+    if (look.background !== 'none') {
+      svg.append(svgEl('rect', {
+        x: 230 - approx / 2, y: (curved ? 22 : 40) - size * 0.8, width: approx, height: size * 1.6, rx: 4,
+        fill: look.background ?? 'var(--surface)', stroke: look.background ? 'none' : 'var(--border)',
+      }))
+    }
+    svg.append(text)
+  }
+  return svg
 }
 
 // --- type forms ------------------------------------------------------------------
@@ -738,27 +904,24 @@ export function typeFields(container, init, ctx) {
       ...nodeLookSpecs({}, 'default', def.labelFont),
     )
   } else {
-    specs.push(
-      { key: 'label', label: 'Default label', type: 'text', hint: 'Shown on the edge when it has no label of its own.' },
-      { key: 'width', label: 'Width', type: 'number', min: 1, max: 12, placeholder: String(DEFAULT_EDGE.width) },
-      { key: 'dashed', label: 'Line', type: 'select', options: [['', 'Solid'], ['true', 'Dashed']] },
+    // An edge type's label *is* the default edge label; its look comes from the shared specs.
+    specs.splice(1, 2,
+      { key: 'label', label: 'Default label', type: 'text', suggestions: RELATION_WORDS, hint: 'Shown on the edge when it has no label of its own.' },
       {
         key: 'direction', label: 'Default direction', type: 'segmented', wide: true,
         options: Object.entries(DIRECTIONS).map(([k, d]) => [k, d.symbol, d.label]),
       },
+      ...edgeLookSpecs(DEFAULT_EDGE, 'default', def.labelFont),
     )
-    // An edge type's label *is* the default edge label, so drop the generic one.
-    specs.splice(1, 1)
   }
   const form = renderFields(container, specs, {
-    ...def, _name: name, dashed: def.dashed ? 'true' : '', direction: def.direction ?? (isNode ? undefined : 'forward'),
-    ...lookInitial(def),
+    ...def, _name: name, direction: def.direction ?? (isNode ? undefined : 'forward'),
+    ...lookInitial(def), ...(isNode ? {} : edgeInitial(def)),
   })
   return {
     ...form,
     values() {
-      const { _name, ...rest } = lookValues(form.values())
-      if (rest.dashed !== undefined) rest.dashed = rest.dashed === 'true'
+      const { _name, ...rest } = isNode ? lookValues(form.values()) : edgeBoolValues(form.values())
       return { name: slugify(_name) || _name, def: rest }
     },
     validate() {

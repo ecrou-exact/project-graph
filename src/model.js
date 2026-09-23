@@ -39,9 +39,21 @@ export const TAG_FIELDS = ['color', 'icon']
 
 // Colours given to tags that have no colour of their own (picked from the name).
 export const TAG_PALETTE = ['#3b63f3', '#0f9d8a', '#e8833a', '#d6384b', '#7c5cd6', '#2f9e44', '#c2860b', '#56627a']
-export const EDGE_FIELDS = ['label', 'type', 'description', 'details', 'direction', 'color', 'width', 'dashed']
+// Edge appearance keys a type can provide too.
+const EDGE_LOOK = [
+  'direction', 'color', 'width', 'dashed', 'curve', 'animated',
+  'hideLabel', 'labelColor', 'labelBackground', 'labelSize', 'labelFont',
+]
+export const EDGE_FIELDS = ['label', 'type', 'description', 'details', ...EDGE_LOOK]
 export const NODE_TYPE_FIELDS = ['label', ...NODE_LOOK]
-export const EDGE_TYPE_FIELDS = ['label', 'color', 'width', 'dashed', 'direction']
+export const EDGE_TYPE_FIELDS = ['label', ...EDGE_LOOK]
+
+// Edge shapes, and Pivotick's name for each ("auto" curves only parallel edges).
+export const CURVES = {
+  auto: { label: 'Auto', pivotick: 'bidirectional' },
+  straight: { label: 'Straight', pivotick: 'straight' },
+  curved: { label: 'Curved', pivotick: 'curved' },
+}
 
 // Marker ids registered in Pivotick's markerStyleMap. Any id missing from the
 // map draws no marker, which is how an edge end loses its arrow.
@@ -355,7 +367,10 @@ export function edgeStyle(data, edgeTypes) {
     edge: {
       strokeColor: a.color,
       strokeWidth: Number(a.width) || DEFAULT_EDGE.width,
-      dashed: isTrue(a.dashed),
+      // An animated line is a dashed line whose dashes move along the edge.
+      dashed: isTrue(a.dashed) || isTrue(a.animated),
+      animateDash: isTrue(a.animated),
+      curveStyle: (CURVES[a.curve] ?? CURVES.auto).pivotick,
       markerEnd: direction === 'forward' || direction === 'both' ? MARKER_END : NO_MARKER,
       markerStart: direction === 'backward' || direction === 'both' ? MARKER_START : NO_MARKER,
     },
@@ -365,6 +380,18 @@ export function edgeStyle(data, edgeTypes) {
 
 export function edgeLabel(data, edgeTypes) {
   return resolveEdge(data, edgeTypes).label ?? ''
+}
+
+/** How an edge's label is drawn: hidden, or its colours, size and font. */
+export function edgeLabelLook(data, edgeTypes) {
+  const a = resolveEdge(data, edgeTypes)
+  return {
+    hidden: isTrue(a.hideLabel),
+    color: a.labelColor,
+    background: a.labelBackground,
+    size: Number(a.labelSize) || undefined,
+    font: a.labelFont ? LABEL_FONTS[a.labelFont]?.css ?? a.labelFont : undefined,
+  }
 }
 
 /** Document node -> Pivotick RawNode. */
