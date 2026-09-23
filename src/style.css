@@ -185,6 +185,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   border-radius: var(--radius);
   cursor: pointer;
 }
+.pg-item { user-select: none; }
 .pg-item:hover { background: var(--surface-2); }
 .pg-item-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .pg-item-title { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -608,3 +609,28 @@ body.pg-resizing .pg-graph { pointer-events: none; }
   box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
 }
 .pg-graph-toggle[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-text); }
+.pg-center { align-self: center; }
+
+/* --- read-only documents -------------------------------------------------- */
+
+.pg-readonly {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px 2px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
+  color: var(--text);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+.pg-readonly[hidden] { display: none; }
+.pg-readonly .pg-btn { padding: 3px 10px; font-size: 12.5px; color: var(--primary); }
+.pg-btn:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+.pg-title-input[readonly] { cursor: default; }
+.pg-title-input[readonly]:hover { border-color: transparent; }
+
+/* --- embedded in another site (?embed=1, ?sidebar=0) ---------------------- */
+
+body.pg-embed .pg-header { display: none; }
+body.pg-no-sidebar .pg-sidebar, body.pg-no-sidebar .pg-resizer { display: none; }

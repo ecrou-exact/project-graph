@@ -88,5 +88,6 @@ describe('OCD import', () => {
     expect(member.details).toEqual({ type: 'member_of', since: '2024-01-15', evidence: ['https://consortium.example/members'] })
     expect(doc.edgeTypes['rel-co_maintains'].direction).toBe('both')
     expect(doc.meta.source).toMatchObject({ format: 'ocd', domain: 'example.org' })
+    expect(doc.meta.readOnly).toBe(true) // a published descriptor opens read-only
   })
 })

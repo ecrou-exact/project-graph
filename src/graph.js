@@ -8,6 +8,7 @@ import {
   compact, edgeLabel, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, toRawEdge, toRawNode,
 } from './model.js'
 import { badgeIconSvg } from './badgeIcons.js'
+import { faPenToSquare } from '@fortawesome/free-solid-svg-icons'
 import { tagPills } from './ui/pills.js'
 import { link, linkList, repoCard, repoLink } from './ui/githubCard.js'
 import { detailEntries } from './ui/details.js'
@@ -49,6 +50,7 @@ export class GraphView {
     this.pillObserver = null
     this.pillFrame = null
     this.showPills = true
+    this.readOnly = false
     this.labelSheet = document.createElement('style')
     document.head.append(this.labelSheet)
   }
@@ -65,6 +67,10 @@ export class GraphView {
       nodes: doc.nodes.map((n) => this.withStyle(toRawNode(n, doc))),
       edges: doc.edges.map((e) => toRawEdge(e, doc)),
     }
+    // Read-only documents (e.g. an imported well-known): no editing affordance at all.
+    const readOnly = Boolean(doc.meta?.readOnly)
+    this.readOnly = readOnly
+    const editable = { enabled: !readOnly }
     this.graph = new Pivotick(mount, data, {
       isDirected: true,
       // Longer links leave room for the node and edge labels.
@@ -87,6 +93,9 @@ export class GraphView {
       },
       UI: {
         mode: 'full',
+        // With every editor and notes off, Pivotick drops its Create section.
+        editors: { nodeEditor: editable, nodeCreator: editable, edgeCreator: editable, edgeEditor: editable, deletion: editable },
+        notes: editable,
         filter: {
           facets: this.filterFacets(doc),
           edgeFacets: [{
@@ -109,6 +118,21 @@ export class GraphView {
         propertiesPanel: {
           nodePropertiesMap: (node) => this.nodeProperties(node),
           edgePropertiesMap: (edge) => this.edgeProperties(edge),
+        },
+        // Right-click on a node: Pivotick's entries, then ours (lists are appended).
+        contextMenu: {
+          menuNode: {
+            menu: readOnly ? [] : [{
+              text: 'Edit node',
+              title: 'Edit this node',
+              svgIcon: faIconSvg(faPenToSquare),
+              variant: 'outline-primary',
+              onclick: (_event, node) => {
+                const target = Array.isArray(node) ? node[0] : node
+                if (target) this.editNode(String(target.id))
+              },
+            }],
+          },
         },
         tooltip: {
           nodePropertiesMap: (node) => this.nodeProperties(node),
@@ -254,7 +278,6 @@ export class GraphView {
     // Same order as an OCD item: identity, its own fields, then tags and links.
     const entries = [
       ...propertyList([
-        ['id', String(node.id)],
         ['label', data.label],
         ['type', type ? type.label || data.type : data.type],
         ['description', data.description],
@@ -279,7 +302,6 @@ export class GraphView {
     const type = data.type && types[data.type]
     const labelOf = (n) => n.getData().label ?? String(n.id)
     return propertyList([
-      ['id', String(edge.id)],
       ['from', labelOf(edge.from)],
       ['to', labelOf(edge.to)],
       ['label', edgeLabel(data, types)],
@@ -482,7 +504,9 @@ export class GraphView {
   }
 
   select(id) {
-    const element = this.nodes().find((n) => String(n.id) === id) ?? this.edges().find((e) => String(e.id) === id)
+    // The live node, not a copy from getNodes(): Pivotick draws the details header
+    // (icon included) from the element it is given.
+    const element = this.liveNodes().find((n) => String(n.id) === id) ?? this.edges().find((e) => String(e.id) === id)
     if (element) this.graph.selectElement(element)
   }
 
@@ -553,6 +577,7 @@ export class GraphView {
   }
 
   async editNode(id) {
+    if (this.readOnly) return
     const node = this.nodes().find((n) => String(n.id) === id)
     if (!node) return
     const values = await this.hooks.nodeForm({ mode: 'edit', values: { id, ...node.getData() } })
@@ -560,6 +585,7 @@ export class GraphView {
   }
 
   async editEdge(id) {
+    if (this.readOnly) return
     const edge = this.edges().find((e) => String(e.id) === id)
     if (!edge) return
     const values = await this.hooks.edgeForm({
@@ -713,4 +739,9 @@ function drawPillRow(pills, top) {
   layout()
   requestAnimationFrame(layout)
   return row
+}
+
+/** A Font Awesome icon as SVG markup in the current text colour (for Pivotick menus). */
+function faIconSvg({ icon: [width, height, , , path] }) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}"><path fill="currentColor" d="${[].concat(path).join(' ')}"/></svg>`
 }

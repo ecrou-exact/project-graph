@@ -179,6 +179,8 @@ export function ocdToDocument(ocd) {
       title: `${orgName} — open contributions`,
       description: text(org.description) ?? '',
       source: { format: 'ocd', domain: org.domain, spec_version: ocd.spec_version, generated_at: ocd.generated_at },
+      // A published descriptor is shown as it is: editing is off until unlocked.
+      readOnly: true,
     },
     nodeTypes,
     edgeTypes,

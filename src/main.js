@@ -2,7 +2,7 @@ import './style.css'
 import pivotickPackage from 'pivotick/package.json'
 import rulezetExample from '../examples/rulezet.json'
 import { GraphView } from './graph.js'
-import { DIRECTIONS, TAG_FIELDS, compact, parseDocument, resolveEdge, resolveNode, starterDocument } from './model.js'
+import { DIRECTIONS, TAG_FIELDS, compact, emptyDocument, parseDocument, resolveEdge, resolveNode, starterDocument } from './model.js'
 import { h } from './ui/dom.js'
 import { edgeFields, nodeFields, tagFields, typeFields } from './ui/forms.js'
 import { tagPill } from './ui/pills.js'
@@ -10,6 +10,25 @@ import { isOcd, ocdToDocument, wellKnownUrl } from './ocd.js'
 import { confirmModal, openFormModal, toast } from './ui/modal.js'
 
 const STORAGE_KEY = 'pivograph:document'
+
+/**
+ * Embedding in another site (an <iframe>):
+ *   ?embed=1     hide the app's top bar (logo, New, Open JSON…)
+ *   ?src=<url>   load this JSON at start: a Pivograph graph or an OCD file
+ *   ?sidebar=0   hide the side panel
+ *   ?tags=0      start with the tag pills hidden
+ * The host page can also send the data, e.g. a file its visitor opened:
+ *   iframe.contentWindow.postMessage({ type: 'pivograph:load', data, name }, '*')
+ * The app announces itself with { type: 'pivograph:ready' } and answers each
+ * load with { type: 'pivograph:loaded', nodes, edges } or { type: 'pivograph:error', message }.
+ */
+const PARAMS = new URLSearchParams(location.search)
+const EMBED = {
+  enabled: PARAMS.has('embed') && PARAMS.get('embed') !== '0',
+  src: PARAMS.get('src'),
+  sidebar: PARAMS.get('sidebar') !== '0',
+  tags: PARAMS.get('tags') !== '0',
+}
 
 // Document-level state. Nodes and edges live in Pivotick (see GraphView).
 const state = { meta: {}, nodeTypes: {}, edgeTypes: {}, tags: {} }
@@ -94,19 +113,40 @@ async function importWellKnown() {
       const update = () => (resolved.textContent = input.value.trim() ? `Will fetch ${wellKnownUrl(input.value)}` : '')
       input.addEventListener('input', update)
       const error = h('div', { class: 'pg-form-error', hidden: true })
+      // A local file: read it, then submit the modal right away.
+      let picked = null
+      const file = h('input', { type: 'file', accept: '.json,application/json', hidden: true })
+      file.addEventListener('change', async () => {
+        const chosen = file.files?.[0]
+        if (!chosen) return
+        try {
+          picked = { raw: JSON.parse(await chosen.text()), source: chosen.name }
+        } catch (e) {
+          error.textContent = `Could not read ${chosen.name}: ${e.message}`
+          error.hidden = false
+          return
+        }
+        body.closest('form').requestSubmit()
+      })
       body.append(error,
         h('div', { class: 'pg-field pg-field-wide' },
-          h('label', {}, 'Domain or URL'), input, resolved,
+          h('label', {}, 'From a file'),
+          h('div', { class: 'pg-row' },
+            h('button', { type: 'button', class: 'pg-btn', onclick: () => file.click() }, 'Choose a file…'),
+            h('small', { class: 'pg-muted pg-center' }, 'an open-contributions.json saved on your computer')),
+          file),
+        h('div', { class: 'pg-field pg-field-wide' },
+          h('label', {}, 'Or from a domain or URL'), input, resolved,
           h('small', { class: 'pg-muted' },
-            'The site must allow cross-origin requests (CORS). If it doesn’t, download the file and use Open JSON… or drop it on the page.')),
+            'The site must allow cross-origin requests (CORS). If it doesn’t, download the file and choose it above.')),
         h('div', { class: 'pg-field pg-field-wide' },
           h('label', {}, 'Official samples'),
           h('div', { class: 'pg-row pg-wrap' }, Object.entries(OCD_SAMPLES).map(([name, url]) => h('button', {
             type: 'button', class: 'pg-btn', onclick: () => { input.value = url; update() },
           }, name)))))
       return {
-        values: () => ({ url: wellKnownUrl(input.value) }),
-        validate: () => (input.value.trim() ? null : 'Enter a domain or a URL.'),
+        values: () => (picked ?? { url: wellKnownUrl(input.value) }),
+        validate: () => (picked || input.value.trim() ? null : 'Choose a file, or enter a domain or a URL.'),
         showError: (message) => {
           error.textContent = message ?? ''
           error.hidden = !message
@@ -115,18 +155,20 @@ async function importWellKnown() {
     },
   })
   if (!values) return
-  let raw
+  let raw = values.raw
   try {
-    const response = await fetch(values.url, { headers: { Accept: 'application/json' } })
-    if (!response.ok) throw new Error(`the server answered ${response.status}`)
-    raw = await response.json()
+    if (!raw) {
+      const response = await fetch(values.url, { headers: { Accept: 'application/json' } })
+      if (!response.ok) throw new Error(`the server answered ${response.status}`)
+      raw = await response.json()
+    }
   } catch (error) {
     const reason = error instanceof TypeError ? 'network error or cross-origin request blocked (CORS)' : error.message
     return toast(`Could not load ${values.url}: ${reason}.`, 'error')
   }
   if (!isOcd(raw) && !Array.isArray(raw?.nodes)) return toast('This file is neither an Open Contributions Descriptor nor a Pivograph graph.', 'error')
   if (view.nodes().length && !(await confirmModal('Replace the current graph with the imported one?', { confirmLabel: 'Replace', danger: false }))) return
-  loadRaw(raw, values.url)
+  loadRaw(raw, values.source ?? values.url)
 }
 
 function currentDocument() {
@@ -134,6 +176,8 @@ function currentDocument() {
 }
 
 function persist() {
+  // Embedded in another site: never overwrite what the visitor keeps in the app itself.
+  if (EMBED.enabled) return
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(view.toDocument(state, true)))
   } catch {
@@ -205,6 +249,7 @@ function applyTagDefs(defs = {}) {
 }
 
 async function editTag(name) {
+  if (!editable()) return
   const values = await openFormModal({
     title: name ? `Tag #${name}` : 'New tag',
     build: (body) => tagFields(body, { name, def: state.tags[name] }, { takenNames: new Set(knownTags()) }),
@@ -215,6 +260,7 @@ async function editTag(name) {
 }
 
 async function removeTag(name) {
+  if (!editable()) return
   const nodes = tagUsage(name)
   const extra = nodes.length ? ` It will be removed from ${nodes.length} node(s).` : ''
   if (!(await confirmModal(`Delete the tag #${name}?${extra}`))) return
@@ -234,12 +280,19 @@ function openEdgeForm(init) {
   })
 }
 
+/** False for read-only documents (an imported well-known, until unlocked). */
+function editable() {
+  return !state.meta.readOnly
+}
+
 async function addNode() {
+  if (!editable()) return
   const values = await openNodeForm({ mode: 'create' })
   if (values) view.addNode(values)
 }
 
 async function addEdge(from) {
+  if (!editable()) return
   if (view.nodes().length === 0) return toast('Add some nodes first.', 'warning')
   const values = await openEdgeForm({ mode: 'create', values: from ? { from } : {} })
   if (!values) return
@@ -247,16 +300,19 @@ async function addEdge(from) {
 }
 
 async function removeNode(id, label) {
+  if (!editable()) return
   const count = view.edges().filter((e) => String(e.from.id) === id || String(e.to.id) === id).length
   const extra = count ? ` and its ${count} edge(s)` : ''
   if (await confirmModal(`Delete "${label}"${extra}?`)) view.removeNode(id)
 }
 
 async function removeEdge(id) {
+  if (!editable()) return
   if (await confirmModal('Delete this edge?')) view.removeEdge(id)
 }
 
 async function editType(kind, name) {
+  if (!editable()) return
   const types = kind === 'node' ? state.nodeTypes : state.edgeTypes
   const values = await openFormModal({
     title: name ? `Type "${name}"` : kind === 'node' ? 'New node type' : 'New edge type',
@@ -268,6 +324,7 @@ async function editType(kind, name) {
 }
 
 async function removeType(kind, name) {
+  if (!editable()) return
   const types = kind === 'node' ? state.nodeTypes : state.edgeTypes
   const elements = kind === 'node' ? view.nodes() : view.edges()
   const used = elements.filter((el) => el.getData().type === name).length
@@ -329,7 +386,26 @@ async function loadExample() {
 function renderHeader() {
   const title = document.getElementById('doc-title')
   title.value = state.meta.title ?? ''
+  title.readOnly = !editable()
   document.title = `${state.meta.title || 'Graph'} · Pivograph`
+  for (const id of ['btn-add-node', 'btn-add-edge']) document.getElementById(id).disabled = !editable()
+  document.getElementById('footer-hint').textContent = editable() ? 'Double-click an item to edit it' : 'Click a tag or a type to filter'
+  // Read-only badge, with the way to unlock editing.
+  const badge = document.getElementById('readonly-badge')
+  badge.hidden = editable()
+  const source = state.meta.source?.format === 'ocd' ? ` · well-known of ${state.meta.source.domain ?? 'an organization'}` : ''
+  badge.replaceChildren(
+    h('span', { title: 'Editing is turned off for this graph' }, `🔒 Read-only${source}`),
+    h('button', { class: 'pg-btn pg-btn-ghost', onclick: enableEditing }, 'Enable editing'))
+}
+
+async function enableEditing() {
+  const ok = await confirmModal('Enable editing? The graph stops being a faithful view of the imported descriptor as soon as you change it.', { confirmLabel: 'Enable editing', danger: false })
+  if (!ok) return
+  const doc = view.toDocument(state, true) // keep the current layout
+  state.meta.readOnly = false
+  loadDocument({ ...doc, meta: { ...doc.meta, readOnly: false } })
+  toast('Editing enabled.')
 }
 
 function swatch(attrs) {
@@ -338,6 +414,7 @@ function swatch(attrs) {
 }
 
 function actionButtons(onEdit, onDelete) {
+  if (!editable()) return null
   return h('span', { class: 'pg-item-actions' },
     h('button', { class: 'pg-icon-btn', title: 'Edit', onclick: (e) => { e.stopPropagation(); onEdit() } }, '✎'),
     h('button', { class: 'pg-icon-btn pg-icon-danger', title: 'Delete', onclick: (e) => { e.stopPropagation(); onDelete() } }, '🗑'))
@@ -355,7 +432,7 @@ function renderNodes() {
     .sort((a, b) => (a.data.label ?? a.id).localeCompare(b.data.label ?? b.id))
   return h('div', {},
     h('div', { class: 'pg-toolbar' },
-      h('button', { class: 'pg-btn pg-btn-primary', onclick: addNode }, '+ Node')),
+      editable() ? h('button', { class: 'pg-btn pg-btn-primary', onclick: addNode }, '+ Node') : null),
     nodes.length === 0
       ? h('p', { class: 'pg-empty' }, ui.filter ? 'No matching node.' : 'No nodes yet. Add one with the button above or with Pivotick’s Create tool.')
       : h('ul', { class: 'pg-list' }, nodes.map(({ id, data }) => {
@@ -370,7 +447,7 @@ function renderNodes() {
                 `${degree} edge${degree === 1 ? '' : 's'}`),
               // The description, like OCD Viewer's cards (tags are in the Tags tab and filter).
               data.description ? h('span', { class: 'pg-item-desc', title: data.description }, data.description) : null),
-            h('button', { class: 'pg-icon-btn', title: 'New edge from this node', onclick: (e) => { e.stopPropagation(); addEdge(id) } }, '↗'),
+            editable() ? h('button', { class: 'pg-icon-btn', title: 'New edge from this node', onclick: (e) => { e.stopPropagation(); addEdge(id) } }, '↗') : null,
             actionButtons(() => view.editNode(id), () => removeNode(id, data.label ?? id)))
         })))
 }
@@ -383,7 +460,7 @@ function renderEdges() {
     .sort((a, b) => a.from.localeCompare(b.from) || a.to.localeCompare(b.to))
   return h('div', {},
     h('div', { class: 'pg-toolbar' },
-      h('button', { class: 'pg-btn pg-btn-primary', onclick: () => addEdge() }, '+ Edge')),
+      editable() ? h('button', { class: 'pg-btn pg-btn-primary', onclick: () => addEdge() }, '+ Edge') : null),
     edges.length === 0
       ? h('p', { class: 'pg-empty' }, ui.filter ? 'No matching edge.' : 'No edges yet. Add one, or connect two nodes with Pivotick’s Add edge tool.')
       : h('ul', { class: 'pg-list' }, edges.map(({ id, from, to, data }) => {
@@ -420,7 +497,7 @@ function renderTags() {
   const tags = knownTags().filter((t) => matches(`#${t}`))
   return h('div', {},
     h('div', { class: 'pg-toolbar' },
-      h('button', { class: 'pg-btn pg-btn-primary', onclick: () => editTag() }, '+ Tag')),
+      editable() ? h('button', { class: 'pg-btn pg-btn-primary', onclick: () => editTag() }, '+ Tag') : null),
     tags.length === 0
       ? h('p', { class: 'pg-empty' }, ui.filter ? 'No matching tag.' : 'No tags yet. Add #tags to a node (Badges tab of the node form): each one becomes a badge.')
       : h('ul', { class: 'pg-list' }, tags.map((name) => {
@@ -446,7 +523,7 @@ function renderTypes() {
   const section = (kind, title, types) => h('section', { class: 'pg-types' },
     h('div', { class: 'pg-toolbar' },
       h('h3', {}, title),
-      h('button', { class: 'pg-btn', onclick: () => editType(kind) }, '+ Type')),
+      editable() ? h('button', { class: 'pg-btn', onclick: () => editType(kind) }, '+ Type') : null),
     Object.keys(types).length === 0
       ? h('p', { class: 'pg-empty' }, 'No types yet. A type gives several items a shared style.')
       : h('ul', { class: 'pg-list' }, Object.entries(types).map(([name, def]) => {
@@ -474,7 +551,7 @@ function renderTypes() {
 }
 
 function renderJson() {
-  const textarea = h('textarea', { class: 'pg-json', spellcheck: false })
+  const textarea = h('textarea', { class: 'pg-json', spellcheck: false, readOnly: !editable() })
   textarea.value = ui.jsonDraft ?? JSON.stringify(currentDocument(), null, 2)
   const status = h('div', { class: 'pg-json-status' })
   textarea.addEventListener('input', () => {
@@ -505,7 +582,7 @@ function renderJson() {
   }
   return h('div', { class: 'pg-json-panel' },
     h('div', { class: 'pg-toolbar' },
-      h('button', { class: 'pg-btn pg-btn-primary', onclick: apply }, 'Apply'),
+      editable() ? h('button', { class: 'pg-btn pg-btn-primary', onclick: apply }, 'Apply') : null,
       h('button', { class: 'pg-btn', onclick: reset }, 'Discard changes'),
       h('label', { class: 'pg-check', title: 'Include x/y positions to keep the same layout' },
         h('input', {
@@ -547,9 +624,9 @@ const PILLS_KEY = 'pivograph:show-tags'
 /** Tag pills on the graph, on or off; remembered per browser. */
 function bindPillsToggle() {
   const button = document.getElementById('btn-pills')
-  let show = true
+  let show = EMBED.tags
   try {
-    show = localStorage.getItem(PILLS_KEY) !== 'off'
+    if (EMBED.tags && !EMBED.enabled) show = localStorage.getItem(PILLS_KEY) !== 'off'
   } catch {
     // storage unavailable: pills are shown
   }
@@ -649,7 +726,53 @@ function bindHeader() {
   })
 }
 
+// --- start --------------------------------------------------------------------------
+
+const inFrame = window.parent !== window
+
+function tellHost(message, origin = '*') {
+  // A host opened from a file has the origin "null", which postMessage can't target.
+  if (inFrame) window.parent.postMessage(message, origin && origin !== 'null' ? origin : '*')
+}
+
+/** Loads data given by the host page or the ?src URL, and reports back to the host. */
+function loadForHost(raw, name, origin) {
+  const { errors } = loadRaw(raw, name)
+  if (errors.length) tellHost({ type: 'pivograph:error', message: errors[0] }, origin)
+  else tellHost({ type: 'pivograph:loaded', nodes: view.nodes().length, edges: view.edges().length }, origin)
+}
+
+async function loadSrc(url) {
+  try {
+    const response = await fetch(url, { headers: { Accept: 'application/json' } })
+    if (!response.ok) throw new Error(`the server answered ${response.status}`)
+    loadForHost(await response.json(), url)
+  } catch (error) {
+    const reason = error instanceof TypeError ? 'network error or cross-origin request blocked (CORS)' : error.message
+    toast(`Could not load ${url}: ${reason}.`, 'error')
+    tellHost({ type: 'pivograph:error', message: reason })
+  }
+}
+
+if (inFrame) {
+  window.addEventListener('message', (event) => {
+    // Only the page embedding the app can load data into it.
+    if (event.source !== window.parent || event.data?.type !== 'pivograph:load') return
+    loadForHost(event.data.data, event.data.name ?? 'data', event.origin)
+  })
+}
+
+document.body.classList.toggle('pg-embed', EMBED.enabled)
+document.body.classList.toggle('pg-no-sidebar', !EMBED.sidebar)
 bindHeader()
-const saved = restore()
-if (saved) loadDocument(saved)
-else loadRaw(rulezetExample, 'example')
+if (EMBED.enabled) {
+  // Start empty: the graph comes from ?src or from the host page.
+  loadDocument({ ...emptyDocument(), meta: { title: '', readOnly: true } })
+  if (EMBED.src) loadSrc(EMBED.src)
+} else {
+  const saved = restore()
+  if (saved) loadDocument(saved)
+  else loadRaw(rulezetExample, 'example')
+  if (EMBED.src) loadSrc(EMBED.src)
+}
+tellHost({ type: 'pivograph:ready' })

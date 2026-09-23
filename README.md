@@ -58,11 +58,44 @@ Pivograph recognizes an OCD file wherever a JSON file is accepted (*Open JSON…
 | `open_standards[]` | *Open standard* nodes (“participates in”): working groups as tags, contributions as links |
 | `relationships[]` | *External organization* / *External project* nodes, linked with the relationship type (`maintains`, `co_maintains`, `supports`, `contributes_to`, `sponsors`, `upstream_of`, `downstream_of`, `member_of`, `affiliated_with`); `since`, `until`, evidence and contacts in the edge details |
 
-*Import well-known…* fetches the file from a domain (`misp-project.org` → `https://misp-project.org/.well-known/open-contributions.json`) or a URL, and offers the official samples (MISP, AIL, flowintel). The site must allow cross-origin requests; otherwise download the file and open it.
+*Import well-known…* opens a local file, or fetches the file from a domain (`misp-project.org` → `https://misp-project.org/.well-known/open-contributions.json`) or a URL, and offers the official samples (MISP, AIL, flowintel). The site must allow cross-origin requests; otherwise download the file and open it.
 
 Each item keeps its OCD structure in the node's `details` (status, repository { url, license, type, clone }, links, participate, governance, release, custom fields…), so the details panel reads section by section like OCD Viewer, and unknown or future fields are kept. The details form edits nested fields by path (`repository.url`).
 
+An imported descriptor opens **read-only**: no creation, editing or deletion (Pivotick's Create tools, context-menu entries, double-click, the app's buttons and the JSON editor are all off), while browsing, filtering and exporting still work. *Enable editing* in the header lifts it.
+
 The result is an ordinary Pivograph graph: it can be edited, restyled and exported like any other. Under a node, at most three tag pills are drawn plus a “+N” pill; the details panel lists them all.
+
+## Embedding in another site
+
+The app can be embedded in an `<iframe>` without its top bar (logo, *New*, *Open JSON…*):
+
+| Parameter | Effect |
+|---|---|
+| `embed=1` | hide the top bar; start empty and read-only; never touch the visitor's saved graph |
+| `src=<url>` | load this JSON at start (a Pivograph graph or an OCD file; the server must allow CORS) |
+| `sidebar=0` | hide the side panel |
+| `tags=0` | start with the tag pills hidden |
+
+```html
+<iframe src="https://ecrou-exact.github.io/project-graph/?embed=1&src=https://example.org/.well-known/open-contributions.json"
+        style="width:100%;height:80vh;border:0"></iframe>
+```
+
+The host page can also send the data itself — for instance a file its visitor opened:
+
+```js
+const frame = document.querySelector('iframe')
+window.addEventListener('message', (event) => {
+  if (event.source !== frame.contentWindow) return
+  if (event.data?.type === 'pivograph:ready') {
+    frame.contentWindow.postMessage({ type: 'pivograph:load', data: ocdJson, name: 'open-contributions.json' }, '*')
+  }
+  // then { type: 'pivograph:loaded', nodes, edges } or { type: 'pivograph:error', message }
+})
+```
+
+[OCD Viewer](https://github.com/ossbase-org/ocd-viewer) uses this for its *Graph* view.
 
 ## JSON format
 

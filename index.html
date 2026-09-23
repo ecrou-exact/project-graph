@@ -14,6 +14,7 @@
         <strong>Pivograph</strong>
       </div>
       <input id="doc-title" class="pg-title-input" aria-label="Graph title" placeholder="Graph title" />
+      <div id="readonly-badge" class="pg-readonly" hidden></div>
       <nav class="pg-actions" aria-label="Actions">
         <button id="btn-add-node" class="pg-btn pg-btn-primary">+ Node</button>
         <button id="btn-add-edge" class="pg-btn pg-btn-primary">+ Edge</button>
@@ -35,7 +36,7 @@
         <div id="panel" class="pg-panel"></div>
         <footer class="pg-sidebar-footer">
           <span id="pivotick-version"></span>
-          <span class="pg-muted">Double-click an item to edit it</span>
+          <span id="footer-hint" class="pg-muted">Double-click an item to edit it</span>
         </footer>
       </aside>
       <div id="sidebar-resizer" class="pg-resizer" role="separator" aria-orientation="vertical" aria-label="Resize the side panel" tabindex="0"></div>
