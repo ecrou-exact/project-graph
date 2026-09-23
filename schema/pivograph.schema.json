@@ -15,6 +15,11 @@
         },
         "description": {
           "type": "string"
+        },
+        "linkDistance": {
+          "type": "number",
+          "minimum": 1,
+          "description": "Length of the edges in the layout (default 150). Raise it for big nodes or long edge labels."
         }
       }
     },
@@ -286,7 +291,7 @@
         },
         "labelFont": {
           "type": "string",
-          "description": "sans, serif, mono, rounded, condensed — or any CSS font-family."
+          "description": "sans, serif, mono, rounded, condensed \u2014 or any CSS font-family."
         },
         "hideBadges": {
           "type": "boolean",
@@ -317,7 +322,7 @@
             "both",
             "none"
           ],
-          "description": "forward: from → to, backward: to → from, both: ↔, none: no arrow."
+          "description": "forward: from \u2192 to, backward: to \u2192 from, both: \u2194, none: no arrow."
         }
       }
     }

@@ -73,8 +73,9 @@ export class GraphView {
     const editable = { enabled: !readOnly }
     this.graph = new Pivotick(mount, data, {
       isDirected: true,
-      // Longer links leave room for the node and edge labels.
-      simulation: { d3LinkDistance: 150, d3CollideRadiusMultiplier: 2.2 },
+      // Longer links leave room for the node and edge labels; a document with
+      // big nodes or long edge labels can ask for more with meta.linkDistance.
+      simulation: { d3LinkDistance: Number(doc.meta?.linkDistance) || 150, d3CollideRadiusMultiplier: 2.2 },
       render: {
         markerStyleMap: {
           [MARKER_END]: { ...ARROW, orient: 'auto' },

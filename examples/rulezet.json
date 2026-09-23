@@ -2,45 +2,663 @@
   "version": 1,
   "meta": {
     "title": "Projects linked to Rulezet",
-    "description": "Illustrative map of projects linked to Rulezet — adapt and extend it."
+    "description": "How Rulezet connects to the other projects of its ecosystem. Arrow = who calls or uses whom. Checked against the code of each project (September 2026).",
+    "linkDistance": 330
   },
   "nodeTypes": {
-    "project": { "label": "Project", "color": "#3b63f3", "shape": "hexagon", "size": 26, "image": "icons/project.svg", "imageFit": "icon" },
-    "platform": { "label": "Platform", "color": "#0f9d8a", "shape": "circle", "size": 18, "image": "icons/platform.svg", "imageFit": "icon" },
-    "format": { "label": "Rule format", "color": "#e8833a", "shape": "square", "size": 14, "image": "icons/rule.svg", "imageFit": "icon" },
-    "source": { "label": "Source", "color": "#7c5cd6", "shape": "circle", "size": 16, "image": "icons/code.svg", "imageFit": "icon" },
-    "organization": { "label": "Organization", "color": "#56627a", "shape": "square", "size": 18, "image": "icons/organization.svg", "imageFit": "icon" }
+    "project": {
+      "label": "Project",
+      "color": "transparent",
+      "shape": "circle",
+      "size": 44,
+      "imageFit": "contain",
+      "borderWidth": 0,
+      "labelBackground": "none",
+      "labelSize": 17,
+      "labelFont": "sans"
+    }
   },
   "edgeTypes": {
-    "develops": { "label": "develops", "color": "#56627a", "dashed": true },
-    "supports": { "label": "supports", "color": "#e8833a" },
-    "imports": { "label": "imports from", "color": "#7c5cd6" },
-    "integrates": { "label": "exchanges with", "color": "#0f9d8a", "direction": "both", "width": 3 }
+    "consumes": {
+      "label": "uses Rulezet",
+      "color": "#3b63f3",
+      "width": 2,
+      "direction": "forward",
+      "labelSize": 13,
+      "labelColor": "#ffffff",
+      "labelBackground": "#3b63f3",
+      "labelFont": "sans"
+    },
+    "uses": {
+      "label": "uses",
+      "color": "#0f9d8a",
+      "width": 2,
+      "direction": "forward",
+      "labelSize": 13,
+      "labelColor": "#ffffff",
+      "labelBackground": "#0f9d8a",
+      "labelFont": "sans"
+    }
   },
   "nodes": [
-    { "id": "rulezet", "label": "Rulezet", "type": "project", "description": "Community platform for sharing and managing detection rules.", "url": "https://rulezet.org", "size": 34 },
-    { "id": "circl", "label": "CIRCL", "type": "organization", "url": "https://www.circl.lu" },
-    { "id": "misp", "label": "MISP", "type": "platform", "description": "Threat intelligence sharing platform.", "url": "https://www.misp-project.org" },
-    { "id": "vulnerability-lookup", "label": "Vulnerability-Lookup", "type": "platform", "description": "Vulnerability lookup and correlation.", "url": "https://vulnerability.circl.lu" },
-    { "id": "pivotick", "label": "Pivotick", "type": "project", "description": "Graph visualization library.", "url": "https://pivotick.github.io/Pivotick/", "size": 20 },
-    { "id": "github", "label": "GitHub repositories", "type": "source", "description": "Public rule repositories." },
-    { "id": "yara", "label": "YARA", "type": "format" },
-    { "id": "sigma", "label": "Sigma", "type": "format" },
-    { "id": "suricata", "label": "Suricata", "type": "format" },
-    { "id": "zeek", "label": "Zeek", "type": "format" }
+    {
+      "id": "rulezet",
+      "label": "Rulezet",
+      "type": "project",
+      "size": 64,
+      "image": "logos/rulezet.png",
+      "description": "Community platform for sharing, reviewing and managing detection rules (YARA, Sigma, Suricata, Zeek, ...).",
+      "url": "https://rulezet.org",
+      "github": "rulezet/rulezet-core",
+      "imageFit": "contain",
+      "githubInfo": {
+        "fullName": "rulezet/rulezet-core",
+        "url": "https://github.com/rulezet/rulezet-core",
+        "description": "Rulezet is an open-source web platform for sharing, evaluating, improving, and managing cybersecurity detection rules (YARA, Sigma, Suricata, etc). It aims to foster collaboration among professionals and enthusiasts to improve the quality and reliability of detection rules. ",
+        "homepage": "https://rulezet.org/docs/",
+        "stars": 55,
+        "forks": 9,
+        "issues": 14,
+        "language": "Python",
+        "license": "AGPL-3.0",
+        "topics": [
+          "cti",
+          "network-detection",
+          "network-security",
+          "threat-intelligence",
+          "yara"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-21T12:45:58Z",
+        "fetchedAt": "2026-09-23T12:33:10.436Z"
+      },
+      "tags": [
+        "cti",
+        "network-detection",
+        "network-security",
+        "threat-intelligence",
+        "yara"
+      ]
+    },
+    {
+      "id": "misp",
+      "label": "MISP",
+      "type": "project",
+      "image": "logos/misp.png",
+      "description": "Open source threat intelligence sharing platform.",
+      "url": "https://www.misp-project.org",
+      "github": "MISP/MISP",
+      "imageFit": "contain",
+      "githubInfo": {
+        "fullName": "MISP/MISP",
+        "url": "https://github.com/MISP/MISP",
+        "description": "MISP (core software) - Open Source Threat Intelligence and Sharing Platform",
+        "homepage": "https://www.misp-project.org/",
+        "stars": 6547,
+        "forks": 1637,
+        "issues": 2923,
+        "language": "PHP",
+        "license": "AGPL-3.0",
+        "topics": [
+          "cti",
+          "cybersecurity",
+          "fraud-detection",
+          "fraud-management",
+          "fraud-prevention",
+          "information-exchange",
+          "information-security",
+          "information-sharing",
+          "intelligence",
+          "malware-analysis",
+          "misp",
+          "security",
+          "stix",
+          "threat-analysis",
+          "threat-hunting",
+          "threat-intel",
+          "threat-intelligence",
+          "threat-intelligence-platform",
+          "threat-sharing",
+          "threatintel"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-23T09:16:13Z",
+        "fetchedAt": "2026-09-23T12:33:10.436Z"
+      },
+      "tags": [
+        "cti",
+        "cybersecurity",
+        "fraud-detection",
+        "fraud-management",
+        "fraud-prevention",
+        "information-exchange",
+        "information-security",
+        "information-sharing",
+        "intelligence",
+        "malware-analysis",
+        "misp",
+        "security",
+        "stix",
+        "threat-analysis",
+        "threat-hunting",
+        "threat-intel",
+        "threat-intelligence",
+        "threat-intelligence-platform",
+        "threat-sharing",
+        "threatintel"
+      ]
+    },
+    {
+      "id": "vulnerability-lookup",
+      "label": "Vulnerability-Lookup",
+      "type": "project",
+      "image": "logos/vulnerability-lookup.png",
+      "description": "Fast vulnerability (CVE, GHSA, ...) lookup and correlation service.",
+      "url": "https://vulnerability.circl.lu",
+      "github": "vulnerability-lookup/vulnerability-lookup",
+      "imageFit": "contain",
+      "githubInfo": {
+        "fullName": "vulnerability-lookup/vulnerability-lookup",
+        "url": "https://github.com/vulnerability-lookup/vulnerability-lookup",
+        "description": "Vulnerability-Lookup facilitates quick correlation of vulnerabilities from various sources, independent of vulnerability IDs, and streamlines the management of Coordinated Vulnerability Disclosure (CVD). ",
+        "homepage": "https://www.vulnerability-lookup.org",
+        "stars": 576,
+        "forks": 92,
+        "issues": 70,
+        "language": "Python",
+        "license": "AGPL-3.0",
+        "topics": [
+          "cvd",
+          "cvd-policy",
+          "cve",
+          "vulnerability-databases",
+          "vulnerability-lookup"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-23T12:05:44Z",
+        "fetchedAt": "2026-09-23T12:33:10.436Z"
+      },
+      "tags": [
+        "cvd",
+        "cvd-policy",
+        "cve",
+        "vulnerability-databases",
+        "vulnerability-lookup"
+      ]
+    },
+    {
+      "id": "cti-transmute",
+      "label": "CTI-Transmute",
+      "type": "project",
+      "image": "logos/cti-transmute.png",
+      "description": "CTI format conversion service (MISP <-> STIX).",
+      "url": "https://cti-transmute.org",
+      "imageFit": "contain",
+      "github": "MISP/cti-transmute",
+      "githubInfo": {
+        "fullName": "MISP/cti-transmute",
+        "url": "https://github.com/MISP/cti-transmute",
+        "description": "An online service for converting cyber threat intelligence format, built to promote interoperability and seamless data exchange",
+        "homepage": "https://cti-transmute.org",
+        "stars": 39,
+        "forks": 5,
+        "issues": 1,
+        "language": "JavaScript",
+        "license": "AGPL-3.0",
+        "topics": [
+          "cti",
+          "cyberthreatintelligence",
+          "misp",
+          "stix",
+          "stix2",
+          "threat-intelligence",
+          "threat-intelligence-data"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-08T21:25:24Z",
+        "fetchedAt": "2026-09-23T12:33:10.436Z"
+      },
+      "tags": [
+        "cti",
+        "cyberthreatintelligence",
+        "misp",
+        "stix",
+        "stix2",
+        "threat-intelligence",
+        "threat-intelligence-data"
+      ]
+    },
+    {
+      "id": "velociraptor",
+      "label": "Velociraptor",
+      "type": "project",
+      "image": "logos/velociraptor.png",
+      "description": "Endpoint visibility, DFIR and hunting tool driven by VQL artifacts.",
+      "url": "https://docs.velociraptor.app",
+      "github": "Velocidex/velociraptor",
+      "imageFit": "contain",
+      "githubInfo": {
+        "fullName": "Velocidex/velociraptor",
+        "url": "https://github.com/Velocidex/velociraptor",
+        "description": "Digging Deeper....",
+        "homepage": "https://docs.velociraptor.app/",
+        "stars": 4268,
+        "forks": 657,
+        "issues": 75,
+        "language": "Go",
+        "license": "",
+        "topics": [
+          "digital-forensics",
+          "endpoint-discovery",
+          "endpoint-protection",
+          "endpoint-security",
+          "forensics-investigations",
+          "incident-response",
+          "inventory-management"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-21T09:03:37Z",
+        "fetchedAt": "2026-09-23T12:33:10.436Z"
+      },
+      "tags": [
+        "digital-forensics",
+        "endpoint-discovery",
+        "endpoint-protection",
+        "endpoint-security",
+        "forensics-investigations",
+        "incident-response",
+        "inventory-management"
+      ]
+    },
+    {
+      "id": "ail",
+      "label": "AIL",
+      "type": "project",
+      "image": "logos/ail.png",
+      "description": "Analysis of Information Leaks framework: collects and analyses unstructured data, with YARA trackers and retro hunts.",
+      "url": "https://www.ail-project.org",
+      "github": "ail-project/ail-framework",
+      "imageFit": "contain",
+      "githubInfo": {
+        "fullName": "ail-project/ail-framework",
+        "url": "https://github.com/ail-project/ail-framework",
+        "description": "AIL framework - Analysis Information Leak framework",
+        "homepage": "",
+        "stars": 1018,
+        "forks": 145,
+        "issues": 136,
+        "language": "Python",
+        "license": "AGPL-3.0",
+        "topics": [
+          "ail-framework",
+          "darkweb",
+          "darkweb-scraping",
+          "data-mining",
+          "information-extraction",
+          "information-security",
+          "leak"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-22T15:19:25Z",
+        "fetchedAt": "2026-09-23T12:33:10.436Z"
+      },
+      "tags": [
+        "ail-framework",
+        "darkweb",
+        "darkweb-scraping",
+        "data-mining",
+        "information-extraction",
+        "information-security",
+        "leak"
+      ]
+    },
+    {
+      "id": "flowintel",
+      "label": "Flowintel",
+      "type": "project",
+      "image": "logos/flowintel.png",
+      "description": "Case management and analyst workflow platform.",
+      "github": "flowintel/flowintel",
+      "imageFit": "contain",
+      "githubInfo": {
+        "fullName": "flowintel/flowintel",
+        "url": "https://github.com/flowintel/flowintel",
+        "description": "An open source platform to support analysts to organise their case and tasks",
+        "homepage": "https://flowintel.github.io/flowintel-doc ",
+        "stars": 158,
+        "forks": 26,
+        "issues": 17,
+        "language": "Python",
+        "license": "AGPL-3.0",
+        "topics": [
+          "case-management",
+          "flowintel",
+          "incident-response",
+          "threatintel"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-23T12:23:49Z",
+        "fetchedAt": "2026-09-23T12:33:10.436Z"
+      },
+      "tags": [
+        "case-management",
+        "flowintel",
+        "incident-response",
+        "threatintel"
+      ]
+    },
+    {
+      "id": "misp-workbench",
+      "label": "MISP-Workbench",
+      "type": "project",
+      "image": "logos/misp-workbench.png",
+      "description": "Analyst workbench around MISP data, with hunts over external sources.",
+      "github": "MISP/misp-workbench",
+      "imageFit": "contain",
+      "githubInfo": {
+        "fullName": "MISP/misp-workbench",
+        "url": "https://github.com/MISP/misp-workbench",
+        "description": "Built for the frontlines of cyber defense, our next-generation MISP empowers edge deployments and threat hunters with fast, lightweight, and actionable intelligence, anytime, anywhere.",
+        "homepage": "https://misp-workbench.readthedocs.io/en/latest/",
+        "stars": 31,
+        "forks": 6,
+        "issues": 8,
+        "language": "Python",
+        "license": "AGPL-3.0",
+        "topics": [
+          "misp",
+          "threat-hunting",
+          "threat-intelligence"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-23T12:29:19Z",
+        "fetchedAt": "2026-09-23T12:33:10.436Z"
+      },
+      "tags": [
+        "misp",
+        "threat-hunting",
+        "threat-intelligence"
+      ]
+    },
+    {
+      "id": "zsazsa",
+      "label": "zsazsa",
+      "type": "project",
+      "image": "logos/zsazsa.png",
+      "description": "CTI program management and production platform built around MISP.",
+      "github": "zsazsa-project/zsazsa",
+      "imageFit": "contain",
+      "githubInfo": {
+        "fullName": "zsazsa-project/zsazsa",
+        "url": "https://github.com/zsazsa-project/zsazsa",
+        "description": "A CTI program management and production platform built around MISP",
+        "homepage": "",
+        "stars": 40,
+        "forks": 8,
+        "issues": 9,
+        "language": "Python",
+        "license": "AGPL-3.0",
+        "topics": [
+          "cti",
+          "misp"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-23T07:50:34Z",
+        "fetchedAt": "2026-09-23T12:33:10.436Z"
+      },
+      "tags": [
+        "cti",
+        "misp"
+      ]
+    },
+    {
+      "id": "pivotick",
+      "label": "Pivotick",
+      "type": "project",
+      "image": "logos/pivotick.png",
+      "description": "Graph visualization library.",
+      "url": "https://pivotick.github.io/Pivotick/",
+      "github": "Pivotick/Pivotick",
+      "imageFit": "contain",
+      "githubInfo": {
+        "fullName": "Pivotick/Pivotick",
+        "url": "https://github.com/Pivotick/Pivotick",
+        "description": "Pivotick is network graph library to facilitate pivoting.",
+        "homepage": "https://pivotick.github.io/Pivotick/",
+        "stars": 30,
+        "forks": 6,
+        "issues": 1,
+        "language": "TypeScript",
+        "license": "",
+        "topics": [
+          "infovis",
+          "network-vis",
+          "network-visualization"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-17T09:02:06Z",
+        "fetchedAt": "2026-09-23T12:33:10.436Z"
+      },
+      "tags": [
+        "infovis",
+        "network-vis",
+        "network-visualization"
+      ]
+    }
   ],
   "edges": [
-    { "from": "circl", "to": "rulezet", "type": "develops" },
-    { "from": "circl", "to": "misp", "type": "develops" },
-    { "from": "circl", "to": "vulnerability-lookup", "type": "develops" },
-    { "from": "circl", "to": "pivotick", "type": "develops" },
-    { "from": "rulezet", "to": "yara", "type": "supports" },
-    { "from": "rulezet", "to": "sigma", "type": "supports" },
-    { "from": "rulezet", "to": "suricata", "type": "supports" },
-    { "from": "rulezet", "to": "zeek", "type": "supports" },
-    { "from": "rulezet", "to": "github", "type": "imports", "direction": "backward", "label": "imports rules" },
-    { "from": "rulezet", "to": "vulnerability-lookup", "type": "integrates", "label": "CVE references" },
-    { "from": "rulezet", "to": "misp", "type": "integrates", "label": "shares", "dashed": true },
-    { "from": "pivotick", "to": "rulezet", "label": "visualizes", "color": "#d6384b", "direction": "forward" }
+    {
+      "id": "rulezet-federation",
+      "from": "rulezet",
+      "to": "rulezet",
+      "type": "uses",
+      "label": "federates with (Connector sync)",
+      "description": "A Rulezet instance pulls rules and bundles from another Rulezet instance through an admin-configured Connector. Each pull runs as a background connector_pull job that calls the remote sync API with an X-API-KEY header and imports rules and bundles with their tags, CVEs and ATT&CK techniques. Items are matched by UUID only. Soft mode skips existing rules, hard mode updates them in place. Pull only: nothing is pushed back to the source.",
+      "details": {
+        "protocol": "REST (X-API-KEY)",
+        "endpoints": [
+          "/api/sync/manifest",
+          "/api/sync/stats",
+          "/api/sync/rules",
+          "/api/sync/bundles"
+        ],
+        "modes": [
+          "soft",
+          "hard"
+        ],
+        "matching": "uuid",
+        "code": [
+          "app/features/connector/connector_core.py",
+          "app/api/connector/connector_sync_api.py"
+        ]
+      }
+    },
+    {
+      "from": "rulezet",
+      "to": "vulnerability-lookup",
+      "type": "uses",
+      "label": "fetches CVE & EPSS data",
+      "description": "Rulezet uses Vulnerability-Lookup as its CVE reference. Every CVE shown on a rule or blog post links to its vulnerability.circl.lu page. A background job generates blog posts from CVE details and EPSS scores fetched from the Vulnerability-Lookup API, and a blog endpoint proxies CVE data from it to avoid browser CORS issues.",
+      "details": {
+        "protocol": "REST (public)",
+        "endpoints": [
+          "/api/cve/<id>",
+          "/api/epss/<id>",
+          "/vuln/<id> (links)"
+        ],
+        "code": [
+          "app/features/jobs/job_handlers.py",
+          "app/features/blog/blog.py",
+          "app/static/js/vulnerability/"
+        ]
+      }
+    },
+    {
+      "from": "rulezet",
+      "to": "misp",
+      "type": "uses",
+      "label": "pushes rules as MISP events",
+      "description": "Admins register MISP servers in Rulezet (URL + API key, stored encrypted). A rule or bundle can be pushed as a MISP Object or a richer MISP Event (with tags and CVE attributes) through PyMISP, as a background misp_push job. Rules and bundles are also downloadable as MISP JSON, using the rulezet-metadata and rulezet-bundle object templates published in misp-objects.",
+      "details": {
+        "protocol": "REST via PyMISP (API key)",
+        "misp_objects": [
+          "rulezet-metadata",
+          "rulezet-bundle"
+        ],
+        "job": "misp_push",
+        "code": [
+          "app/features/misp/misp_connector_core.py",
+          "app/features/misp/rule/misp_object.py",
+          "app/features/misp/bundle/misp_object.py"
+        ]
+      }
+    },
+    {
+      "from": "rulezet",
+      "to": "misp",
+      "type": "uses",
+      "label": "imports taxonomies & galaxies",
+      "dashed": true,
+      "description": "Rulezet embeds the MISP taxonomies and MISP galaxy repositories as git submodules and turns them into tags (TLP, PAP, threat actors, ...). An admin can refresh them with the update_misp_data background job, which runs git submodule update --remote.",
+      "details": {
+        "source": [
+          "MISP/misp-taxonomies",
+          "MISP/misp-galaxy"
+        ],
+        "job": "update_misp_data",
+        "code": [
+          "app/features/tags/tags_core.py",
+          "app/features/jobs/job_handlers.py",
+          "app/modules/"
+        ]
+      },
+      "curve": "curved"
+    },
+    {
+      "from": "rulezet",
+      "to": "cti-transmute",
+      "type": "uses",
+      "label": "converts MISP to STIX",
+      "description": "To show and export a rule in STIX, Rulezet builds the rule's MISP event and sends it to the CTI-Transmute conversion API, which returns the STIX bundle. The endpoint can be pointed to a self-hosted CTI-Transmute with CTI_TRANSMUTE_URL.",
+      "details": {
+        "protocol": "REST",
+        "endpoint": "https://cti-transmute.org/api/convert/misp_to_stix",
+        "config": "CTI_TRANSMUTE_URL",
+        "code": [
+          "app/features/misp/misp_core.py",
+          "app/features/rule/rule.py (/get_stix)"
+        ]
+      }
+    },
+    {
+      "from": "rulezet",
+      "to": "velociraptor",
+      "type": "uses",
+      "label": "pushes detection artifacts",
+      "description": "Admins register Velociraptor servers in Rulezet with their API client config (mutual TLS certificates, stored encrypted). Rulezet turns a rule into a Velociraptor artifact and registers it on the server over gRPC with a VQL artifact_set() call, as a background job.",
+      "details": {
+        "protocol": "gRPC + mutual TLS (VQL)",
+        "vql": "SELECT artifact_set(...) FROM scope()",
+        "tested_with": "Velociraptor v0.77.1",
+        "code": [
+          "app/features/velociraptor/velociraptor_core.py",
+          "app/features/rule/exporters/velociraptor_exporter.py"
+        ]
+      }
+    },
+    {
+      "from": "rulezet",
+      "to": "pivotick",
+      "type": "uses",
+      "label": "draws graphs with",
+      "description": "Rulezet embeds the Pivotick library to draw interactive graphs (e.g. on the rule detail page).",
+      "details": {
+        "code": "app/modules/pivotick"
+      }
+    },
+    {
+      "from": "vulnerability-lookup",
+      "to": "rulezet",
+      "type": "consumes",
+      "label": "queries rules by CVE",
+      "description": "Vulnerability-Lookup calls Rulezet's public API to list the detection rules that cover a vulnerability (CVE, GHSA, ...). It calls this endpoint heavily and depends on its exact JSON format. On Rulezet's side the response is cached for 60s and only returns active rules.",
+      "details": {
+        "protocol": "REST (public, no auth)",
+        "endpoint": "GET /api/rule/public/search_rules_by_cve?cve_ids=...",
+        "cache": "60s",
+        "code": [
+          "app/api/rule/rule_public_api.py",
+          "app/features/rule/rule_core.py"
+        ]
+      }
+    },
+    {
+      "from": "ail",
+      "to": "rulezet",
+      "type": "consumes",
+      "label": "imports YARA rules",
+      "description": "In AIL's tracker and retro hunt forms, an analyst can search Rulezet and paste a rulezet.org rule URL. AIL extracts the rule id, fetches the rule from Rulezet's public API and imports it as a YARA tracker (only YARA rules are accepted). Each AIL user can also store a Rulezet API key in their profile.",
+      "details": {
+        "protocol": "REST",
+        "endpoint": "GET /api/rule/public/detail/<id>",
+        "formats": "yara",
+        "code": [
+          "ail-framework: var/www/blueprints/hunters.py",
+          "ail-framework: bin/lib/ail_users.py"
+        ]
+      }
+    },
+    {
+      "from": "flowintel",
+      "to": "rulezet",
+      "type": "consumes",
+      "label": "attaches rules to cases",
+      "description": "Flowintel has a Rulezet 'receive from' connector module: from a case, an analyst fetches a rule or bundle from a configured Rulezet instance and stores it on the case (title, format, content, version). Instances use an API key and optional SSL verification.",
+      "details": {
+        "protocol": "REST (X-API-KEY / Bearer)",
+        "endpoint": "GET /api/rule/public/detail/<id>",
+        "config": "RULEZET_VERIFY_SSL",
+        "code": [
+          "flowintel: app/modules/receive_from/rulezet_rule.py",
+          "flowintel: app/static/js/case/ModuleComponents/Rulezet.js"
+        ]
+      }
+    },
+    {
+      "from": "misp-workbench",
+      "to": "rulezet",
+      "type": "consumes",
+      "label": "hunts rules by CVE",
+      "description": "MISP-Workbench has a 'Rulezet vuln check' hunt type: given a vulnerability id (e.g. CVE-2021-44228), it looks up the matching detection rules on rulezet.org.",
+      "details": {
+        "protocol": "REST (public)",
+        "endpoint": "GET /api/rule/public/search_rules_by_cve?cve_ids=...",
+        "hunt_type": "rulezet",
+        "code": [
+          "misp-workbench: api/app/services/rulezet.py",
+          "misp-workbench: docs/features/hunts.md"
+        ]
+      }
+    },
+    {
+      "from": "zsazsa",
+      "to": "rulezet",
+      "type": "consumes",
+      "label": "looks up & validates rules",
+      "description": "zsazsa's vulnerability advisory and detection engineering wizards have a 'Search Rulezet' button that finds existing rules by CVE or MITRE ATT&CK technique, shown as 'Existing coverage (Rulezet)' in the product. zsazsa also calls Rulezet's validate endpoint to check a rule before a detection request can become Active. Its rule viewer reuses Rulezet's syntax highlighters.",
+      "details": {
+        "protocol": "REST (public)",
+        "endpoints": [
+          "GET /api/rule/public/search_rules_by_cve",
+          "GET /api/rule/public/search_rules_by_attack",
+          "/api/rule/public/validate"
+        ],
+        "config": "RULEZET_URL",
+        "code": [
+          "zsazsa: core/rulezet_lookup.py",
+          "zsazsa: webapp/routes/api.py"
+        ]
+      }
+    }
   ]
 }
