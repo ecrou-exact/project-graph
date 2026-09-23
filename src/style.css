@@ -73,6 +73,48 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .pg-title-input:focus { outline: none; border-color: var(--primary); box-shadow: var(--focus); }
 
 .pg-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+/* Header menus (src/ui/menu.js) */
+.pg-menu-wrap { position: relative; }
+.pg-menu-btn { display: inline-flex; align-items: center; gap: 7px; font-weight: 500; }
+.pg-menu-caret { width: 0; height: 0; border: 4px solid transparent; border-top: 5px solid currentColor; border-bottom: 0; opacity: 0.7; transition: transform 0.15s; }
+.pg-menu-btn[aria-expanded="true"] .pg-menu-caret { transform: rotate(180deg); }
+.pg-menu-btn[aria-expanded="true"]:not(.pg-btn-primary) { background: var(--surface-2); }
+.pg-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  z-index: 1000;
+  min-width: 310px;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgb(20 26 40 / 0.16), 0 2px 6px rgb(20 26 40 / 0.08);
+}
+.pg-menu[hidden] { display: none; }
+.pg-menu-start { left: 0; }
+.pg-menu-end { right: 0; }
+.pg-menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.pg-menu-item:hover, .pg-menu-item:focus-visible { background: var(--surface-2); outline: none; }
+.pg-menu-item:focus-visible { box-shadow: inset 0 0 0 2px var(--primary); }
+.pg-menu-item:disabled { opacity: 0.45; cursor: not-allowed; background: transparent; }
+.pg-menu-label { font-weight: 550; font-size: 14px; }
+.pg-menu-hint { font-size: 12.5px; color: var(--muted); }
+.pg-menu-sep { height: 1px; margin: 5px 4px; background: var(--border); }
+.pg-menu-heading { padding: 6px 10px 2px; font-size: 12px; color: var(--muted); }
 .pg-sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
 
 /* --- buttons ------------------------------------------------------------ */

@@ -4,13 +4,16 @@ Pivograph is a static web app built with [Vite](https://vite.dev), in plain Java
 
 ```text
 src/
-  main.js        app shell: state, side panel, import/export, embedding, autosave
+  main.js        app shell: state, header menus, side panel, import/export, embedding, autosave
   graph.js       GraphView: the Pivotick instance, styles, forms wired to Pivotick's tools, filters, tag pills
   model.js       the document format: parsing and validation, type inheritance, Pivotick styles
   ocd.js         Open Contributions Descriptor → document
   icons.js       node icons drawn on the node's colour
   badgeIcons.js  the bundled Font Awesome Free icons
   github.js      GitHub API client (cached, only used by the node form)
+  report.js      the report protocol: document → English Markdown (pure, also used by scripts/report.mjs)
+  reportPrint.js the report laid out for print (PDF)
+  snapshot.js    the graph as a PNG picture
   ui/            forms, modals, tag pills, GitHub card, details rendering, DOM helper
 examples/        example maps
 schema/          JSON schema of the format
@@ -42,7 +45,8 @@ tests/           Vitest tests
 
 ```bash
 npm run dev              # dev server with hot reload; the docs are served at /docs/
-npm test                 # Vitest: document format, OCD import, icons
+npm test                 # Vitest: document format, OCD import, icons, reports
+npm run report -- map.json report.md   # the text report from the command line
 npm run build            # static site in dist/: the app, docs/, llms.txt, llms-full.txt
 npm run update:pivotick  # install the latest Pivotick
 ```

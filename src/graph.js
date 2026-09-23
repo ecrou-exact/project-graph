@@ -26,6 +26,22 @@ const ARROW = {
   fill: 'context-stroke',
 }
 
+/** The plain-data part of Pivograph's Pivotick options: layout and arrow markers. */
+export function pivotickOptions(doc) {
+  return {
+    isDirected: true,
+    // Longer links leave room for the node and edge labels; a document with
+    // big nodes or long edge labels can ask for more with meta.linkDistance.
+    simulation: { d3LinkDistance: Number(doc.meta?.linkDistance) || 150, d3CollideRadiusMultiplier: 2.2 },
+    render: {
+      markerStyleMap: {
+        [MARKER_END]: { ...ARROW, orient: 'auto' },
+        [MARKER_START]: { ...ARROW, orient: 'auto-start-reverse' },
+      },
+    },
+  }
+}
+
 export class GraphView {
   /**
    * @param {HTMLElement} container
@@ -63,24 +79,16 @@ export class GraphView {
     mount.className = 'pg-canvas'
     this.container.append(mount)
 
-    const data = {
-      nodes: doc.nodes.map((n) => this.withStyle(toRawNode(n, doc))),
-      edges: doc.edges.map((e) => toRawEdge(e, doc)),
-    }
+    const data = this.toPivotickData(doc)
     // Read-only documents (e.g. an imported well-known): no editing affordance at all.
     const readOnly = Boolean(doc.meta?.readOnly)
     this.readOnly = readOnly
     const editable = { enabled: !readOnly }
+    const base = pivotickOptions(doc)
     this.graph = new Pivotick(mount, data, {
-      isDirected: true,
-      // Longer links leave room for the node and edge labels; a document with
-      // big nodes or long edge labels can ask for more with meta.linkDistance.
-      simulation: { d3LinkDistance: Number(doc.meta?.linkDistance) || 150, d3CollideRadiusMultiplier: 2.2 },
+      ...base,
       render: {
-        markerStyleMap: {
-          [MARKER_END]: { ...ARROW, orient: 'auto' },
-          [MARKER_START]: { ...ARROW, orient: 'auto-start-reverse' },
-        },
+        ...base.render,
         // Custom renderer so a label inherited from the edge type shows too
         // (Pivotick's default one only reads `data.label`).
         renderLabel: (edge) => {
@@ -436,6 +444,35 @@ export class GraphView {
       this.iconsArrived = false
       this.restyleAll()
     })
+  }
+
+  /**
+   * A file for Pivotick alone, without Pivograph: `new Pivotick(el, file, file.options)`.
+   * Edge labels inherited from a type are written into `data.label` (the only
+   * field Pivotick's default renderer reads); images are left to the caller to inline.
+   */
+  toPivotickFile(doc) {
+    const { nodes, edges } = this.toPivotickData(doc)
+    return {
+      nodes,
+      edges: edges.map((e) => {
+        const label = edgeLabelLook(e.data, doc.edgeTypes).hidden ? '' : edgeLabel(e.data, doc.edgeTypes)
+        const { label: _own, ...data } = e.data
+        return { ...e, data: label ? { ...data, label } : data }
+      }),
+      options: pivotickOptions(doc),
+    }
+  }
+
+  /**
+   * The graph as Pivotick's own input, `{ nodes, edges }` with the computed
+   * styles: what `load()` passes to `new Pivotick(container, data, options)`.
+   */
+  toPivotickData(doc) {
+    return {
+      nodes: doc.nodes.map((n) => this.withStyle(toRawNode(n, doc))),
+      edges: doc.edges.map((e) => toRawEdge(e, doc)),
+    }
   }
 
   withStyle(raw) {

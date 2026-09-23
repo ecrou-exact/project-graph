@@ -102,6 +102,7 @@ const SECTION_SUMMARIES = {
   'document-format': 'Every field of meta, nodes, edges, types and tags, with defaults and validation rules.',
   'examples': 'A complete checked map and a minimal one.',
   'open-contributions-descriptor': 'How a .well-known/open-contributions.json file becomes a map.',
+  'reports': 'Export a map as JSON, Pivotick data, a picture, or a PDF or Markdown report, and how the text is written.',
   'embedding': 'Show a map on another site: iframe parameters and the postMessage protocol.',
   'using-the-app': 'Editing nodes and edges, GitHub details, filters and saving.',
   'architecture': 'How the code is organized, and the Pivotick details it works around.',

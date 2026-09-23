@@ -20,7 +20,7 @@ What a map contains:
 
 ## Quick start
 
-**In the browser.** Open the [app](https://ecrou-exact.github.io/project-graph/). It starts with the Rulezet example. Use *Open JSON…* or drop a `.json` file on the page to load a map, *Import well-known…* to load an organization's Open Contributions Descriptor, *New* to start from ready-made types, and *Export JSON* to save your work. Changes are also kept in the browser between visits.
+**In the browser.** Open the [app](https://ecrou-exact.github.io/project-graph/). It starts with the Rulezet example. The *Graph* menu opens a map (or drop a `.json` file on the page), imports an organization's Open Contributions Descriptor, or starts a new graph from ready-made types. *Add* creates nodes and edges. *Export* saves the map as JSON, or as a PDF or Markdown report with a picture of the graph. Changes are also kept in the browser between visits.
 
 **From the command line.**
 

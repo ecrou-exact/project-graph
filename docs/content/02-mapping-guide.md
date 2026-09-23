@@ -6,7 +6,7 @@ This section is a procedure. It is written for an AI agent (or a person) asked t
 
 Gather facts before writing anything, and keep the URL of every fact you use.
 
-1. **The organization's Open Contributions Descriptor**, if it publishes one: `https://<domain>/.well-known/open-contributions.json`. It lists projects, licenses, repositories, open data, standards and relationships in a structured form. If it exists, load it in the app with *Import well-known…* first: it gives you a correct skeleton in one step (see [Open Contributions Descriptor](#open-contributions-descriptor)).
+1. **The organization's Open Contributions Descriptor**, if it publishes one: `https://<domain>/.well-known/open-contributions.json`. It lists projects, licenses, repositories, open data, standards and relationships in a structured form. If it exists, load it in the app with *Graph → Import an organization…* first: it gives you a correct skeleton in one step (see [Open Contributions Descriptor](#open-contributions-descriptor)).
 2. **The code hosting organization**: `https://github.com/<org>` (or GitLab). List the repositories that are real projects: skip forks, archived experiments and tooling repositories unless they matter to the map. For each project, note the repository description, license, main language and topics. The GitHub API gives them without authentication (`https://api.github.com/repos/<owner>/<repo>`), at up to 60 requests per hour.
 3. **The website and documentation** of the organization and of each project: what the project is for, who uses it, which other projects it talks to.
 4. **The code itself**, for relationships: API clients, configuration files, import/export modules, webhooks, submodules, dependency manifests. A relationship you can point to in code is worth more than one inferred from a website.
@@ -52,7 +52,7 @@ Follow the [document format](#document-format) exactly. Rules that matter:
 
 ### 6. Validate
 
-Load the file in the app (*Open JSON…*, or paste it in the JSON tab and press *Apply*). The app reports **errors** (the file is refused: duplicate ids, edges pointing to unknown nodes, wrong top-level shapes) and **warnings** (the file loads, but something was ignored: an unknown shape or direction, a type that is not declared). Fix every error and every warning. You can also check the file against the [JSON schema](pivograph.schema.json).
+Load the file in the app (*Graph → Open a file…*, or paste it in the JSON tab and press *Apply*). The app reports **errors** (the file is refused: duplicate ids, edges pointing to unknown nodes, wrong top-level shapes) and **warnings** (the file loads, but something was ignored: an unknown shape or direction, a type that is not declared). Fix every error and every warning. You can also check the file against the [JSON schema](pivograph.schema.json).
 
 Then read the map as a newcomer would: every node label is understandable, every arrow reads as a sentence (`Flowintel` → *uses* → `MISP`), nothing important floats unconnected.
 

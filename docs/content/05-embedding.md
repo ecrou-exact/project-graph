@@ -4,7 +4,7 @@ Pivograph can be shown inside another site with an `<iframe>`, without its top b
 
 | URL parameter | Effect |
 |---|---|
-| `embed=1` | Hides the top bar (logo, *New*, *Open JSON…*). Starts empty and read-only. Never reads or overwrites the visitor's saved map. |
+| `embed=1` | Hides the top bar (logo and menus). Starts empty and read-only. Never reads or overwrites the visitor's saved map. |
 | `src=<url>` | Loads this JSON at start: a Pivograph document or an OCD file. The server must allow CORS. |
 | `sidebar=0` | Hides the side panel. |
 | `tags=0` | Starts with the tag pills hidden. |

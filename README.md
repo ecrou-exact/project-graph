@@ -13,11 +13,12 @@ Bundled example: projects linked to **Rulezet** (`examples/rulezet.json`).
 - **Tags**: `#tags` on a node become coloured pills under it, with a colour and an optional icon (a curated set of Font Awesome Free icons, picked from a grid) per tag, shared by every node with that tag. Existing tags are suggested when typing; pills can be hidden per node or per type. A Tags tab lists and edits them.
 - **Links**: a website, a GitHub repository and any number of other links per node. The GitHub API (60 unauthenticated requests per hour) is only called from the node form — when a repository is entered, or with *Refresh* — and the summary (description, stars, forks, open issues, language, licence, topics, last update) is saved with the node (`githubInfo`) and shown from there: displaying or importing a graph, a well-known file included, never calls it. When fetching, *Also add the repository topics as tags* adds the repository's GitHub topics to the node's tags (never removing any).
 - **Details**: any extra key / value fields on a node or an edge (license, maintainers, formats…), shown in the details panel and tooltip, edited in the Details tab.
-- **Open Contributions Descriptor import**: open, drop or paste a `.well-known/open-contributions.json` file (or use *Import well-known…* with a domain or URL) and it becomes a graph — see below.
+- **Exports**: the graph as JSON, as Pivotick data (self-contained, for `new Pivotick()`), as a PNG picture, or as a **PDF or Markdown report**: a picture of the graph followed by an English description written from every field of the nodes and edges, by a fixed protocol that works for any graph (also `npm run report -- map.json`). See [Reports](https://ecrou-exact.github.io/project-graph/docs/guide.html#reports).
+- **Open Contributions Descriptor import**: open, drop or paste a `.well-known/open-contributions.json` file (or use *Graph → Import an organization…* with a domain or URL) and it becomes a graph — see below.
 - **Types**: a node or edge type defines default styling; every element can override it.
   *New* starts a graph with ready-to-use types (one per bundled icon, plus common relations such as *uses*, *depends on*, *integrates with*), all editable in the Types tab.
 - **Two synchronised ways to edit**:
-  - the app's own UI: `+ Node` / `+ Edge` buttons, filterable lists, double-click to edit;
+  - the app's own UI: the *Add* menu (node, edge), filterable lists, double-click to edit;
   - Pivotick's tools: *Create ▸ Add node* (click on the canvas) and *Add edge* (click source, then target) open **the same form modal**; so do *Edit node* and *Edit edge*.
 - Built-in **JSON editor** (JSON tab) with validation and error messages.
 - Import (button, or drag & drop a `.json` file) and JSON export (with or without positions, to keep the layout).
@@ -50,7 +51,7 @@ npm run build      # static site in dist/
 
 [OCD](https://github.com/ossbase-org/Open-Contributions-Descriptor) is a machine-readable description of an organization's open source projects, open data, open standards participation and relationships, published at `https://<domain>/.well-known/open-contributions.json` (see also [OCD Viewer](https://github.com/ossbase-org/ocd-viewer)).
 
-Pivograph recognizes an OCD file wherever a JSON file is accepted (*Open JSON…*, drag & drop, the JSON tab) and converts it:
+Pivograph recognizes an OCD file wherever a JSON file is accepted (*Graph → Open a file…*, drag & drop, the JSON tab) and converts it:
 
 | OCD | Graph |
 |---|---|
@@ -60,7 +61,7 @@ Pivograph recognizes an OCD file wherever a JSON file is accepted (*Open JSON…
 | `open_standards[]` | *Open standard* nodes (“participates in”): working groups as tags, contributions as links |
 | `relationships[]` | *External organization* / *External project* nodes, linked with the relationship type (`maintains`, `co_maintains`, `supports`, `contributes_to`, `sponsors`, `upstream_of`, `downstream_of`, `member_of`, `affiliated_with`); `since`, `until`, evidence and contacts in the edge details |
 
-*Import well-known…* opens a local file, or fetches the file from a domain (`misp-project.org` → `https://misp-project.org/.well-known/open-contributions.json`) or a URL, and offers the official samples (MISP, AIL, flowintel). The site must allow cross-origin requests; otherwise download the file and open it.
+*Graph → Import an organization…* opens a local file, or fetches the file from a domain (`misp-project.org` → `https://misp-project.org/.well-known/open-contributions.json`) or a URL, and offers the official samples (MISP, AIL, flowintel). The site must allow cross-origin requests; otherwise download the file and open it.
 
 Each item keeps its OCD structure in the node's `details` (status, repository { url, license, type, clone }, links, participate, governance, release, custom fields…), so the details panel reads section by section like OCD Viewer, and unknown or future fields are kept. The details form edits nested fields by path (`repository.url`).
 
@@ -70,7 +71,7 @@ The result is an ordinary Pivograph graph: it can be edited, restyled and export
 
 ## Embedding in another site
 
-The app can be embedded in an `<iframe>` without its top bar (logo, *New*, *Open JSON…*):
+The app can be embedded in an `<iframe>` without its top bar (logo and menus):
 
 | Parameter | Effect |
 |---|---|

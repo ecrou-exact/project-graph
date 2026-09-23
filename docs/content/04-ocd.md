@@ -2,7 +2,7 @@
 
 The [Open Contributions Descriptor](https://github.com/ossbase-org/Open-Contributions-Descriptor) (OCD) is a JSON file in which an organization describes its open source projects, open data, participation in open standards and relationships with other organizations. It is published at `https://<domain>/.well-known/open-contributions.json`. [OCD Viewer](https://github.com/ossbase-org/ocd-viewer) shows it as cards and, through Pivograph, as a graph.
 
-Pivograph recognizes an OCD file wherever a JSON file is accepted (*Open JSON…*, drag and drop, the JSON tab, *Import well-known…*, `?src=`, `postMessage`) and turns it into a map:
+Pivograph recognizes an OCD file wherever a JSON file is accepted (*Graph → Open a file…*, drag and drop, the JSON tab, *Graph → Import an organization…*, `?src=`, `postMessage`) and turns it into a map:
 
 | OCD | Map |
 |---|---|
@@ -16,6 +16,6 @@ Because each item keeps its OCD structure in `details`, the details panel reads 
 
 An imported descriptor opens **read-only**: no creation, editing or deletion (Pivotick's *Create* tools, context-menu entries, double-click, the app's buttons and the JSON editor are off). Browsing, filtering and exporting still work. *Enable editing* in the header lifts it.
 
-*Import well-known…* accepts a local file, a domain (`misp-project.org` becomes `https://misp-project.org/.well-known/open-contributions.json`), or a URL, and offers the official samples (MISP, AIL, flowintel). A remote file must be served with CORS headers; otherwise download it and open it.
+*Graph → Import an organization…* accepts a local file, a domain (`misp-project.org` becomes `https://misp-project.org/.well-known/open-contributions.json`), or a URL, and offers the official samples (MISP, AIL, flowintel). A remote file must be served with CORS headers; otherwise download it and open it.
 
 To go further than the descriptor, enable editing and add what it does not say: relationships between the organization's own projects, logos, tags with colours and icons.

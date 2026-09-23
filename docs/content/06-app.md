@@ -1,5 +1,7 @@
 ## Using the app
 
+**Top bar.** *Add* creates a node or an edge. *Graph* starts a new graph, opens a file (a Pivograph document or an Open Contributions Descriptor), imports an organization from its domain, or loads the Rulezet example. *Export* saves the graph (see [Reports](#reports)).
+
 **Side panel** (left, resizable by dragging its edge):
 
 - *Nodes* and *Edges* list everything with its type and description. Click to select on the graph, double-click to edit. The filter box searches labels, types, descriptions and tags.
@@ -26,4 +28,4 @@
 
 **View.** *Tags on graph* shows or hides every tag pill. Pivotick's *View* and *Physics* tools change the layout; the minimap and zoom controls sit on the right.
 
-**Saving.** The map is kept in the browser automatically. *Export JSON* downloads it (with positions, unless *positions* is unticked in the JSON tab).
+**Saving.** The map is kept in the browser automatically. *Export → Graph data (JSON)* downloads it (with positions, unless *positions* is unticked in the JSON tab). The other *Export* entries are described in [Reports](#reports).

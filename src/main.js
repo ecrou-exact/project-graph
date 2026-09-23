@@ -8,12 +8,13 @@ import { edgeFields, nodeFields, tagFields, typeFields } from './ui/forms.js'
 import { tagPill } from './ui/pills.js'
 import { isOcd, ocdToDocument, wellKnownUrl } from './ocd.js'
 import { confirmModal, openFormModal, toast } from './ui/modal.js'
+import { menuButton } from './ui/menu.js'
 
 const STORAGE_KEY = 'pivograph:document'
 
 /**
  * Embedding in another site (an <iframe>):
- *   ?embed=1     hide the app's top bar (logo, New, Open JSON…)
+ *   ?embed=1     hide the app's top bar (logo, menus)
  *   ?src=<url>   load this JSON at start: a Pivograph graph or an OCD file
  *   ?sidebar=0   hide the side panel
  *   ?tags=0      start with the tag pills hidden
@@ -357,10 +358,67 @@ function download(filename, text, type = 'application/json') {
   URL.revokeObjectURL(url)
 }
 
+function fileBase(doc) {
+  return (doc.meta.title ?? '').trim().replace(/[^\w-]+/g, '_').replace(/^_+|_+$/g, '') || 'graph'
+}
+
 function exportJson() {
   const doc = currentDocument()
-  const name = `${doc.meta.title ? doc.meta.title.replace(/[^\w-]+/g, '_') : 'graphe'}.json`
-  download(name, JSON.stringify(doc, null, 2))
+  download(`${fileBase(doc)}.json`, JSON.stringify(doc, null, 2))
+}
+
+/**
+ * The graph for Pivotick alone: `new Pivotick(el, file, file.options)`, styles
+ * included and images embedded, so the file works anywhere.
+ */
+async function exportPivotick() {
+  const doc = currentDocument()
+  const file = view.toPivotickFile(doc)
+  const { toDataUrl } = await import('./snapshot.js')
+  const missing = new Set()
+  await Promise.all(file.nodes.map(async (node) => {
+    const src = node.style?.imagePath
+    if (!src || src.startsWith('data:')) return
+    try {
+      node.style.imagePath = await toDataUrl(new URL(src, document.baseURI).href)
+    } catch {
+      missing.add(src) // kept as a URL: a site without CORS can't be read from here
+    }
+  }))
+  download(`${fileBase(doc)}.pivotick.json`, JSON.stringify(file, null, 2))
+  if (missing.size) toast(`${missing.size} image(s) could not be embedded and stay as links.`, 'error')
+}
+
+/** A PNG of the whole graph as drawn, or null (with a message) when it can't be made. */
+async function snapshot() {
+  const { graphSnapshot } = await import('./snapshot.js')
+  try {
+    return await graphSnapshot(document.getElementById('graph'))
+  } catch (error) {
+    toast(`The picture of the graph could not be made (${error.message}).`, 'error')
+    return null
+  }
+}
+
+async function exportPicture() {
+  const image = await snapshot()
+  if (!image) return
+  const a = h('a', { href: image, download: `${fileBase(currentDocument())}.png` })
+  document.body.append(a)
+  a.click()
+  a.remove()
+}
+
+/** The report (docs: "Reports"): the picture of the graph, then the text written from every field. */
+async function exportReport(format) {
+  const doc = currentDocument()
+  const [{ buildReport }, image] = await Promise.all([import('./report.js'), snapshot()])
+  if (format === 'md') return download(`${fileBase(doc)}.md`, buildReport(doc, { image }), 'text/markdown')
+  const { printHtml, reportHtml } = await import('./reportPrint.js')
+  // Each node's picture as drawn (logos, icons tinted on the node's colour).
+  const images = new Map(view.toPivotickData(doc).nodes.map((n) => [n.id, n.style?.imagePath]).filter(([, src]) => src))
+  toast('Choose "Save as PDF" in the print dialog.')
+  await printHtml(reportHtml(doc, { image, images, baseUrl: document.baseURI }))
 }
 
 async function importFile(file) {
@@ -394,7 +452,7 @@ function renderHeader() {
   title.value = state.meta.title ?? ''
   title.readOnly = !editable()
   document.title = `${state.meta.title || 'Graph'} · Pivograph`
-  for (const id of ['btn-add-node', 'btn-add-edge']) document.getElementById(id).disabled = !editable()
+  document.getElementById('btn-add').disabled = !editable()
   document.getElementById('footer-hint').textContent = editable() ? 'Double-click an item to edit it' : 'Click a tag or a type to filter'
   // Read-only badge, with the way to unlock editing.
   const badge = document.getElementById('readonly-badge')
@@ -707,13 +765,39 @@ function bindHeader() {
     document.title = `${state.meta.title || 'Graph'} · Pivograph`
     persist()
   })
-  document.getElementById('btn-new').addEventListener('click', newDocument)
-  document.getElementById('btn-open').addEventListener('click', pickFile)
-  document.getElementById('btn-wellknown').addEventListener('click', importWellKnown)
-  document.getElementById('btn-example').addEventListener('click', loadExample)
-  document.getElementById('btn-export').addEventListener('click', exportJson)
-  document.getElementById('btn-add-node').addEventListener('click', addNode)
-  document.getElementById('btn-add-edge').addEventListener('click', () => addEdge())
+  document.getElementById('header-actions').append(
+    menuButton({
+      id: 'btn-add',
+      label: 'Add',
+      primary: true,
+      items: [
+        { label: 'Node', hint: 'A project, team, platform, dataset…', onclick: addNode },
+        { label: 'Edge', hint: 'An arrow between two nodes', onclick: () => addEdge(), disabled: () => view.nodes().length === 0 },
+      ],
+    }),
+    menuButton({
+      id: 'btn-graph',
+      label: 'Graph',
+      items: [
+        { label: 'New graph', hint: 'Start empty, with ready-made types', onclick: newDocument },
+        { label: 'Open a file…', hint: 'Pivograph JSON or open-contributions.json', onclick: pickFile },
+        { label: 'Import an organization…', hint: 'From its .well-known/open-contributions.json', onclick: importWellKnown },
+        'separator',
+        { label: 'Rulezet example', hint: 'Projects linked to Rulezet', onclick: loadExample },
+      ],
+    }),
+    menuButton({
+      id: 'btn-export',
+      label: 'Export',
+      align: 'end',
+      items: [
+        { label: 'Graph data (JSON)', hint: 'To open again or edit later', onclick: exportJson },
+        { label: 'Pivotick data (JSON)', hint: 'Nodes and edges with styles, for new Pivotick()', onclick: exportPivotick },
+        { label: 'Report (PDF)', hint: 'Picture of the graph + a written description', onclick: () => exportReport('pdf') },
+        { label: 'Report (Markdown)', hint: 'The same report, as a .md file', onclick: () => exportReport('md') },
+        { label: 'Picture (PNG)', hint: 'The whole graph as drawn', onclick: exportPicture },
+      ],
+    }))
   document.getElementById('search').addEventListener('input', (e) => {
     ui.filter = e.target.value
     renderSidebar()
