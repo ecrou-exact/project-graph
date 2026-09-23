@@ -2,6 +2,7 @@
 title: "Pivotick"
 description: "Graph visualization library."
 tags: ["infovis", "network-vis", "network-visualization"]
+weight: 10
 graph:
   id: "pivotick"
   type: "project"

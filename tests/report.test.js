@@ -27,6 +27,9 @@ describe('phrase', () => {
     expect(phrase('API')).toBe('noun')
     expect(phrase('upstream')).toBe('noun')
     expect(phrase('')).toBe('none')
+    expect(phrase('manages or co-manages')).toBe('verb')
+    expect(phrase('reads and writes')).toBe('verb')
+    expect(phrase('uses and pushes events')).toBe('action')
   })
 })
 
@@ -87,6 +90,13 @@ describe('buildReport', () => {
     expect(md).toContain('# A \\*b\\* \\[c\\]')
     expect(md).toContain('\\<script\\>')
     expect(md).not.toContain('<script>')
+  })
+
+  it('keeps inner capitals when lowering a type name', async () => {
+    const { lowerFirst } = await import('../src/report.js')
+    expect(lowerFirst('Open data')).toBe('open data')
+    expect(lowerFirst('GitHub organisation')).toBe('GitHub organisation')
+    expect(lowerFirst('MISP instance')).toBe('MISP instance')
   })
 
   it('pluralizes type names', () => {

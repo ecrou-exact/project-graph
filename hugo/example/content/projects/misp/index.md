@@ -2,6 +2,7 @@
 title: "MISP"
 description: "Open source threat intelligence sharing platform."
 tags: ["cti", "cybersecurity", "fraud-detection", "fraud-management", "fraud-prevention", "information-exchange", "information-security", "information-sharing", "intelligence", "malware-analysis", "misp", "security", "stix", "threat-analysis", "threat-hunting", "threat-intel", "threat-intelligence", "threat-intelligence-platform", "threat-sharing", "threatintel"]
+weight: 2
 graph:
   id: "misp"
   type: "project"

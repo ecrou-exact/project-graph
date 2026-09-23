@@ -53,7 +53,7 @@ The content is decided by `reportModel()` in `src/report.js`, and laid out by `b
 | `API`, `upstream` | noun | **A** is linked to **B** (API). |
 | none | — | **A** is linked to **B**. |
 
-A word counts as a verb when it ends in *s* (*uses*, *pushes*), or when it is one of *is*, *are*, *was*, *has*, *have*, *can*, *will*, *may*, *must*, *does*, *use*. A label that starts with a capital letter is read as a noun. With `direction: "both"`, the sentence ends with "in both directions". An edge from a node to itself reads "… itself".
+A word counts as a verb when it ends in *s* (*uses*, *pushes*), or when it is one of *is*, *are*, *was*, *has*, *have*, *can*, *will*, *may*, *must*, *does*, *use*. Verbs joined by *or* / *and* read as one verb (`manages or co-manages`: **A** manages or co-manages **B**). A label that starts with a capital letter is read as a noun. With `direction: "both"`, the sentence ends with "in both directions". An edge from a node to itself reads "… itself".
 
 **Writing labels that read well.** Use a lowercase verb phrase from the source's point of view: `uses`, `depends on`, `fetches data from`, `is funded by`. The same label then reads well on the graph and in the report.
 

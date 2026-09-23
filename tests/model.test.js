@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import {
   MARKER_END, MARKER_START, NO_MARKER,
   edgeLabel, edgeLabelLook, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, parseDetails, parseDocument, parseGithub, parseLinks, parseTags, readableOn, tagLook, resolveNode, slugify, starterDocument, toRawEdge, toRawNode, uniqueId,
@@ -9,6 +9,21 @@ import { flattenDetails, unflattenDetails } from '../src/ui/forms.js'
 const example = JSON.parse(readFileSync(new URL('../examples/rulezet.json', import.meta.url), 'utf8'))
 
 describe('parseDocument', () => {
+  it('accepts the CIRCL example: every organisation around CIRCL, with its logo', () => {
+    const circl = JSON.parse(readFileSync(new URL('../examples/circl.json', import.meta.url), 'utf8'))
+    const { doc, errors, warnings } = parseDocument(circl)
+    expect(errors).toEqual([])
+    expect(warnings).toEqual([])
+    expect(doc.nodes).toHaveLength(22)
+    expect(doc.edges.every((e) => e.from === 'circl')).toBe(true)
+    expect(new Set(doc.edges.map((e) => e.to)).size).toBe(21)
+    for (const node of doc.nodes) {
+      expect(node.image, node.id).toMatch(/^logos\/circl\/[a-z0-9-]+\.png$/)
+      expect(existsSync(new URL(`../public/${node.image}`, import.meta.url)), node.image).toBe(true)
+      expect(node.links[0].url, node.id).toMatch(/^https:\/\/github\.com\//)
+    }
+  })
+
   it('accepts the bundled example without errors or warnings', () => {
     const { doc, errors, warnings } = parseDocument(example)
     expect(errors).toEqual([])

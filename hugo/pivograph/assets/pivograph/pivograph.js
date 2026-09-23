@@ -6,9 +6,49 @@
 
 // The script is included once per graph; each figure is enhanced once.
 // ?pivograph=static keeps the page as it is without JavaScript (the picture
-// drawn by Hugo and the text), to check or show that version.
-if (new URLSearchParams(location.search).get('pivograph') !== 'static') {
+// drawn by Hugo and the text), to check or show that version. The choice holds
+// for the tab, and the site's links keep it, until ?pivograph=interactive.
+if (staticMode()) {
+  for (const figure of document.querySelectorAll('figure[data-pivograph]:not(.pivograph-static)')) showStatic(figure)
+} else {
   for (const figure of document.querySelectorAll('figure[data-pivograph]:not(.pivograph-enhanced)')) enhance(figure)
+}
+
+function staticMode() {
+  const mode = new URLSearchParams(location.search).get('pivograph')
+  try {
+    if (mode === 'static') sessionStorage.setItem('pivograph', 'static')
+    if (mode === 'interactive') sessionStorage.removeItem('pivograph')
+    return mode === 'static' || (mode !== 'interactive' && sessionStorage.getItem('pivograph') === 'static')
+  } catch {
+    return mode === 'static' // storage unavailable: only the address says so
+  }
+}
+
+/** The version without JavaScript, said as such, with the way back to the interactive graph. */
+function showStatic(figure) {
+  figure.classList.add('pivograph-static')
+  const note = document.createElement('p')
+  note.className = 'pivograph-static-note'
+  const back = new URL(location.href)
+  back.searchParams.set('pivograph', 'interactive')
+  note.append('You are seeing the version without JavaScript: the picture drawn by Hugo, then the text. ')
+  const link = document.createElement('a')
+  link.href = back.href
+  link.textContent = 'Show the interactive graph'
+  note.append(link)
+  figure.prepend(note)
+  // The site's links keep the mode, so it survives a page without a graph too.
+  const base = new URL(figure.dataset.base || '/', location.href)
+  const root = new URL(base.pathname, location.origin)
+  for (const a of document.querySelectorAll('a[href]')) {
+    if (a === link) continue
+    const url = new URL(a.getAttribute('href'), location.href)
+    const local = url.origin === location.origin || url.href.startsWith(base.href)
+    if (!local || !(url.pathname.startsWith(root.pathname) || url.href.startsWith(base.href)) || url.hash && url.pathname === location.pathname) continue
+    url.searchParams.set('pivograph', 'static')
+    a.setAttribute('href', url.origin === location.origin ? url.pathname + url.search + url.hash : url.href)
+  }
 }
 
 function enhance(figure) {

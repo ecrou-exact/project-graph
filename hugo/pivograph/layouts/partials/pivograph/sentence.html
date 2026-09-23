@@ -45,7 +45,19 @@
   {{- $last := index $words (sub (len $words) 1) -}}
   {{- $tail := slice "of" "to" "with" "in" "on" "for" "from" "by" "into" "at" "as" "about" "onto" "over" "through" -}}
   {{- $verbs := slice "is" "are" "was" "has" "have" "can" "will" "may" "must" "does" "depends" "uses" "use" -}}
-  {{- if ne $first (lower $first) -}}
+  {{- /* Coordinated verbs read as one verb: "manages or co-manages", "reads and writes". */ -}}
+  {{- $parts := split (replaceRE `\s+(or|and)\s+` "\x1f" $label) "\x1f" -}}
+  {{- $allVerbs := gt (len $parts) 1 -}}
+  {{- range $parts -}}
+    {{- $w := index (split . " ") 0 -}}
+    {{- $one := eq (len (split . " ")) 1 -}}
+    {{- $isVerb := and (eq $w (lower $w)) (or (in $verbs $w) (and (gt (len (findRE `[^s]s$` $w)) 0) (eq (len (findRE `(ous|ss|is|us)$` $w)) 0) (gt (len (findRE `^[a-z-]+$` $w)) 0))) -}}
+    {{- $last := index (split . " ") (sub (len (split . " ")) 1) -}}
+    {{- if not (and $isVerb (or $one (in $tail $last))) -}}{{- $allVerbs = false -}}{{- end -}}
+  {{- end -}}
+  {{- if $allVerbs -}}
+    {{- $kind = "verb" -}}
+  {{- else if ne $first (lower $first) -}}
     {{- $kind = "noun" -}}
   {{- else if or (in $verbs $first) (and (findRE `[^s]s$` $first) (not (findRE `(ous|ss|is|us)$` $first)) (findRE `^[a-z-]+$` $first)) -}}
     {{- $kind = cond (or (eq (len $words) 1) (in $tail $last)) "verb" "action" -}}

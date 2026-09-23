@@ -63,16 +63,32 @@ export function hugoExamplePlugin() {
       const available = hasHugo()
       const out = mkdtempSync(join(tmpdir(), 'pivograph-hugo-example-'))
       let error = null
+      let port = server.config.server.port ?? 5173
       const rebuild = () => {
-        const { port = 5173 } = server.config.server
-        const origin = `http://localhost:${server.config.server.port ?? port}`
+        const origin = `http://localhost:${port}`
         error = available ? build(out, `${origin}/hugo-example/`, `${origin}/`) : null
         if (error) server.config.logger.error(`[hugo-example] ${error}`)
       }
-      server.httpServer?.once('listening', rebuild)
+      // Built right away (a restarted server never emits "listening"), and again
+      // if the server ends up on another port than the configured one.
+      rebuild()
+      server.httpServer?.once('listening', () => {
+        const actual = server.httpServer.address()?.port
+        if (actual && actual !== port) {
+          port = actual
+          rebuild()
+        }
+      })
       if (available) {
+        // Any change under hugo/ (added, changed or removed files), in bursts:
+        // one rebuild once a script has finished writing its pages.
+        let timer = null
         server.watcher.add(join(root, 'hugo'))
-        server.watcher.on('change', (file) => file.startsWith(join(root, 'hugo')) && rebuild())
+        server.watcher.on('all', (_event, file) => {
+          if (!file.startsWith(join(root, 'hugo'))) return
+          clearTimeout(timer)
+          timer = setTimeout(rebuild, 300)
+        })
       }
 
       server.middlewares.use((req, res, next) => {

@@ -13,7 +13,7 @@ JavaScript, add `?pivograph=static` to its address.
 Folders:
 
 - `pivograph/`: the component (shortcode, partials, script, styles). Copy it into a site's `themes/`.
-- `example/`: an example site, the Rulezet map as ten project pages.
+- `example/`: an example site: the Rulezet map as ten project pages, and the GitHub organisations of CIRCL as 22 pages.
   `npm run hugo:example` regenerates it from `examples/rulezet.json` and serves it.
 
 Full guide, with the front-matter reference, parameters, a checklist and a

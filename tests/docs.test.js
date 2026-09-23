@@ -8,7 +8,7 @@ const text = (key) => String(files[key])
 describe('documentation site', () => {
   it('publishes the pages, the files for AI agents, the schema and the examples', () => {
     for (const key of ['docs/index.html', 'docs/guide.html', 'docs/site.css', 'llms.txt', 'llms-full.txt',
-      'docs/pivograph.schema.json', 'docs/examples/rulezet.json', 'docs/examples/minimal.json', 'docs/assets/hero.png']) {
+      'docs/pivograph.schema.json', 'docs/examples/rulezet.json', 'docs/examples/circl.json', 'docs/examples/minimal.json', 'docs/assets/hero.png']) {
       expect(files[key], key).toBeTruthy()
     }
     expect(text('docs/index.html')).not.toMatch(/\{\{\w+\}\}/)
@@ -54,7 +54,7 @@ describe('documentation site', () => {
       const { errors, warnings } = parseDocument(JSON.parse(block))
       expect({ errors, warnings }).toEqual({ errors: [], warnings: [] })
     }
-    for (const key of ['docs/examples/rulezet.json', 'docs/examples/minimal.json']) {
+    for (const key of ['docs/examples/rulezet.json', 'docs/examples/circl.json', 'docs/examples/minimal.json']) {
       expect(parseDocument(JSON.parse(text(key))).errors, key).toEqual([])
     }
   })

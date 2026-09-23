@@ -2,7 +2,7 @@
 
 Build a **graph of a project's connections** from a simple JSON file, then edit it with the mouse or through forms. Rendering and interaction are powered by the latest version of [Pivotick](https://pivotick.github.io/Pivotick/) (CIRCL).
 
-Bundled example: projects linked to **Rulezet** (`examples/rulezet.json`).
+Bundled examples: projects linked to **Rulezet** (`examples/rulezet.json`), and the **GitHub organisations of CIRCL** (`examples/circl.json`, generated from the GitHub API by `node scripts/circl-example.mjs`).
 
 **Documentation: [ecrou-exact.github.io/project-graph/docs](https://ecrou-exact.github.io/project-graph/docs/)** — the guide (format reference, a step-by-step procedure to map an organization, OCD import, embedding, architecture), plus [`llms.txt`](https://ecrou-exact.github.io/project-graph/llms.txt) and [`llms-full.txt`](https://ecrou-exact.github.io/project-graph/llms-full.txt) for AI agents.
 

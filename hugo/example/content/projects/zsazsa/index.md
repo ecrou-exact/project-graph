@@ -2,6 +2,7 @@
 title: "zsazsa"
 description: "CTI program management and production platform built around MISP."
 tags: ["cti", "misp"]
+weight: 9
 graph:
   id: "zsazsa"
   type: "project"

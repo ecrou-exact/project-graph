@@ -99,6 +99,19 @@ describe.skipIf(!available)('Hugo component', () => {
     expect(svg).toContain('stroke-dasharray')
   })
 
+  it('builds the CIRCL section too, nodes without tags or description included', () => {
+    const circl = parseDocument(JSON.parse(readFileSync(join(root, 'examples/circl.json'), 'utf8'))).doc
+    const { doc, errors } = parseDocument(JSON.parse(readFileSync(join(out, 'pivograph/circl.json'), 'utf8')))
+    expect(errors).toEqual([])
+    expect(doc.nodes.map((n) => n.id)).toEqual(circl.nodes.map((n) => n.id)) // the page weights keep the map's order
+    expect(doc.edges).toHaveLength(circl.edges.length)
+    const html = readFileSync(join(out, 'circl/index.html'), 'utf8')
+    expect((html.match(/class="pivograph-node"/g) ?? []).length).toBe(circl.nodes.length)
+    expect(html).toContain('<a href="#pivograph-bintriage">')
+    expect(html).not.toContain('undefined')
+    expect(html).toMatch(/<strong>CIRCL<\/strong> manages or co-manages <strong>MISP<\/strong>, /)
+  })
+
   it('reads a data file, and keeps the positions of the app in the picture', () => {
     // A copy of the example with a data file: a graph exported from the app, with positions.
     const site = mkdtempSync(join(tmpdir(), 'pivograph-hugo-data-'))

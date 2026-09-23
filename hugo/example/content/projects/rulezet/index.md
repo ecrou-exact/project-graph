@@ -2,6 +2,7 @@
 title: "Rulezet"
 description: "Community platform for sharing, reviewing and managing detection rules (YARA, Sigma, Suricata, Zeek, ...)."
 tags: ["cti", "network-detection", "network-security", "threat-intelligence", "yara"]
+weight: 1
 graph:
   id: "rulezet"
   type: "project"

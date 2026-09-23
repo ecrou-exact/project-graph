@@ -1,0 +1,1334 @@
+{
+  "version": 1,
+  "meta": {
+    "title": "CIRCL GitHub organisations",
+    "description": "The GitHub organisations managed or co-managed by CIRCL, the CERT for the private sector, communes and non-governmental entities in Luxembourg, as listed on https://new.circl.lu/projects/github-organisations/. For each organisation: its logo, its description and website from GitHub, its most starred repository and its most used topics. GitHub data of 2026-09-23.",
+    "linkDistance": 300
+  },
+  "nodeTypes": {
+    "cert": {
+      "label": "CERT",
+      "color": "#ffffff",
+      "shape": "circle",
+      "size": 70,
+      "imageFit": "contain",
+      "borderColor": "#1c2b4a",
+      "borderWidth": 3,
+      "labelSize": 22,
+      "labelFont": "sans",
+      "labelBackground": "none"
+    },
+    "organisation": {
+      "label": "GitHub organisation",
+      "color": "#ffffff",
+      "shape": "circle",
+      "size": 36,
+      "imageFit": "contain",
+      "borderColor": "#c9d1e0",
+      "borderWidth": 2,
+      "labelSize": 15,
+      "labelFont": "sans",
+      "labelBackground": "none"
+    }
+  },
+  "edgeTypes": {
+    "manages": {
+      "label": "manages or co-manages",
+      "color": "#8aa0c8",
+      "width": 2,
+      "direction": "forward",
+      "hideLabel": true
+    }
+  },
+  "nodes": [
+    {
+      "id": "circl",
+      "label": "CIRCL",
+      "type": "cert",
+      "description": "CIRCL is the CERT (Computer Emergency Response Team/Computer Security Incident Response Team) for the private sector, communes and non-governmental entities.",
+      "url": "https://www.circl.lu",
+      "image": "logos/circl/circl.png",
+      "github": "CIRCL/Circlean",
+      "githubInfo": {
+        "fullName": "CIRCL/Circlean",
+        "url": "https://github.com/CIRCL/Circlean",
+        "description": "USB key cleaner",
+        "homepage": "https://www.circl.lu/projects/CIRCLean/",
+        "stars": 487,
+        "forks": 71,
+        "issues": 41,
+        "language": "Python",
+        "license": "BSD-3-Clause",
+        "topics": [
+          "security",
+          "usb-cleaner",
+          "usb-devices",
+          "usb-keys"
+        ],
+        "archived": false,
+        "pushedAt": "2023-05-24T09:12:57Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/CIRCL"
+        }
+      ],
+      "tags": [
+        "dfir",
+        "security",
+        "network-analysis",
+        "yara",
+        "yara-rules"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/CIRCL",
+        "public_repositories": 80,
+        "own_repositories": 65,
+        "stars_across_repositories": 3275,
+        "followers": 259,
+        "location": "Luxembourg",
+        "email": "info@circl.lu",
+        "on_github_since": "2010-11-05",
+        "most_starred_repositories": [
+          "Circlean (487 stars)",
+          "url-abuse (148 stars)",
+          "bgp-ranking (116 stars)",
+          "potiron (88 stars)",
+          "PyPDNS (82 stars)"
+        ],
+        "archived_repositories": 3
+      }
+    },
+    {
+      "id": "misp",
+      "label": "MISP",
+      "type": "organisation",
+      "description": "MISP Project - Open Source Threat Intelligence Platform & Open Standards For Threat Information Sharing",
+      "url": "https://www.misp-project.org",
+      "image": "logos/circl/misp.png",
+      "github": "MISP/MISP",
+      "githubInfo": {
+        "fullName": "MISP/MISP",
+        "url": "https://github.com/MISP/MISP",
+        "description": "MISP (core software) - Open Source Threat Intelligence and Sharing Platform",
+        "homepage": "https://www.misp-project.org/",
+        "stars": 6547,
+        "forks": 1637,
+        "issues": 2923,
+        "language": "PHP",
+        "license": "AGPL-3.0",
+        "topics": [
+          "cti",
+          "cybersecurity",
+          "fraud-detection",
+          "fraud-management",
+          "fraud-prevention",
+          "information-exchange",
+          "information-security",
+          "information-sharing",
+          "intelligence",
+          "malware-analysis",
+          "misp",
+          "security",
+          "stix",
+          "threat-analysis",
+          "threat-hunting",
+          "threat-intel",
+          "threat-intelligence",
+          "threat-intelligence-platform",
+          "threat-sharing",
+          "threatintel"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-23T09:16:13Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/MISP"
+        }
+      ],
+      "tags": [
+        "misp",
+        "threat-intelligence",
+        "information-exchange",
+        "cti",
+        "information-sharing"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/MISP",
+        "public_repositories": 107,
+        "own_repositories": 99,
+        "stars_across_repositories": 12748,
+        "followers": 1172,
+        "location": "Worldwide",
+        "email": "info@misp-project.org",
+        "on_github_since": "2013-04-12",
+        "most_starred_repositories": [
+          "MISP (6547 stars)",
+          "misp-warninglists (650 stars)",
+          "misp-galaxy (641 stars)",
+          "PyMISP (492 stars)",
+          "misp-training (440 stars)"
+        ],
+        "archived_repositories": 1
+      }
+    },
+    {
+      "id": "vulnerability-lookup",
+      "label": "Vulnerability-Lookup",
+      "type": "organisation",
+      "description": "Vulnerability-Lookup facilitates quick correlation of vulnerabilities from various sources, independent of vulnerability IDs.",
+      "url": "https://www.vulnerability-lookup.org",
+      "image": "logos/circl/vulnerability-lookup.png",
+      "github": "vulnerability-lookup/vulnerability-lookup",
+      "githubInfo": {
+        "fullName": "vulnerability-lookup/vulnerability-lookup",
+        "url": "https://github.com/vulnerability-lookup/vulnerability-lookup",
+        "description": "Vulnerability-Lookup facilitates quick correlation of vulnerabilities from various sources, independent of vulnerability IDs, and streamlines the management of Coordinated Vulnerability Disclosure (CVD). ",
+        "homepage": "https://www.vulnerability-lookup.org",
+        "stars": 576,
+        "forks": 92,
+        "issues": 72,
+        "language": "Python",
+        "license": "AGPL-3.0",
+        "topics": [
+          "cvd",
+          "cvd-policy",
+          "cve",
+          "vulnerability-databases",
+          "vulnerability-lookup"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-23T14:06:40Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/vulnerability-lookup"
+        }
+      ],
+      "tags": [
+        "vulnerability-lookup",
+        "vulnerability",
+        "sightings",
+        "cve",
+        "observations"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/vulnerability-lookup",
+        "public_repositories": 26,
+        "own_repositories": 24,
+        "stars_across_repositories": 913,
+        "followers": 65,
+        "email": "info@circl.lu",
+        "on_github_since": "2025-01-24",
+        "most_starred_repositories": [
+          "vulnerability-lookup (576 stars)",
+          "cpe-guesser (130 stars)",
+          "VulnMCP (41 stars)",
+          "VulnTrain (40 stars)",
+          "VulnAgent (24 stars)"
+        ]
+      }
+    },
+    {
+      "id": "pandora-analysis",
+      "label": "Pandora Analysis",
+      "type": "organisation",
+      "url": "https://pandora.circl.lu/",
+      "image": "logos/circl/pandora-analysis.png",
+      "github": "pandora-analysis/pandora",
+      "githubInfo": {
+        "fullName": "pandora-analysis/pandora",
+        "url": "https://github.com/pandora-analysis/pandora",
+        "description": "Pandora is an analysis framework to discover if a file is suspicious and conveniently show the results ",
+        "homepage": "https://pandora.circl.lu/",
+        "stars": 284,
+        "forks": 47,
+        "issues": 76,
+        "language": "Python",
+        "license": "AGPL-3.0",
+        "topics": [
+          "document-analysis",
+          "document-analyzing",
+          "infosec",
+          "malware-detection"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-21T20:54:41Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/pandora-analysis"
+        }
+      ],
+      "tags": [
+        "document-analysis",
+        "document-analyzing",
+        "infosec",
+        "malware-detection",
+        "pandora"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/pandora-analysis",
+        "public_repositories": 4,
+        "own_repositories": 2,
+        "stars_across_repositories": 291,
+        "followers": 38,
+        "location": "Luxembourg",
+        "on_github_since": "2021-09-21",
+        "most_starred_repositories": [
+          "pandora (284 stars)",
+          "pypandora (7 stars)"
+        ]
+      }
+    },
+    {
+      "id": "lookyloo",
+      "label": "Lookyloo",
+      "type": "organisation",
+      "description": "Lookyloo is a web interface allowing to scrape a website and then displays a tree of domains calling each other. ",
+      "url": "https://www.lookyloo.eu/",
+      "image": "logos/circl/lookyloo.png",
+      "github": "Lookyloo/lookyloo",
+      "githubInfo": {
+        "fullName": "Lookyloo/lookyloo",
+        "url": "https://github.com/Lookyloo/lookyloo",
+        "description": "Lookyloo is a web interface that allows users to capture a website page and then display a tree of domains that call each other.",
+        "homepage": "https://www.lookyloo.eu",
+        "stars": 775,
+        "forks": 93,
+        "issues": 62,
+        "language": "Python",
+        "topics": [
+          "capture",
+          "dfir",
+          "information-security",
+          "lookyloo",
+          "privacy",
+          "scraping",
+          "web-security"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-22T15:40:47Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/Lookyloo"
+        }
+      ],
+      "tags": [
+        "lookyloo",
+        "lookyloo-documentation",
+        "information-security",
+        "osint",
+        "phishing"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/Lookyloo",
+        "public_repositories": 32,
+        "own_repositories": 23,
+        "stars_across_repositories": 908,
+        "followers": 64,
+        "on_github_since": "2020-06-08",
+        "most_starred_repositories": [
+          "lookyloo (775 stars)",
+          "PlaywrightCapture (32 stars)",
+          "har2tree (14 stars)",
+          "sanejs (14 stars)",
+          "phishtank-lookup (12 stars)"
+        ],
+        "archived_repositories": 1
+      }
+    },
+    {
+      "id": "ail-project",
+      "label": "AIL Project",
+      "type": "organisation",
+      "description": "AIL Project is an open source project to collect and analyse data to produce security intelligence.",
+      "url": "https://www.ail-project.org/",
+      "image": "logos/circl/ail-project.png",
+      "github": "ail-project/ail-framework",
+      "githubInfo": {
+        "fullName": "ail-project/ail-framework",
+        "url": "https://github.com/ail-project/ail-framework",
+        "description": "AIL framework - Analysis Information Leak framework",
+        "stars": 1018,
+        "forks": 145,
+        "issues": 136,
+        "language": "Python",
+        "license": "AGPL-3.0",
+        "topics": [
+          "ail-framework",
+          "darkweb",
+          "darkweb-scraping",
+          "data-mining",
+          "information-extraction",
+          "information-security",
+          "leak"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-22T15:19:25Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/ail-project"
+        },
+        {
+          "label": "X / Twitter",
+          "url": "https://x.com/ail_project"
+        }
+      ],
+      "tags": [
+        "ail-framework",
+        "osint",
+        "ail-project",
+        "darkweb",
+        "lacus"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/ail-project",
+        "public_repositories": 45,
+        "own_repositories": 39,
+        "stars_across_repositories": 1484,
+        "followers": 234,
+        "on_github_since": "2020-03-19",
+        "most_starred_repositories": [
+          "ail-framework (1018 stars)",
+          "lacus (119 stars)",
+          "onion-lookup (65 stars)",
+          "ail-yara-rules (44 stars)",
+          "ail-training (39 stars)"
+        ],
+        "archived_repositories": 1
+      }
+    },
+    {
+      "id": "hashlookup",
+      "label": "Hashlookup",
+      "type": "organisation",
+      "description": "Open source tools and standards to lookup known files",
+      "url": "https://hashlookup.io",
+      "image": "logos/circl/hashlookup.png",
+      "github": "hashlookup/hashlookup-forensic-analyser",
+      "githubInfo": {
+        "fullName": "hashlookup/hashlookup-forensic-analyser",
+        "url": "https://github.com/hashlookup/hashlookup-forensic-analyser",
+        "description": "Analyse a forensic target (such as a directory) to find and report files found and not found from CIRCL hashlookup public service - https://circl.lu/services/hashlookup/",
+        "homepage": "https://hashlookup.github.io/hashlookup-forensic-analyser/",
+        "stars": 130,
+        "forks": 14,
+        "issues": 4,
+        "language": "Python",
+        "topics": [
+          "bloom-filter",
+          "dfir",
+          "dfir-automation",
+          "forensic-analysis",
+          "forensics-investigations",
+          "hashlookup",
+          "nsrl",
+          "nsrllookup"
+        ],
+        "archived": false,
+        "pushedAt": "2023-09-24T12:47:57Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/hashlookup"
+        },
+        {
+          "label": "X / Twitter",
+          "url": "https://x.com/hashlookup_io"
+        }
+      ],
+      "tags": [
+        "hashlookup",
+        "dfir",
+        "bloom-filter",
+        "nsrl",
+        "yara"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/hashlookup",
+        "public_repositories": 18,
+        "own_repositories": 14,
+        "stars_across_repositories": 361,
+        "followers": 38,
+        "on_github_since": "2021-09-23",
+        "most_starred_repositories": [
+          "hashlookup-forensic-analyser (130 stars)",
+          "fleur (116 stars)",
+          "poppy (29 stars)",
+          "private-search-set (16 stars)",
+          "a-ray-grass (14 stars)"
+        ]
+      }
+    },
+    {
+      "id": "rulezet",
+      "label": "Rulezet",
+      "type": "organisation",
+      "description": "Community-Driven Detection Rules Platform",
+      "url": "https://rulezet.org/",
+      "image": "logos/circl/rulezet.png",
+      "github": "rulezet/rulezet-core",
+      "githubInfo": {
+        "fullName": "rulezet/rulezet-core",
+        "url": "https://github.com/rulezet/rulezet-core",
+        "description": "Rulezet is an open-source web platform for sharing, evaluating, improving, and managing cybersecurity detection rules (YARA, Sigma, Suricata, etc). It aims to foster collaboration among professionals and enthusiasts to improve the quality and reliability of detection rules. ",
+        "homepage": "https://rulezet.org/docs/",
+        "stars": 55,
+        "forks": 9,
+        "issues": 14,
+        "language": "Python",
+        "license": "AGPL-3.0",
+        "topics": [
+          "cti",
+          "network-detection",
+          "network-security",
+          "threat-intelligence",
+          "yara"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-21T12:45:58Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/rulezet"
+        }
+      ],
+      "tags": [
+        "cti",
+        "threat-intelligence"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/rulezet",
+        "public_repositories": 7,
+        "own_repositories": 7,
+        "stars_across_repositories": 67,
+        "followers": 12,
+        "on_github_since": "2026-04-20",
+        "most_starred_repositories": [
+          "rulezet-core (55 stars)",
+          "rulezet-cast (6 stars)",
+          "rulezet-workshop (3 stars)",
+          "rulezet-rulesets (1 stars)",
+          "rulezet-scripts (1 stars)"
+        ]
+      }
+    },
+    {
+      "id": "pivotick",
+      "label": "Pivotick",
+      "type": "organisation",
+      "url": "https://pivotick.github.io/Pivotick/",
+      "image": "logos/circl/pivotick.png",
+      "github": "Pivotick/Pivotick",
+      "githubInfo": {
+        "fullName": "Pivotick/Pivotick",
+        "url": "https://github.com/Pivotick/Pivotick",
+        "description": "Pivotick is network graph library to facilitate pivoting.",
+        "homepage": "https://pivotick.github.io/Pivotick/",
+        "stars": 30,
+        "forks": 6,
+        "issues": 1,
+        "language": "TypeScript",
+        "topics": [
+          "infovis",
+          "network-vis",
+          "network-visualization"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-17T09:02:06Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/Pivotick"
+        }
+      ],
+      "tags": [
+        "infovis",
+        "network-vis",
+        "network-visualization"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/Pivotick",
+        "public_repositories": 1,
+        "own_repositories": 1,
+        "stars_across_repositories": 30,
+        "followers": 4,
+        "on_github_since": "2025-11-04",
+        "most_starred_repositories": [
+          "Pivotick (30 stars)"
+        ]
+      }
+    },
+    {
+      "id": "gcve-eu",
+      "label": "GCVE",
+      "type": "organisation",
+      "description": "Global CVE Allocation System",
+      "url": "https://gcve.eu",
+      "image": "logos/circl/gcve-eu.png",
+      "github": "gcve-eu/gcve.eu",
+      "githubInfo": {
+        "fullName": "gcve-eu/gcve.eu",
+        "url": "https://github.com/gcve-eu/gcve.eu",
+        "description": "BCP documents and website of GCVE",
+        "homepage": "https://gcve.eu",
+        "stars": 58,
+        "forks": 6,
+        "issues": 0,
+        "language": "CSS",
+        "license": "CC-BY-4.0",
+        "archived": false,
+        "pushedAt": "2026-09-23T05:08:40Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/gcve-eu"
+        }
+      ],
+      "tags": [
+        "cve",
+        "gcve"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/gcve-eu",
+        "public_repositories": 15,
+        "own_repositories": 13,
+        "stars_across_repositories": 118,
+        "followers": 52,
+        "email": "info@gcve.eu",
+        "on_github_since": "2025-04-16",
+        "most_starred_repositories": [
+          "gcve.eu (58 stars)",
+          "gcve (21 stars)",
+          "cpe-editor (8 stars)",
+          "gcve-eu-kev (7 stars)",
+          "gcve.eu-directory (6 stars)"
+        ]
+      }
+    },
+    {
+      "id": "cve-search",
+      "label": "CVE Search",
+      "type": "organisation",
+      "description": "Tools to perform local searches for known vulnerabilities",
+      "url": "https://www.cve-search.org/",
+      "image": "logos/circl/cve-search.png",
+      "github": "cve-search/cve-search",
+      "githubInfo": {
+        "fullName": "cve-search/cve-search",
+        "url": "https://github.com/cve-search/cve-search",
+        "description": "cve-search - a tool to perform local searches for known vulnerabilities",
+        "homepage": "https://www.cve-search.org/",
+        "stars": 2649,
+        "forks": 619,
+        "issues": 0,
+        "language": "Python",
+        "license": "AGPL-3.0",
+        "topics": [
+          "common-vulnerabilities",
+          "cpe",
+          "cve",
+          "cve-databases",
+          "cve-entries",
+          "cve-scanning",
+          "cve-search",
+          "vulnerabilities",
+          "vulnerability-assessment",
+          "vulnerability-detection"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-02T10:27:05Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/cve-search"
+        }
+      ],
+      "tags": [
+        "cve-search",
+        "cve",
+        "cve-scanning",
+        "software-vulnerability",
+        "vulnerabilities"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/cve-search",
+        "public_repositories": 15,
+        "own_repositories": 15,
+        "stars_across_repositories": 3570,
+        "followers": 126,
+        "on_github_since": "2015-10-08",
+        "most_starred_repositories": [
+          "cve-search (2649 stars)",
+          "git-vuln-finder (428 stars)",
+          "PyCVESearch (127 stars)",
+          "VIA4CVE (124 stars)",
+          "CVE-Search-Docker (121 stars)"
+        ],
+        "archived_repositories": 1
+      }
+    },
+    {
+      "id": "typosquatter",
+      "label": "Typosquatter",
+      "type": "organisation",
+      "description": "open source projects to find typosquatting in different sources, domain, pypi...",
+      "url": "https://typosquatting-finder.circl.lu/",
+      "image": "logos/circl/typosquatter.png",
+      "github": "typosquatter/ail-typo-squatting",
+      "githubInfo": {
+        "fullName": "typosquatter/ail-typo-squatting",
+        "url": "https://github.com/typosquatter/ail-typo-squatting",
+        "description": "Generate list of potential typo squatting domains with domain name permutation engine to feed AIL and other systems.",
+        "homepage": "https://typosquatter.github.io/ail-typo-squatting/",
+        "stars": 109,
+        "forks": 9,
+        "issues": 0,
+        "language": "Python",
+        "license": "BSD-2-Clause",
+        "topics": [
+          "threat-intelligence",
+          "typo-squatting",
+          "typosquatting",
+          "typosquatting-domains"
+        ],
+        "archived": false,
+        "pushedAt": "2025-04-30T08:47:29Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/typosquatter"
+        }
+      ],
+      "tags": [
+        "threat-intelligence",
+        "typosquatting",
+        "typosquatting-domains",
+        "misp",
+        "typo-squatting"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/typosquatter",
+        "public_repositories": 3,
+        "own_repositories": 3,
+        "stars_across_repositories": 191,
+        "followers": 8,
+        "email": "info@circl.lu",
+        "on_github_since": "2023-05-26",
+        "most_starred_repositories": [
+          "ail-typo-squatting (109 stars)",
+          "ail-typo-website (76 stars)",
+          "pypi-squatting (6 stars)"
+        ]
+      }
+    },
+    {
+      "id": "kunai-project",
+      "label": "Kunai Project",
+      "type": "organisation",
+      "url": "https://why.kunai.rocks",
+      "image": "logos/circl/kunai-project.png",
+      "github": "kunai-project/kunai",
+      "githubInfo": {
+        "fullName": "kunai-project/kunai",
+        "url": "https://github.com/kunai-project/kunai",
+        "description": "Threat-hunting tool for Linux",
+        "homepage": "https://why.kunai.rocks",
+        "stars": 1091,
+        "forks": 79,
+        "issues": 15,
+        "language": "Rust",
+        "license": "GPL-3.0",
+        "topics": [
+          "ebpf",
+          "linux",
+          "security-monitoring",
+          "threat-detection",
+          "threat-hunting"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-23T13:22:47Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/kunai-project"
+        },
+        {
+          "label": "X / Twitter",
+          "url": "https://x.com/kunai_project"
+        }
+      ],
+      "details": {
+        "github_organisation": "https://github.com/kunai-project",
+        "public_repositories": 15,
+        "own_repositories": 12,
+        "stars_across_repositories": 1163,
+        "followers": 81,
+        "location": "Luxembourg",
+        "on_github_since": "2024-01-19",
+        "most_starred_repositories": [
+          "kunai (1091 stars)",
+          "sandbox (30 stars)",
+          "sandbox-ui (18 stars)",
+          "pykunai (8 stars)",
+          "kunai-build-docker (6 stars)"
+        ]
+      }
+    },
+    {
+      "id": "d4-project",
+      "label": "D4 Project",
+      "type": "organisation",
+      "description": "Large-scale distributed sensor network project to monitor DDoS and other malicious activities.",
+      "url": "https://d4-project.org/",
+      "image": "logos/circl/d4-project.png",
+      "github": "D4-project/passive-ssh",
+      "githubInfo": {
+        "fullName": "D4-project/passive-ssh",
+        "url": "https://github.com/D4-project/passive-ssh",
+        "description": "A Passive SSH back-end and scanner.",
+        "homepage": "https://d4-project.github.io/passive-ssh/",
+        "stars": 105,
+        "forks": 11,
+        "issues": 1,
+        "language": "Python",
+        "license": "AGPL-3.0",
+        "topics": [
+          "hassh",
+          "passive-ssh",
+          "passive-ssh-server",
+          "ssh",
+          "ssh-scanner",
+          "threat-intelligence"
+        ],
+        "archived": false,
+        "pushedAt": "2026-05-11T11:35:52Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/D4-project"
+        },
+        {
+          "label": "X / Twitter",
+          "url": "https://x.com/d4_project"
+        }
+      ],
+      "tags": [
+        "d4-project",
+        "network-monitoring",
+        "network-security",
+        "threat-intelligence",
+        "bgp"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/D4-project",
+        "public_repositories": 46,
+        "own_repositories": 38,
+        "stars_across_repositories": 535,
+        "followers": 49,
+        "location": "Worldwide",
+        "on_github_since": "2018-02-21",
+        "most_starred_repositories": [
+          "passive-ssh (105 stars)",
+          "IPASN-History (99 stars)",
+          "BGP-Ranking (82 stars)",
+          "d4-core (43 stars)",
+          "sensor-d4-tls-fingerprinting (37 stars)"
+        ],
+        "archived_repositories": 1
+      }
+    },
+    {
+      "id": "ngsoti",
+      "label": "NGSOTI",
+      "type": "organisation",
+      "image": "logos/circl/ngsoti.png",
+      "github": "ngsoti/rust-training",
+      "githubInfo": {
+        "fullName": "ngsoti/rust-training",
+        "url": "https://github.com/ngsoti/rust-training",
+        "description": "Rust Training by Examples",
+        "stars": 16,
+        "forks": 2,
+        "issues": 0,
+        "language": "Rust",
+        "topics": [
+          "rust",
+          "training",
+          "training-materials"
+        ],
+        "archived": false,
+        "pushedAt": "2025-12-17T08:30:41Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/ngsoti"
+        }
+      ],
+      "details": {
+        "github_organisation": "https://github.com/ngsoti",
+        "public_repositories": 4,
+        "own_repositories": 4,
+        "stars_across_repositories": 34,
+        "followers": 25,
+        "on_github_since": "2024-01-23",
+        "most_starred_repositories": [
+          "rust-training (16 stars)",
+          "misp-wazuh-workshop (9 stars)",
+          "ngsoti (9 stars)",
+          ".github (0 stars)"
+        ]
+      }
+    },
+    {
+      "id": "neolea",
+      "label": "Neolea",
+      "type": "organisation",
+      "description": "Training materials for (LEA) law enforcement agency and partners",
+      "url": "https://neolea.github.io/neolea-training-materials/",
+      "image": "logos/circl/neolea.png",
+      "github": "neolea/neolea-training-materials",
+      "githubInfo": {
+        "fullName": "neolea/neolea-training-materials",
+        "url": "https://github.com/neolea/neolea-training-materials",
+        "description": "Open source training materials for law-enforcement and organisations interested in DFIR.",
+        "homepage": "https://neolea.github.io/neolea-training-materials/",
+        "stars": 64,
+        "forks": 6,
+        "issues": 1,
+        "language": "TeX",
+        "topics": [
+          "dfir",
+          "law-enforcement",
+          "misp",
+          "neola"
+        ],
+        "archived": false,
+        "pushedAt": "2026-05-29T13:29:52Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/neolea"
+        }
+      ],
+      "tags": [
+        "dfir",
+        "law-enforcement",
+        "misp",
+        "neola"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/neolea",
+        "public_repositories": 3,
+        "own_repositories": 3,
+        "stars_across_repositories": 64,
+        "followers": 6,
+        "location": "Europe",
+        "on_github_since": "2020-06-09",
+        "most_starred_repositories": [
+          "neolea-training-materials (64 stars)",
+          "misp-lea-website (0 stars)",
+          "neolea-training-materials-files (0 stars)"
+        ]
+      }
+    },
+    {
+      "id": "draugnet",
+      "label": "Draugnet",
+      "type": "organisation",
+      "image": "logos/circl/draugnet.png",
+      "github": "draugnet/draugnet",
+      "githubInfo": {
+        "fullName": "draugnet/draugnet",
+        "url": "https://github.com/draugnet/draugnet",
+        "description": "Draugnet is a lightweight, open-source tool for anonymous cyber threat reporting. Built for the MISP ecosystem, it lets users submit and track reports — no accounts, no logins, just a simple token. Supports plain text, MISP JSON, and object templates — ideal for CSIRTs, ISACs, and trusted communities. 🔐 Built for anonymity 🧩 Easy MISP integration",
+        "homepage": "https://github.com/draugnet/draugnet/",
+        "stars": 21,
+        "forks": 3,
+        "issues": 2,
+        "language": "Python",
+        "license": "AGPL-3.0",
+        "archived": false,
+        "pushedAt": "2026-07-08T14:09:27Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/draugnet"
+        }
+      ],
+      "details": {
+        "github_organisation": "https://github.com/draugnet",
+        "public_repositories": 3,
+        "own_repositories": 3,
+        "stars_across_repositories": 27,
+        "followers": 5,
+        "on_github_since": "2025-06-11",
+        "most_starred_repositories": [
+          "draugnet (21 stars)",
+          "draugnetUI (6 stars)",
+          "draugnet-docker (0 stars)"
+        ]
+      }
+    },
+    {
+      "id": "fanything-project",
+      "label": "FAnything Project",
+      "type": "organisation",
+      "description": "Fingerprint everything",
+      "image": "logos/circl/fanything-project.png",
+      "github": "fanything-project/fanything",
+      "githubInfo": {
+        "fullName": "fanything-project/fanything",
+        "url": "https://github.com/fanything-project/fanything",
+        "description": "Fingerprint anything on a network perspective",
+        "stars": 15,
+        "forks": 3,
+        "issues": 4,
+        "language": "Python",
+        "license": "BSD-2-Clause",
+        "archived": false,
+        "pushedAt": "2026-07-13T09:53:24Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/fanything-project"
+        }
+      ],
+      "details": {
+        "github_organisation": "https://github.com/fanything-project",
+        "public_repositories": 1,
+        "own_repositories": 1,
+        "stars_across_repositories": 15,
+        "followers": 5,
+        "on_github_since": "2026-06-16",
+        "most_starred_repositories": [
+          "fanything (15 stars)"
+        ]
+      }
+    },
+    {
+      "id": "flowintel",
+      "label": "FlowIntel",
+      "type": "organisation",
+      "description": "Organize your intelligence flow",
+      "url": "https://flowintel.github.io/flowintel-doc ",
+      "image": "logos/circl/flowintel.png",
+      "github": "flowintel/flowintel",
+      "githubInfo": {
+        "fullName": "flowintel/flowintel",
+        "url": "https://github.com/flowintel/flowintel",
+        "description": "An open source platform to support analysts to organise their case and tasks",
+        "homepage": "https://flowintel.github.io/flowintel-doc ",
+        "stars": 158,
+        "forks": 26,
+        "issues": 16,
+        "language": "Python",
+        "license": "AGPL-3.0",
+        "topics": [
+          "case-management",
+          "flowintel",
+          "incident-response",
+          "threatintel"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-23T13:43:19Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/flowintel"
+        }
+      ],
+      "tags": [
+        "flowintel"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/flowintel",
+        "public_repositories": 14,
+        "own_repositories": 11,
+        "stars_across_repositories": 190,
+        "followers": 29,
+        "on_github_since": "2021-12-25",
+        "most_starred_repositories": [
+          "flowintel (158 stars)",
+          "cocktailparty (23 stars)",
+          "benthos (4 stars)",
+          "flowintel-templates (2 stars)",
+          "flowintel-doc (1 stars)"
+        ]
+      }
+    },
+    {
+      "id": "cerebrate-project",
+      "label": "Cerebrate Project",
+      "type": "organisation",
+      "description": "Cerebrate is an open-source platform meant to act as a trusted contact information provider and interconnection orchestrator for other security tools. ",
+      "url": "https://www.cerebrate-project.org",
+      "image": "logos/circl/cerebrate-project.png",
+      "github": "cerebrate-project/cerebrate",
+      "githubInfo": {
+        "fullName": "cerebrate-project/cerebrate",
+        "url": "https://github.com/cerebrate-project/cerebrate",
+        "description": "Cerebrate is an open-source platform meant to act as a trusted contact information provider and interconnection orchestrator for other security tools.",
+        "homepage": "https://www.cerebrate-project.org/",
+        "stars": 93,
+        "forks": 20,
+        "issues": 99,
+        "language": "PHP",
+        "license": "AGPL-3.0",
+        "topics": [
+          "cerebrate",
+          "cerebrate-project",
+          "information-sharing",
+          "misp",
+          "security-automation"
+        ],
+        "archived": false,
+        "pushedAt": "2026-09-21T09:12:26Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/cerebrate-project"
+        },
+        {
+          "label": "X / Twitter",
+          "url": "https://x.com/cerebrateproje1"
+        }
+      ],
+      "tags": [
+        "cerebrate-project",
+        "misp"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/cerebrate-project",
+        "public_repositories": 6,
+        "own_repositories": 6,
+        "stars_across_repositories": 111,
+        "followers": 15,
+        "email": "info@circl.lu",
+        "on_github_since": "2020-01-26",
+        "most_starred_repositories": [
+          "cerebrate (93 stars)",
+          "cerebrate-training (9 stars)",
+          "module-collection (3 stars)",
+          "cerebrate-website (1 stars)",
+          "doc.cerebrate-project.org (1 stars)"
+        ],
+        "archived_repositories": 1
+      }
+    },
+    {
+      "id": "skillaegis",
+      "label": "SkillAegis",
+      "type": "organisation",
+      "image": "logos/circl/skillaegis.png",
+      "github": "SkillAegis/SkillAegis",
+      "githubInfo": {
+        "fullName": "SkillAegis/SkillAegis",
+        "url": "https://github.com/SkillAegis/SkillAegis",
+        "description": "SkillAegis is a platform to design, run, and monitor exercise scenarios, enhancing skills in applications like MISP and training users in best practices for information management and protective tools. Its gamification system makes learning engaging, ensuring users acquire essential technical skills and adhere to industry standards.",
+        "stars": 38,
+        "forks": 8,
+        "issues": 1,
+        "language": "HTML",
+        "license": "AGPL-3.0",
+        "archived": false,
+        "pushedAt": "2026-07-20T11:40:22Z",
+        "fetchedAt": "2026-09-23T14:21:17.374Z"
+      },
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/SkillAegis"
+        }
+      ],
+      "tags": [
+        "scenario-creator",
+        "training"
+      ],
+      "details": {
+        "github_organisation": "https://github.com/SkillAegis",
+        "public_repositories": 3,
+        "own_repositories": 3,
+        "stars_across_repositories": 46,
+        "followers": 1,
+        "on_github_since": "2025-10-23",
+        "most_starred_repositories": [
+          "SkillAegis (38 stars)",
+          "SkillAegis-Dashboard (4 stars)",
+          "SkillAegis-Editor (4 stars)"
+        ]
+      }
+    },
+    {
+      "id": "bintriage",
+      "label": "BinTriage",
+      "type": "organisation",
+      "image": "logos/circl/bintriage.png",
+      "links": [
+        {
+          "label": "GitHub organisation",
+          "url": "https://github.com/BinTriage"
+        }
+      ],
+      "details": {
+        "github_organisation": "https://github.com/BinTriage",
+        "public_repositories": 5,
+        "own_repositories": 0,
+        "stars_across_repositories": 0,
+        "followers": 2,
+        "on_github_since": "2026-08-18"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "circl",
+      "to": "misp",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "vulnerability-lookup",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "pandora-analysis",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "lookyloo",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "ail-project",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "hashlookup",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "rulezet",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "pivotick",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "gcve-eu",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "cve-search",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "typosquatter",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "kunai-project",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "d4-project",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "ngsoti",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "neolea",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "draugnet",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "fanything-project",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "flowintel",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "cerebrate-project",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "skillaegis",
+      "type": "manages"
+    },
+    {
+      "from": "circl",
+      "to": "bintriage",
+      "type": "manages"
+    }
+  ]
+}

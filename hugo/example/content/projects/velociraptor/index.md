@@ -2,6 +2,7 @@
 title: "Velociraptor"
 description: "Endpoint visibility, DFIR and hunting tool driven by VQL artifacts."
 tags: ["digital-forensics", "endpoint-discovery", "endpoint-protection", "endpoint-security", "forensics-investigations", "incident-response", "inventory-management"]
+weight: 5
 graph:
   id: "velociraptor"
   type: "project"

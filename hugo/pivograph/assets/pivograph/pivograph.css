@@ -20,6 +20,7 @@
 .pivograph-button { font: inherit; padding: 0.25rem 0.75rem; border: 1px solid var(--pivograph-border); border-radius: 6px; background: transparent; color: inherit; cursor: pointer; }
 .pivograph-button:hover { background: color-mix(in srgb, currentColor 7%, transparent); }
 .pivograph-failed .pivograph-status { color: #c0392b; }
+.pivograph-static-note { margin: 0 0 0.6rem; padding: 0.5rem 0.8rem; border: 1px dashed var(--pivograph-border); border-radius: var(--pivograph-radius); font-size: 0.9em; }
 .pivograph-text-toggle { margin-top: 0.75rem; }
 .pivograph-text-toggle > summary { cursor: pointer; color: var(--pivograph-muted); font-size: 0.9em; }
 .pivograph-picture { border: 1px solid var(--pivograph-border); border-radius: var(--pivograph-radius); background: #f6f7f9; overflow: hidden; }

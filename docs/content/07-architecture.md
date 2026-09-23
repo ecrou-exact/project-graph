@@ -68,6 +68,7 @@ The build turns the Markdown into `docs/index.html` (static HTML, readable witho
 | [`/llms-full.txt`](../llms-full.txt) | This whole page as Markdown. Read it before generating a map. |
 | [`pivograph.schema.json`](pivograph.schema.json) | JSON schema of the document format. |
 | [`examples/rulezet.json`](examples/rulezet.json) | A complete, checked map. |
+| [`examples/circl.json`](examples/circl.json) | An organisation and the 21 GitHub organisations it manages, with logos and GitHub facts. |
 | [`examples/minimal.json`](examples/minimal.json) | The smallest useful map. |
 | [Hugo](#hugo) | To add a graph to a Hugo site: procedure, front-matter reference, checklist and prompt. |
 

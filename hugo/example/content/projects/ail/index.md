@@ -2,6 +2,7 @@
 title: "AIL"
 description: "Analysis of Information Leaks framework: collects and analyses unstructured data, with YARA trackers and retro hunts."
 tags: ["ail-framework", "darkweb", "darkweb-scraping", "data-mining", "information-extraction", "information-security", "leak"]
+weight: 6
 graph:
   id: "ail"
   type: "project"

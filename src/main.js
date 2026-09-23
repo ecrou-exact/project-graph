@@ -1,6 +1,7 @@
 import './style.css'
 import pivotickPackage from 'pivotick/package.json'
 import rulezetExample from '../examples/rulezet.json'
+import circlExample from '../examples/circl.json'
 import { GraphView } from './graph.js'
 import { DIRECTIONS, TAG_FIELDS, compact, emptyDocument, parseDocument, resolveEdge, resolveNode, starterDocument } from './model.js'
 import { h } from './ui/dom.js'
@@ -452,16 +453,23 @@ async function newDocument() {
 
 // The bundled example is shown locked: on the public site, it is a demo to
 // look at. To make a graph, start a new one (kept in the visitor's browser only).
-const EXAMPLE = { ...rulezetExample, meta: { ...rulezetExample.meta, readOnly: true, source: { format: 'example' } } }
+const locked = (doc) => ({ ...doc, meta: { ...doc.meta, readOnly: true, source: { format: 'example' } } })
+const EXAMPLES = {
+  rulezet: { name: 'the Rulezet example', doc: locked(rulezetExample) },
+  circl: { name: 'the CIRCL example', doc: locked(circlExample) },
+}
+const EXAMPLE = EXAMPLES.rulezet.doc
 
-/** The bundled example, or a copy of it (same title) saved by an older version. */
+/** A bundled example, or a copy of one (same title) saved by an older version. */
 function isExample(doc) {
-  return doc?.meta?.source?.format === 'example' || doc?.meta?.title === rulezetExample.meta.title
+  return doc?.meta?.source?.format === 'example'
+    || Object.values(EXAMPLES).some((e) => doc?.meta?.title === e.doc.meta.title)
 }
 
-async function loadExample() {
-  if (view.nodes().length && !(await confirmModal('Replace the current graph with the Rulezet example?', { confirmLabel: 'Load', danger: false }))) return
-  loadRaw(EXAMPLE, 'example')
+async function loadExample(key = 'rulezet') {
+  const example = EXAMPLES[key]
+  if (view.nodes().length && !(await confirmModal(`Replace the current graph with ${example.name}?`, { confirmLabel: 'Load', danger: false }))) return
+  loadRaw(example.doc, 'example')
 }
 
 // --- rendering ------------------------------------------------------------------
@@ -800,7 +808,8 @@ function bindHeader() {
         { label: 'Open a file…', hint: 'Pivograph JSON or open-contributions.json', onclick: pickFile },
         { label: 'Import an organization…', hint: 'From its .well-known/open-contributions.json', onclick: importWellKnown },
         'separator',
-        { label: 'Rulezet example', hint: 'Projects linked to Rulezet', onclick: loadExample },
+        { label: 'Rulezet example', hint: 'Projects linked to Rulezet', onclick: () => loadExample('rulezet') },
+        { label: 'CIRCL example', hint: 'The GitHub organisations of CIRCL', onclick: () => loadExample('circl') },
       ],
     }),
     menuButton({

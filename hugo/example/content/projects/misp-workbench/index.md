@@ -2,6 +2,7 @@
 title: "MISP-Workbench"
 description: "Analyst workbench around MISP data, with hunts over external sources."
 tags: ["misp", "threat-hunting", "threat-intelligence"]
+weight: 8
 graph:
   id: "misp-workbench"
   type: "project"

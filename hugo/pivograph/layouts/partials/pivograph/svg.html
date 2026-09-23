@@ -11,8 +11,8 @@
 */ -}}
 {{- $doc := .doc -}}
 {{- $app := .app | default "" -}}
-{{- $nodes := $doc.nodes | default slice -}}
-{{- $edges := $doc.edges | default slice -}}
+{{- $nodes := slice -}}{{- with $doc.nodes -}}{{- $nodes = . -}}{{- end -}}
+{{- $edges := slice -}}{{- with $doc.edges -}}{{- $edges = . -}}{{- end -}}
 {{- $nodeTypes := $doc.nodeTypes | default dict -}}
 {{- $edgeTypes := $doc.edgeTypes | default dict -}}
 {{- $tags := $doc.tags | default dict -}}
@@ -35,7 +35,7 @@
   {{- end -}}
   {{- $pills := slice -}}
   {{- if not ($n.hideBadges | default $t.hideBadges) -}}
-    {{- $all := $n.tags | default slice -}}
+    {{- $all := slice -}}{{- with $n.tags -}}{{- $all = . -}}{{- end -}}
     {{- range first 3 $all -}}
       {{- $c := partial "pivograph/tagcolor.html" (dict "tag" (lower .) "tags" $tags) -}}
       {{- $pills = $pills | append (dict "text" (lower .) "color" $c.color "fg" $c.fg) -}}

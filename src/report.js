@@ -235,6 +235,9 @@ function mergedSentences(ctx, edges) {
  */
 export function phrase(label) {
   if (!label) return 'none'
+  // Coordinated verbs read as one verb: "manages or co-manages", "reads and writes".
+  const parts = label.split(/\s+(?:or|and)\s+/)
+  if (parts.length > 1 && parts.every((p) => phrase(p) === 'verb')) return 'verb'
   const words = label.split(/\s+/)
   const first = words[0]
   if (first !== first.toLowerCase()) return 'noun'
@@ -430,9 +433,9 @@ export function capitalize(text) {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-/** "Open data" -> "open data", but "MISP instance" and "API" stay. */
+/** "Open data" -> "open data", but "MISP instance", "API" and "GitHub organisation" stay. */
 export function lowerFirst(text) {
-  return /^[A-Z][a-z]/.test(text) ? text.charAt(0).toLowerCase() + text.slice(1) : text
+  return /^[A-Z][a-z]*(\s|$)/.test(text) ? text.charAt(0).toLowerCase() + text.slice(1) : text
 }
 
 export function detailKey(key) {

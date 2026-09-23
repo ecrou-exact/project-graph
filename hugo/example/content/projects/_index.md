@@ -1,6 +1,8 @@
 ---
 title: "Projects linked to Rulezet"
+linkTitle: "Projects"
 description: "How Rulezet connects to the other projects of its ecosystem. Arrow = who calls or uses whom. Checked against the code of each project (September 2026)."
+weight: 1
 graph:
   linkDistance: 330
   nodeTypes:

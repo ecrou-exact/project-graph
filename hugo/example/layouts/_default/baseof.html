@@ -12,6 +12,8 @@
     header { display: flex; gap: 1.5rem; align-items: baseline; padding-top: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent); }
     header a { color: inherit; text-decoration: none; }
     header strong { font-size: 1.1rem; }
+    header .back { margin-left: auto; padding: 0.2rem 0.8rem; border: 1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius: 999px; font-size: 0.9rem; }
+    header .back:hover { background: color-mix(in srgb, currentColor 8%, transparent); }
     a { color: var(--accent); }
     main { padding-top: 1.5rem; padding-bottom: 3rem; }
     main > article { max-width: 46rem; }
@@ -21,8 +23,15 @@
 </head>
 <body>
   <header>
-    <a href="{{ "/" | relURL }}"><strong>{{ site.Title }}</strong></a>
-    <a href="{{ "/projects/" | relURL }}">Projects</a>
+    {{- /* Addresses from Hugo itself: right under any base path (/hugo-example/…).
+           A path starting with "/" given to relURL would ignore that path. */}}
+    <a href="{{ site.Home.RelPermalink }}"><strong>{{ site.Title }}</strong></a>
+    {{- range site.Sections }}
+    <a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+    {{- end }}
+    {{- /* Back to the Pivograph site this example belongs to (params.pivograph.home),
+           by default its docs next to the example: /hugo-example/ -> /docs/. */}}
+    <a class="back" href="{{ site.Params.pivograph.home | default (printf "%s/" (path.Join site.Home.RelPermalink "../docs")) }}">← Pivograph</a>
   </header>
   <main>{{ block "main" . }}{{ end }}</main>
   <footer>Built with Hugo and the <a href="https://github.com/ecrou-exact/project-graph/tree/main/hugo">Pivograph component</a>.</footer>

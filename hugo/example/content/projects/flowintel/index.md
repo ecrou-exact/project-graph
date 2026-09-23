@@ -2,6 +2,7 @@
 title: "Flowintel"
 description: "Case management and analyst workflow platform."
 tags: ["case-management", "flowintel", "incident-response", "threatintel"]
+weight: 7
 graph:
   id: "flowintel"
   type: "project"

@@ -2,6 +2,7 @@
 title: "CTI-Transmute"
 description: "CTI format conversion service (MISP <-> STIX)."
 tags: ["cti", "cyberthreatintelligence", "misp", "stix", "stix2", "threat-intelligence", "threat-intelligence-data"]
+weight: 4
 graph:
   id: "cti-transmute"
   type: "project"

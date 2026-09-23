@@ -11,8 +11,8 @@
 {{- $doc := .doc -}}
 {{- $level := int (.level | default 3) -}}
 {{- $app := .app | default "" -}}
-{{- $nodes := $doc.nodes | default slice -}}
-{{- $edges := $doc.edges | default slice -}}
+{{- $nodes := slice -}}{{- with $doc.nodes -}}{{- $nodes = . -}}{{- end -}}
+{{- $edges := slice -}}{{- with $doc.edges -}}{{- $edges = . -}}{{- end -}}
 {{- $nodeTypes := $doc.nodeTypes | default dict -}}
 {{- $edgeTypes := $doc.edgeTypes | default dict -}}
 {{- $tags := $doc.tags | default dict -}}

@@ -225,6 +225,7 @@ To map an organization, read the full documentation first and follow its "Mappin
 
 - [JSON schema](${SITE}docs/pivograph.schema.json): the document format for validators
 - [Example: projects linked to Rulezet](${SITE}docs/examples/rulezet.json): a complete, checked map
+- [Example: CIRCL GitHub organisations](${SITE}docs/examples/circl.json): an organisation in the centre, 21 organisations around it, logos and GitHub facts
 - [Example: minimal map](${SITE}docs/examples/minimal.json)
 
 ## Optional
@@ -243,6 +244,7 @@ To map an organization, read the full documentation first and follow its "Mappin
     'llms.txt': index,
     'docs/pivograph.schema.json': read('schema/pivograph.schema.json'),
     'docs/examples/rulezet.json': read('examples/rulezet.json'),
+    'docs/examples/circl.json': read('examples/circl.json'),
     'docs/examples/minimal.json': read('examples/minimal.json'),
     // Pictures of the site and the guide.
     ...Object.fromEntries(readdirSync(join(root, 'docs/assets')).map((f) => [`docs/assets/${f}`, readFileSync(join(root, 'docs/assets', f))])),

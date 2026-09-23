@@ -16,8 +16,8 @@ The same page of the [example site](../hugo-example/projects/), both ways:
 <figcaption><strong>Without JavaScript</strong>: the picture Hugo draws at build time, followed by the text. <a href="../hugo-example/projects/?pivograph=static">Open it</a></figcaption>
 </figure>
 <figure>
-<a href="../hugo-example/projects/"><img src="assets/hugo-with-js.png" alt="The same graph in the interactive Pivograph app, with its search, filter and view tools" loading="lazy" width="1062" height="678"></a>
-<figcaption><strong>With JavaScript</strong>: the interactive graph, with search, filters and zoom. <a href="../hugo-example/projects/">Open it</a></figcaption>
+<a href="../hugo-example/projects/?pivograph=interactive"><img src="assets/hugo-with-js.png" alt="The same graph in the interactive Pivograph app, with its search, filter and view tools" loading="lazy" width="1062" height="678"></a>
+<figcaption><strong>With JavaScript</strong>: the interactive graph, with search, filters and zoom. <a href="../hugo-example/projects/?pivograph=interactive">Open it</a></figcaption>
 </figure>
 </div>
 
@@ -36,9 +36,12 @@ hugo/example/
         index.md
         logo.png
       …                         one bundle per project
+    circl/
+      _index.md                 the CIRCL GitHub organisations · {{< pivograph >}}
+      circl/  misp/  …          one bundle per organisation, with its logo and GitHub facts
 ```
 
-`hugo` then writes `public/pivograph/projects.json`, the document the page shows.
+`hugo` then writes `public/pivograph/projects.json` and `public/pivograph/circl.json`, the documents the pages show. Both sections are generated from the app's examples by `node scripts/hugo-example.mjs`.
 
 ### Add it to a Hugo site
 
@@ -71,7 +74,7 @@ hugo/example/
    {{ partial "pivograph/embed.html" (dict "page" . "section" "/projects") }}
    ```
 
-5. **Check**: run `hugo`. It must print no `WARN` from pivograph. Then open the page: with JavaScript you get the interactive graph; add `?pivograph=static` to the address (or turn JavaScript off) to see the version without JavaScript, the picture drawn by Hugo and the text.
+5. **Check**: run `hugo`. It must print no `WARN` from pivograph. Then open the page: with JavaScript you get the interactive graph; add `?pivograph=static` to the address (or turn JavaScript off) to see the version without JavaScript, the picture drawn by Hugo and the text. That choice holds for the browser tab, and the site's links keep it, until `?pivograph=interactive`.
 
 Requirements: Hugo 0.130 or later, standard or extended edition. Nothing to install with npm, no build step besides Hugo.
 
