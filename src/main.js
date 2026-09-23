@@ -179,6 +179,9 @@ function currentDocument() {
 function persist() {
   // Embedded in another site: never overwrite what the visitor keeps in the app itself.
   if (EMBED.enabled) return
+  // The bundled example is never saved: the browser keeps only the visitor's
+  // own graph, and loading the example doesn't overwrite it.
+  if (isExample(state)) return
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(view.toDocument(state, true)))
   } catch {
@@ -189,7 +192,10 @@ function persist() {
 function restore() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) return parseDocument(JSON.parse(saved)).doc
+    if (!saved) return null
+    const doc = parseDocument(JSON.parse(saved)).doc
+    // A copy of the example saved before it was locked: show the locked example instead.
+    return doc && !isExample(doc) ? doc : null
   } catch {
     // corrupted or unavailable storage: start from the example
   }
@@ -444,6 +450,11 @@ async function newDocument() {
 // The bundled example is shown locked: on the public site, it is a demo to
 // look at. To make a graph, start a new one (kept in the visitor's browser only).
 const EXAMPLE = { ...rulezetExample, meta: { ...rulezetExample.meta, readOnly: true, source: { format: 'example' } } }
+
+/** The bundled example, or a copy of it (same title) saved by an older version. */
+function isExample(doc) {
+  return doc?.meta?.source?.format === 'example' || doc?.meta?.title === rulezetExample.meta.title
+}
 
 async function loadExample() {
   if (view.nodes().length && !(await confirmModal('Replace the current graph with the Rulezet example?', { confirmLabel: 'Load', danger: false }))) return
