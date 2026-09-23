@@ -208,33 +208,60 @@ function tagsInput(field, value) {
   }
 }
 
-/** "owner/repo" or a GitHub URL, checked against the GitHub API as you type. */
+/**
+ * "owner/repo" or a GitHub URL. The only place the GitHub API is called: when
+ * the repository is entered or changed, or on Refresh. The summary it returns
+ * is saved with the node (`githubInfo`), and shown from there afterwards.
+ */
 function githubInput(field, value) {
   const input = h('input', { type: 'text', placeholder: 'owner/repo or https://github.com/owner/repo' })
   input.value = value ?? ''
   const status = h('div', { class: 'pg-gh-status' })
+  const sameRepo = (repo, slug) => repo?.fullName && slug && repo.fullName.toLowerCase() === slug.toLowerCase()
+  let repo = sameRepo(field.info, parseGithub(value)) ? field.info : null
   let timer
   let seq = 0
-  const check = () => {
-    const text = input.value.trim()
-    const slug = parseGithub(text)
-    const mine = ++seq
-    if (!text) return status.replaceChildren()
+
+  const refreshButton = (label = '↻ Refresh from GitHub') => h('button', {
+    type: 'button', class: 'pg-btn pg-btn-ghost pg-gh-refresh', title: 'Fetch the latest details from GitHub (one API call)',
+    onclick: () => check(true),
+  }, label)
+
+  const show = () => {
+    const slug = parseGithub(input.value)
+    if (!input.value.trim()) return status.replaceChildren()
     if (!slug) return status.replaceChildren(h('small', { class: 'pg-warning' }, 'Not a GitHub repository: use owner/repo or a github.com URL.'))
-    status.replaceChildren(h('small', { class: 'pg-muted' }, `Looking up ${slug}…`))
-    fetchRepo(slug)
-      .then((repo) => mine === seq && status.replaceChildren(repoCard(repo)))
-      .catch((error) => mine === seq && status.replaceChildren(repoError(slug, error.message)))
+    if (sameRepo(repo, slug)) return status.replaceChildren(repoCard(repo), refreshButton())
+    status.replaceChildren(h('small', { class: 'pg-muted' }, 'No GitHub details saved for this repository yet.'), refreshButton('↓ Fetch details from GitHub'))
   }
+
+  const check = (force = false) => {
+    const slug = parseGithub(input.value)
+    if (!slug) return show()
+    const mine = ++seq
+    status.replaceChildren(h('small', { class: 'pg-muted' }, `Looking up ${slug} on GitHub…`))
+    fetchRepo(slug, { force })
+      .then((result) => {
+        if (mine !== seq) return
+        repo = result
+        show()
+      })
+      .catch((error) => mine === seq && status.replaceChildren(repoError(slug, error.message), refreshButton()))
+  }
+
   input.addEventListener('input', () => {
     clearTimeout(timer)
-    timer = setTimeout(check, 600)
+    const slug = parseGithub(input.value)
+    // A changed repository is looked up; the saved one is just shown again.
+    timer = setTimeout(() => (slug && !sameRepo(repo, slug) ? check() : show()), 600)
   })
-  check()
+  show()
   return {
     el: h('div', { class: 'pg-gh-field' }, input, status),
     input,
     get: () => (input.value.trim() ? parseGithub(input.value) ?? input.value.trim() : undefined),
+    /** The summary to save with the node, if it matches the repository entered. */
+    info: () => (sameRepo(repo, parseGithub(input.value)) ? repo : undefined),
   }
 }
 
@@ -562,8 +589,8 @@ export function nodeFields(container, init, ctx) {
     { section: 'Links' },
     { key: 'url', label: 'Website', type: 'text', inputType: 'url', placeholder: 'https://…', wide: true },
     {
-      key: 'github', label: 'GitHub repository', type: 'github', wide: true,
-      hint: 'Its description, stars, language, licence and last update are shown in the node details.',
+      key: 'github', label: 'GitHub repository', type: 'github', wide: true, info: values.githubInfo,
+      hint: 'Its description, stars, language, licence and last update are fetched once and saved with the node.',
     },
     { key: 'links', label: 'Other links', type: 'links', wide: true },
     { section: 'Details' },
@@ -610,7 +637,7 @@ export function nodeFields(container, init, ctx) {
   return {
     ...form,
     // `_tagDefs`: the edited tag registry, applied by the caller.
-    values: () => ({ ...lookValues(form.values()), _tagDefs: tagDefs }),
+    values: () => ({ ...lookValues(form.values()), githubInfo: form.widgets.github.info(), _tagDefs: tagDefs }),
     validate() {
       const missing = form.missingRequired()
       if (missing) return missing

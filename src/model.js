@@ -34,7 +34,7 @@ const NODE_LOOK = [
   'hideLabel', 'labelColor', 'labelBackground', 'labelSize', 'labelFont',
   'hideBadges',
 ]
-export const NODE_FIELDS = ['label', 'type', 'description', 'url', 'github', 'links', 'tags', 'details', ...NODE_LOOK]
+export const NODE_FIELDS = ['label', 'type', 'description', 'url', 'github', 'githubInfo', 'links', 'tags', 'details', ...NODE_LOOK]
 export const TAG_FIELDS = ['color', 'icon']
 
 // Colours given to tags that have no colour of their own (picked from the name).
@@ -168,7 +168,9 @@ export function parseDocument(raw) {
     ids.add(id)
     const github = n.github === undefined || n.github === '' ? undefined : parseGithub(n.github)
     if (n.github && !github) warnings.push(`Node "${id}": "${n.github}" is not a GitHub repository (owner/repo).`)
-    const node = { id, ...compact({ ...n, tags: parseTags(n.tags), github, links: parseLinks(n.links), details: parseDetails(n.details) }, NODE_FIELDS) }
+    // githubInfo: the repository summary saved when the node was edited (no API call on display).
+    const githubInfo = github ? parseDetails(n.githubInfo) : {}
+    const node = { id, ...compact({ ...n, tags: parseTags(n.tags), github, githubInfo, links: parseLinks(n.links), details: parseDetails(n.details) }, NODE_FIELDS) }
     if (node.label === undefined) node.label = id
     if (node.shape && !SHAPES.includes(node.shape)) {
       warnings.push(`Node "${id}": unknown shape "${node.shape}", ignored.`)

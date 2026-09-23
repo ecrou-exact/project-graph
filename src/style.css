@@ -565,3 +565,46 @@ body.pg-resizing { cursor: col-resize; user-select: none; }
 body.pg-resizing .pg-graph { pointer-events: none; }
 .pg-pill-small { font-size: 11px; line-height: 15px; }
 @media (max-width: 760px) { .pg-resizer { display: none; } }
+
+/* --- filters from the side panel ------------------------------------------ */
+
+.pg-item.is-filtered { background: color-mix(in srgb, var(--primary) 12%, transparent); box-shadow: inset 3px 0 0 var(--primary); }
+.pg-pill-clickable { cursor: pointer; }
+.pg-pill-clickable:hover { filter: brightness(1.1); }
+.pg-pill.is-filtered { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--primary); }
+.pg-filter-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 6px 6px 6px 10px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  font-size: 12.5px;
+}
+.pg-item-desc {
+  margin-top: 3px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Tag pills on/off, floating over the graph next to Pivotick's own controls. */
+.pg-graph-wrap { flex: 1; position: relative; min-width: 0; display: flex; }
+.pg-graph-toggle {
+  position: absolute;
+  left: 50%;
+  bottom: 44px;
+  transform: translateX(-50%);
+  z-index: 4;
+  font-size: 12.5px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
+}
+.pg-graph-toggle[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-text); }

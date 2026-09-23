@@ -218,3 +218,12 @@ describe('details', () => {
     expect(unflattenDetails(rows.map(([path, value]) => [path, value]))).toEqual(details)
   })
 })
+
+describe('saved GitHub details', () => {
+  it('keeps the saved summary with its repository, drops it without one', () => {
+    const info = { fullName: 'MISP/MISP', stars: 6500, topics: ['cti'], fetchedAt: '2026-09-23T10:00:00Z' }
+    const { doc } = parseDocument({ nodes: [{ id: 'a', github: 'MISP/MISP', githubInfo: info }, { id: 'b', githubInfo: info }] })
+    expect(doc.nodes[0].githubInfo).toEqual(info)
+    expect(doc.nodes[1].githubInfo).toBeUndefined()
+  })
+})

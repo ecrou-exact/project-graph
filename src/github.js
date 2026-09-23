@@ -1,5 +1,7 @@
-// Repository details from the GitHub REST API, for the node details panel.
-// Unauthenticated calls are limited to 60 per hour per IP, so results are
+// Repository details from the GitHub REST API.
+// Only the node form calls it (when a repository is entered, or on Refresh);
+// the summary is then saved in the node, so displaying a graph never does.
+// Unauthenticated calls are limited to 60 per hour per IP, so results are also
 // cached in memory and in localStorage, and concurrent requests are shared.
 
 const API = 'https://api.github.com/repos/'
@@ -12,10 +14,10 @@ const inFlight = new Map() // "owner/repo" -> Promise
  * @param {string} slug "owner/repo"
  * @returns {Promise<object>} repo summary; rejects with an Error whose message is user-facing
  */
-export function fetchRepo(slug) {
+export function fetchRepo(slug, { force = false } = {}) {
   const key = slug.toLowerCase()
   const cached = readCache()[key]
-  if (cached && Date.now() - cached.at < TTL) return Promise.resolve(cached.repo)
+  if (!force && cached && Date.now() - cached.at < TTL) return Promise.resolve(cached.repo)
   if (!inFlight.has(key)) {
     const request = load(slug)
       .then((repo) => {
@@ -26,11 +28,6 @@ export function fetchRepo(slug) {
     inFlight.set(key, request)
   }
   return inFlight.get(key)
-}
-
-/** The cached summary, if any, without a network call. */
-export function cachedRepo(slug) {
-  return readCache()[slug.toLowerCase()]?.repo
 }
 
 async function load(slug) {
@@ -61,6 +58,7 @@ async function load(slug) {
     topics: r.topics ?? [],
     archived: Boolean(r.archived),
     pushedAt: r.pushed_at,
+    fetchedAt: new Date().toISOString(),
   }
 }
 

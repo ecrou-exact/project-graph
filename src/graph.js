@@ -9,8 +9,7 @@ import {
 } from './model.js'
 import { badgeIconSvg } from './badgeIcons.js'
 import { tagPills } from './ui/pills.js'
-import { fetchRepo } from './github.js'
-import { link, linkList, repoCard, repoError } from './ui/githubCard.js'
+import { link, linkList, repoCard, repoLink } from './ui/githubCard.js'
 import { detailEntries } from './ui/details.js'
 import { loadIcon, isIconLoaded, tintedIcon } from './icons.js'
 
@@ -37,6 +36,7 @@ export class GraphView {
    *   renders the edge fields into a foreign container (Pivotick's modal)
    * @param {(message: string) => Promise<boolean>} hooks.confirm
    * @param {() => void} hooks.onChange called after any change of nodes/edges
+   * @param {() => void} [hooks.onFilterChange] called when the graph's filters change
    */
   constructor(container, hooks) {
     this.container = container
@@ -48,6 +48,7 @@ export class GraphView {
     this.iconsArrived = false
     this.pillObserver = null
     this.pillFrame = null
+    this.showPills = true
     this.labelSheet = document.createElement('style')
     document.head.append(this.labelSheet)
   }
@@ -133,6 +134,9 @@ export class GraphView {
 
     // Edits coming from Pivotick itself: recompute the style from the new data.
     // Our own updateData() calls also emit these, with unchanged data: skip those.
+    // Filters applied from Pivotick's panel: let the sidebar show them too.
+    this.graph.onVisibleChange(() => this.hooks.onFilterChange?.())
+
     this.graph.on('nodeChange', (node, prev, next) => sameData(prev, next) || this.restyleNode(node))
     this.graph.on('edgeChange', (edge, prev, next) => sameData(prev, next) || this.restyleEdge(edge))
     // Per-node label looks are keyed by the DOM ids Pivotick assigns, known only
@@ -187,6 +191,53 @@ export class GraphView {
     return facets
   }
 
+  // --- filters shared with Pivotick's filter panel ---------------------------
+
+  /** The values currently selected for a node filter (tags, type…). */
+  filterValues(key) {
+    const value = this.graph?.queryEngine.getFilters()[key]?.value
+    return Array.isArray(value) ? value : value === undefined ? [] : [value]
+  }
+
+  /** Adds a value to a node filter, or removes it when it's already there. */
+  toggleFilter(key, value) {
+    const engine = this.graph.queryEngine
+    const values = new Set(this.filterValues(key))
+    if (values.has(value)) values.delete(value)
+    else values.add(value)
+    if (values.size) engine.setFilter(key, { value: [...values] })
+    else engine.removeFilter(key)
+    this.hooks.onFilterChange?.()
+  }
+
+  /** The relationship layers (edge types) currently selected. */
+  edgeFilterValues() {
+    const value = this.graph?.queryEngine.getEdgeFilters().type?.value
+    return Array.isArray(value) ? value : value === undefined ? [] : [value]
+  }
+
+  toggleEdgeFilter(type) {
+    const engine = this.graph.queryEngine
+    const label = this.edgeTypeLabel(type)
+    const values = new Set(this.edgeFilterValues())
+    if (values.has(label)) values.delete(label)
+    else values.add(label)
+    if (values.size) engine.setEdgeFilter('type', { value: [...values] })
+    else engine.removeEdgeFilter('type')
+    this.hooks.onFilterChange?.()
+  }
+
+  isEdgeFilterActive(type) {
+    return this.edgeFilterValues().includes(this.edgeTypeLabel(type))
+  }
+
+  resetFilters() {
+    const engine = this.graph.queryEngine
+    engine.resetFilters()
+    engine.removeEdgeFilter('type')
+    this.hooks.onFilterChange?.()
+  }
+
   edgeTypeLabel(type) {
     if (!type) return '(no type)'
     const def = this.hooks.getTypes().edgeTypes[type]
@@ -215,11 +266,11 @@ export class GraphView {
         ['links', data.links?.length ? linkList(data.links) : undefined],
       ]),
     ]
+    // GitHub details come from what was saved when the node was edited: showing
+    // a node never calls the GitHub API (it is rate-limited).
     if (!data.github) return entries
-    const github = (value) => [...entries, { name: 'GitHub', value }]
-    return fetchRepo(data.github)
-      .then((repo) => github(repoCard(repo, { description: !data.description })))
-      .catch((error) => github(repoError(data.github, error.message)))
+    const value = data.githubInfo?.fullName ? repoCard(data.githubInfo, { description: !data.description }) : repoLink(data.github)
+    return [...entries, { name: 'GitHub', value }]
   }
 
   edgeProperties(edge) {
@@ -394,13 +445,19 @@ export class GraphView {
     })
   }
 
+  /** Shows or hides every tag pill on the graph (a view setting, not saved in the document). */
+  setShowPills(show) {
+    this.showPills = show
+    this.drawPills()
+  }
+
   /** Draws each node's tag pills in a row under its label (or its shape). */
   drawPills() {
     const { nodeTypes, tags } = this.hooks.getTypes()
     for (const node of this.liveNodes()) {
       const group = node.getGraphElement()
       if (!group) continue
-      const pills = visiblePills(nodePills(node.getData(), nodeTypes, tags))
+      const pills = this.showPills ? visiblePills(nodePills(node.getData(), nodeTypes, tags)) : []
       const existing = group.querySelector(':scope > .pg-pills')
       const top = pillsTop(group)
       const key = JSON.stringify([pills, top])

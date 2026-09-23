@@ -9,7 +9,7 @@ Bundled example: projects linked to **Rulezet** (`examples/rulezet.json`).
 - **Nodes**: label, type, description, link, colour, shape (circle, square, triangle, hexagon), size, image (URL, relative path, embedded local file, or one of the bundled icons), border (colour, width or none), and label (shown or hidden, text colour, background or none, size, font). The node form is split into tabs: Content, Links, Appearance, Border, Label, Badges.
 - **Edges**: label, type, colour, width, solid/dashed line, and **arrow direction**: `→`, `←`, `↔` or no arrow.
 - **Tags**: `#tags` on a node become coloured pills under it, with a colour and an optional icon (a curated set of Font Awesome Free icons, picked from a grid) per tag, shared by every node with that tag. Existing tags are suggested when typing; pills can be hidden per node or per type. A Tags tab lists and edits them.
-- **Links**: a website, a GitHub repository and any number of other links per node. For the GitHub repository, the details panel and tooltip show its description, stars, forks, open issues, language, licence, topics and last update, fetched from the GitHub API (cached for 6 hours; the API allows 60 unauthenticated requests per hour).
+- **Links**: a website, a GitHub repository and any number of other links per node. The GitHub API (60 unauthenticated requests per hour) is only called from the node form — when a repository is entered, or with *Refresh* — and the summary (description, stars, forks, open issues, language, licence, topics, last update) is saved with the node (`githubInfo`) and shown from there: displaying or importing a graph, a well-known file included, never calls it.
 - **Details**: any extra key / value fields on a node or an edge (license, maintainers, formats…), shown in the details panel and tooltip, edited in the Details tab.
 - **Open Contributions Descriptor import**: open, drop or paste a `.well-known/open-contributions.json` file (or use *Import well-known…* with a domain or URL) and it becomes a graph — see below.
 - **Types**: a node or edge type defines default styling; every element can override it.
@@ -20,7 +20,9 @@ Bundled example: projects linked to **Rulezet** (`examples/rulezet.json`).
 - Built-in **JSON editor** (JSON tab) with validation and error messages.
 - Import (button, or drag & drop a `.json` file) and JSON export (with or without positions, to keep the layout).
 - Pivotick's **Filter Graph** panel filters by tags (every tag in the graph is offered), type, label, description and — for OCD projects — status and license; relationships can be toggled by type.
+- A *Tags on graph* button shows or hides every tag pill on the graph (remembered per browser).
 - Resizable side panel: drag its edge (or focus it and use the arrow keys); the width is remembered.
+- Clicking a tag or a type in the side panel filters the graph (click again to remove it; several can be combined); the filter is the same as Pivotick's panel, and active filters are listed at the top of the side panel with a *Clear* button. The node list shows each node's description.
 - Autosave in the browser.
 
 ## Getting started
@@ -98,6 +100,7 @@ Full schema: [`schema/pivograph.schema.json`](schema/pivograph.schema.json).
 | `description` | shown in the details panel and tooltip |
 | `url` | website |
 | `github` | GitHub repository, `owner/repo` or any github.com URL |
+| `githubInfo` | the repository summary saved from the form (filled in by the app) |
 | `links` | other links: `[{ "label": "Docs", "url": "https://…" }]` |
 | `tags` | `["security", "cve"]` (or `"#security #cve"`) |
 | `hideBadges` | `true` hides the tag pills |

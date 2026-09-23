@@ -27,9 +27,10 @@ export function repoCard(repo, { description = true } = {}) {
       repo.archived ? h('span', { class: 'pg-gh-archived' }, 'archived') : null),
     description && repo.description ? h('div', { class: 'pg-gh-desc' }, repo.description) : null,
     h('div', { class: 'pg-gh-stats' }, stats),
-    repo.topics.length ? h('div', { class: 'pg-gh-topics' }, repo.topics.slice(0, 8).map((t) => h('span', {}, t))) : null,
+    repo.topics?.length ? h('div', { class: 'pg-gh-topics' }, repo.topics.slice(0, 8).map((t) => h('span', {}, t))) : null,
     h('div', { class: 'pg-gh-meta' },
       repo.pushedAt ? `Updated ${timeAgo(repo.pushedAt)}` : null,
+      repo.fetchedAt ? ` · fetched ${new Date(repo.fetchedAt).toLocaleDateString()}` : null,
       repo.homepage ? [' · ', link(repo.homepage, new URL(repo.homepage, 'https://x').hostname)] : null))
 }
 
@@ -50,4 +51,9 @@ export function linkList(links) {
     }
     return link(url, text)
   }))
+}
+
+/** A repository known only by name (no saved details): a plain link, no API call. */
+export function repoLink(slug) {
+  return h('div', { class: 'pg-gh-title' }, icon('github'), link(`https://github.com/${slug}`, slug))
 }

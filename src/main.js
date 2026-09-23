@@ -25,7 +25,17 @@ const view = new GraphView(document.getElementById('graph'), {
     renderSidebar()
     persist()
   },
+  onFilterChange: () => scheduleSidebar(),
 })
+
+let sidebarFrame = null
+function scheduleSidebar() {
+  if (sidebarFrame) return
+  sidebarFrame = requestAnimationFrame(() => {
+    sidebarFrame = null
+    renderSidebar()
+  })
+}
 
 // --- document lifecycle ------------------------------------------------------
 
@@ -358,9 +368,8 @@ function renderNodes() {
               h('span', { class: 'pg-item-sub' },
                 data.type ? h('span', { class: 'pg-tag' }, state.nodeTypes[data.type]?.label || data.type) : null,
                 `${degree} edge${degree === 1 ? '' : 's'}`),
-              data.tags?.length
-                ? h('span', { class: 'pg-item-tags' }, data.tags.map((t) => tagPill(t, state.tags, { small: true })))
-                : null),
+              // The description, like OCD Viewer's cards (tags are in the Tags tab and filter).
+              data.description ? h('span', { class: 'pg-item-desc', title: data.description }, data.description) : null),
             h('button', { class: 'pg-icon-btn', title: 'New edge from this node', onclick: (e) => { e.stopPropagation(); addEdge(id) } }, '↗'),
             actionButtons(() => view.editNode(id), () => removeNode(id, data.label ?? id)))
         })))
@@ -391,6 +400,22 @@ function renderEdges() {
         })))
 }
 
+/** Active filters (from the sidebar or Pivotick's panel), with a way out. */
+function filterBanner() {
+  if (!view.graph) return ''
+  const tags = view.filterValues('tags').map((t) => `#${t}`)
+  const types = view.filterValues('type').map((t) => state.nodeTypes[t]?.label || t)
+  const layers = view.edgeFilterValues()
+  // Other facets of the filter panel (not Pivotick's internal keys, e.g. manual hides).
+  const filters = view.graph.queryEngine.getFilters()
+  const others = ['label', 'description', 'status', 'license'].filter((k) => filters[k]?.value !== undefined && filters[k].value !== '')
+  const parts = [...tags, ...types, ...layers.map((l) => `→ ${l}`), ...others.map((k) => `${k}: ${[].concat(filters[k].value).join(', ')}`)]
+  if (!parts.length) return ''
+  return h('div', { class: 'pg-filter-banner' },
+    h('span', {}, h('strong', {}, 'Filtered: '), parts.join(', ')),
+    h('button', { class: 'pg-btn pg-btn-ghost', onclick: () => view.resetFilters() }, 'Clear'))
+}
+
 function renderTags() {
   const tags = knownTags().filter((t) => matches(`#${t}`))
   return h('div', {},
@@ -401,7 +426,13 @@ function renderTags() {
       : h('ul', { class: 'pg-list' }, tags.map((name) => {
           const used = tagUsage(name).length
           const def = state.tags[name]
-          return h('li', { class: 'pg-item', ondblclick: () => editTag(name) },
+          const active = view.filterValues('tags').includes(name)
+          return h('li', {
+            class: `pg-item${active ? ' is-filtered' : ''}`,
+            title: active ? 'Click to stop filtering by this tag' : 'Click to show only nodes with this tag',
+            onclick: () => view.toggleFilter('tags', name),
+            ondblclick: () => editTag(name),
+          },
             h('span', { class: 'pg-item-main' },
               h('span', { class: 'pg-item-title' }, tagPill(name, state.tags)),
               h('span', { class: 'pg-item-sub' },
@@ -422,7 +453,13 @@ function renderTypes() {
           const elements = kind === 'node' ? view.nodes() : view.edges()
           const used = elements.filter((el) => el.getData().type === name).length
           const attrs = kind === 'node' ? resolveNode({ type: name }, types) : resolveEdge({ type: name }, types)
-          return h('li', { class: 'pg-item', ondblclick: () => editType(kind, name) },
+          const active = kind === 'node' ? view.filterValues('type').includes(name) : view.isEdgeFilterActive(name)
+          return h('li', {
+            class: `pg-item${active ? ' is-filtered' : ''}`,
+            title: active ? 'Click to stop filtering by this type' : `Click to show only ${kind === 'node' ? 'nodes' : 'relationships'} of this type`,
+            onclick: () => (kind === 'node' ? view.toggleFilter('type', name) : view.toggleEdgeFilter(name)),
+            ondblclick: () => editType(kind, name),
+          },
             kind === 'node'
               ? swatch(attrs)
               : h('span', { class: `pg-edge-swatch${attrs.dashed ? ' pg-dashed' : ''}`, style: `--swatch:${attrs.color}` }),
@@ -500,10 +537,38 @@ function renderSidebar() {
   }, tab.label, tab.count ? h('span', { class: 'pg-count' }, tab.count()) : null)))
 
   document.getElementById('search-row').hidden = !['nodes', 'edges', 'tags'].includes(ui.tab)
-  document.getElementById('panel').replaceChildren(TABS[ui.tab].render())
+  document.getElementById('panel').replaceChildren(filterBanner(), TABS[ui.tab].render())
 }
 
 // --- wiring ------------------------------------------------------------------------
+
+const PILLS_KEY = 'pivograph:show-tags'
+
+/** Tag pills on the graph, on or off; remembered per browser. */
+function bindPillsToggle() {
+  const button = document.getElementById('btn-pills')
+  let show = true
+  try {
+    show = localStorage.getItem(PILLS_KEY) !== 'off'
+  } catch {
+    // storage unavailable: pills are shown
+  }
+  const apply = () => {
+    button.setAttribute('aria-pressed', String(show))
+    button.textContent = show ? '# Tags on graph' : '# Tags hidden'
+    view.setShowPills(show)
+  }
+  button.addEventListener('click', () => {
+    show = !show
+    try {
+      localStorage.setItem(PILLS_KEY, show ? 'on' : 'off')
+    } catch {
+      // storage unavailable: the choice lasts until reload
+    }
+    apply()
+  })
+  apply()
+}
 
 const SIDEBAR_KEY = 'pivograph:sidebar-width'
 
@@ -572,6 +637,7 @@ function bindHeader() {
   })
   document.getElementById('pivotick-version').textContent = `Pivotick ${pivotickPackage.version}`
   bindSidebarResizer()
+  bindPillsToggle()
 
   // Drop a JSON file anywhere to open it.
   window.addEventListener('dragover', (e) => e.preventDefault())
