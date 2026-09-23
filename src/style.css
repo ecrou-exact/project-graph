@@ -246,6 +246,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
   color: var(--text);
   box-shadow: 0 20px 60px rgb(0 0 0 / 0.25);
 }
+/* Anchored near the top rather than centred: a centred dialog jumps whenever
+   its content changes height, and a click in progress then misses its target. */
+.pg-modal { margin: 6vh auto auto; }
 .pg-modal-small { width: min(420px, calc(100vw - 32px)); }
 .pg-modal::backdrop { background: rgb(10 14 24 / 0.45); }
 .pg-modal > form { display: flex; flex-direction: column; max-height: calc(100vh - 50px); }
@@ -373,6 +376,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
   border-bottom: 1px solid var(--border);
   margin-bottom: 2px;
   overflow-x: auto;
+  /* Stays put while a tab's content grows or shrinks, so clicks land on it. */
+  position: sticky;
+  top: -10px;
+  z-index: 2;
+  background: var(--surface);
+  padding-top: 10px;
+  margin-top: -10px;
 }
 .pg-form-tab {
   border: 0;
@@ -646,3 +656,4 @@ body.pg-no-sidebar .pg-sidebar, body.pg-no-sidebar .pg-resizer { display: none; 
 .pg-edge-preview-animated { animation: pg-dash 0.8s linear infinite; }
 @keyframes pg-dash { to { stroke-dashoffset: -12; } }
 @media (prefers-reduced-motion: reduce) { .pg-edge-preview-animated { animation: none; } }
+.pg-gh-sync { margin-left: 0; font-size: 12.5px; color: var(--text); }

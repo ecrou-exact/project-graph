@@ -208,6 +208,16 @@ function tagsInput(field, value) {
   return {
     el: h('div', { class: 'pg-tags-field' }, input, suggestions, rows),
     input,
+    /** Adds tags not already there; returns the ones actually added. */
+    add(names) {
+      const current = new Set(parseTags(input.value))
+      const added = parseTags(names).filter((name) => !current.has(name))
+      if (added.length) {
+        input.value = [input.value.trim(), ...added.map((t) => `#${t}`)].filter(Boolean).join(' ')
+        renderRows()
+      }
+      return added
+    },
     get: () => {
       const tags = parseTags(input.value)
       return tags.length ? tags : undefined
@@ -224,6 +234,18 @@ function githubInput(field, value) {
   const input = h('input', { type: 'text', placeholder: 'owner/repo or https://github.com/owner/repo' })
   input.value = value ?? ''
   const status = h('div', { class: 'pg-gh-status' })
+  // Opt-in: the repository's GitHub topics become the node's tags (added, never removed).
+  const syncTags = h('input', { type: 'checkbox' })
+  const syncNote = h('small', { class: 'pg-muted' })
+  const syncRow = h('label', { class: 'pg-check pg-gh-sync' }, syncTags, 'Also add the repository topics as tags', syncNote)
+  const applyTopics = () => {
+    if (!syncTags.checked || !repo) return
+    const added = field.onTopics?.(repo.topics ?? []) ?? []
+    syncNote.textContent = repo.topics?.length
+      ? ` — ${added.length ? `${added.length} tag${added.length === 1 ? '' : 's'} added` : 'already there'}`
+      : ' — this repository has no topics'
+  }
+  syncTags.addEventListener('change', applyTopics)
   const sameRepo = (repo, slug) => repo?.fullName && slug && repo.fullName.toLowerCase() === slug.toLowerCase()
   let repo = sameRepo(field.info, parseGithub(value)) ? field.info : null
   let timer
@@ -252,6 +274,7 @@ function githubInput(field, value) {
         if (mine !== seq) return
         repo = result
         show()
+        applyTopics()
       })
       .catch((error) => mine === seq && status.replaceChildren(repoError(slug, error.message), refreshButton()))
   }
@@ -264,7 +287,7 @@ function githubInput(field, value) {
   })
   show()
   return {
-    el: h('div', { class: 'pg-gh-field' }, input, status),
+    el: h('div', { class: 'pg-gh-field' }, input, status, syncRow),
     input,
     get: () => (input.value.trim() ? parseGithub(input.value) ?? input.value.trim() : undefined),
     /** The summary to save with the node, if it matches the repository entered. */
@@ -597,6 +620,7 @@ export function nodeFields(container, init, ctx) {
     { key: 'url', label: 'Website', type: 'text', inputType: 'url', placeholder: 'https://…', wide: true },
     {
       key: 'github', label: 'GitHub repository', type: 'github', wide: true, info: values.githubInfo,
+      onTopics: (topics) => form.widgets.tags.add(topics),
       hint: 'Its description, stars, language, licence and last update are fetched once and saved with the node.',
     },
     { key: 'links', label: 'Other links', type: 'links', wide: true },
