@@ -1,0 +1,8 @@
+{{- /* dict "n" "word" -> "project" or "projects" (plural() in src/report.js). */ -}}
+{{- $w := .word -}}
+{{- if ne (int .n) 1 -}}
+  {{- if findRE `(?i)[^aeiou]y$` $w -}}{{- $w = printf "%sies" (substr $w 0 (sub (len $w) 1)) -}}
+  {{- else if findRE `(?i)(s|x|z|ch|sh)$` $w -}}{{- $w = printf "%ses" $w -}}
+  {{- else -}}{{- $w = printf "%ss" $w -}}{{- end -}}
+{{- end -}}
+{{- return $w -}}

@@ -1,0 +1,30 @@
+{{- /*
+  The colours of a tag as the app draws it: the tag's own colour from the
+  document's `tags`, else one picked from the palette by the same hash as
+  tagLook() in src/model.js; the text is dark on light colours, white on dark
+  ones (readableOn).
+  Arguments: dict "tag" "tags". Returns dict "color" "fg".
+*/ -}}
+{{- $tag := .tag -}}
+{{- $color := index (index (.tags | default dict) $tag | default dict) "color" -}}
+{{- if not $color -}}
+  {{- $palette := slice "#3b63f3" "#0f9d8a" "#e8833a" "#d6384b" "#7c5cd6" "#2f9e44" "#c2860b" "#56627a" -}}
+  {{- /* Character codes of printable ASCII (tags are lowercase). */ -}}
+  {{- $chars := split ` !"#$%&'()*+,-./0123456789:;<=>?@` "" | append (split "[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" "") -}}
+  {{- $codes := slice 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 -}}
+  {{- $hash := 0 -}}
+  {{- range $c := split $tag "" -}}
+    {{- $code := 0 -}}
+    {{- range $i, $k := $chars -}}{{- if eq $k $c -}}{{- $code = index $codes $i -}}{{- end -}}{{- end -}}
+    {{- $hash = mod (add (mul $hash 31) $code) 4294967296 -}}
+  {{- end -}}
+  {{- $color = index $palette (mod $hash (len $palette)) -}}
+{{- end -}}
+{{- /* Dark text on light colours, white on dark ones (readableOn). */ -}}
+{{- $fg := "#ffffff" -}}
+{{- with findRESubmatch `^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$` $color 1 -}}
+  {{- $m := index . 0 -}}
+  {{- $lum := add (mul 0.2126 (div (float (int (printf "0x%s" (index $m 1)))) 255)) (mul 0.7152 (div (float (int (printf "0x%s" (index $m 2)))) 255)) (mul 0.0722 (div (float (int (printf "0x%s" (index $m 3)))) 255)) -}}
+  {{- if gt $lum 0.6 -}}{{- $fg = "#1c2230" -}}{{- end -}}
+{{- end -}}
+{{- return (dict "color" $color "fg" $fg) -}}

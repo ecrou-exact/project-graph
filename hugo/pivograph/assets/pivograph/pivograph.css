@@ -1,0 +1,44 @@
+/* {{< pivograph >}}: sober defaults that follow the site's fonts and colours.
+   Override the custom properties to match a theme. */
+.pivograph {
+  --pivograph-border: color-mix(in srgb, currentColor 18%, transparent);
+  --pivograph-muted: color-mix(in srgb, currentColor 62%, transparent);
+  --pivograph-radius: 8px;
+  margin: 2rem 0;
+}
+.pivograph-frame {
+  display: block;
+  width: 100%;
+  min-height: 360px;
+  border: 1px solid var(--pivograph-border);
+  border-radius: var(--pivograph-radius);
+  background: #f6f7f9;
+}
+.pivograph:fullscreen { margin: 0; padding: 0.5rem; background: Canvas; overflow: auto; }
+.pivograph:fullscreen .pivograph-frame { height: calc(100vh - 3.5rem) !important; }
+.pivograph-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.5rem; font-size: 0.85em; color: var(--pivograph-muted); }
+.pivograph-button { font: inherit; padding: 0.25rem 0.75rem; border: 1px solid var(--pivograph-border); border-radius: 6px; background: transparent; color: inherit; cursor: pointer; }
+.pivograph-button:hover { background: color-mix(in srgb, currentColor 7%, transparent); }
+.pivograph-failed .pivograph-status { color: #c0392b; }
+.pivograph-text-toggle { margin-top: 0.75rem; }
+.pivograph-text-toggle > summary { cursor: pointer; color: var(--pivograph-muted); font-size: 0.9em; }
+.pivograph-picture { border: 1px solid var(--pivograph-border); border-radius: var(--pivograph-radius); background: #f6f7f9; overflow: hidden; }
+.pivograph-picture[hidden] { display: none; }
+.pivograph-picture img, .pivograph-svg { display: block; width: 100%; height: auto; max-height: 80vh; }
+.pivograph-svg a:focus-visible { outline: 2px solid #3b63f3; outline-offset: 4px; }
+.pivograph-svg text { pointer-events: none; }
+.pivograph-caption { margin-top: 0.5rem; font-size: 0.85em; color: var(--pivograph-muted); }
+
+/* The text version */
+.pivograph-overview { font-size: 1.05em; }
+.pivograph-node { margin: 1.25rem 0; padding-left: 0.9rem; border-left: 3px solid var(--pivograph-border); }
+.pivograph-node-name { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; }
+.pivograph-node-name img { width: 28px; height: 28px; object-fit: contain; }
+.pivograph-facts, .pivograph-details { display: grid; grid-template-columns: max-content 1fr; gap: 0.15rem 1rem; margin: 0.5rem 0; font-size: 0.93em; }
+.pivograph-facts dt, .pivograph-details dt { color: var(--pivograph-muted); }
+.pivograph-facts dd, .pivograph-details dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.pivograph-details .pivograph-details { margin: 0; }
+.pivograph-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.5rem 0; }
+.pivograph-tag { display: inline-block; padding: 0.05rem 0.55rem; border-radius: 999px; font-size: 0.8em; font-weight: 600; line-height: 1.6; }
+.pivograph-relations { padding-left: 1.2rem; }
+.pivograph-relations li { margin: 0.2rem 0; }

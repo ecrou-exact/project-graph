@@ -1,0 +1,5 @@
+# Pivograph for Hugo: a theme component. See README.md.
+[module]
+  [module.hugoVersion]
+    extended = false
+    min = "0.130.0"

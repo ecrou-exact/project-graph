@@ -1,0 +1,25 @@
+{{- /*
+  Sentences for a list of edges, merged when they differ only by their object:
+  "MISP Project maintains MISP, PyMISP and misp-modules."
+  Arguments: dict "edges" "nodes" "edgeTypes". Returns a slice of HTML strings.
+*/ -}}
+{{- $nodes := .nodes -}}
+{{- $edgeTypes := .edgeTypes -}}
+{{- $items := slice -}}
+{{- range .edges -}}
+  {{- $items = $items | append (partial "pivograph/sentence.html" (dict "edge" . "nodes" $nodes "edgeTypes" $edgeTypes)) -}}
+{{- end -}}
+{{- $keys := slice -}}
+{{- range $items -}}{{- $keys = $keys | append .key -}}{{- end -}}
+{{- $out := slice -}}
+{{- range $key := uniq $keys -}}
+  {{- $objects := slice -}}
+  {{- range where $items "key" $key -}}{{- $objects = $objects | append .object -}}{{- end -}}
+  {{- $list := "" -}}
+  {{- range $i, $o := $objects -}}
+    {{- $sep := cond (eq $i 0) "" (cond (eq $i (sub (len $objects) 1)) " and " ", ") -}}
+    {{- $list = printf "%s%s%s" $list $sep $o -}}
+  {{- end -}}
+  {{- $out = $out | append (replace $key "@@OBJECT@@" $list) -}}
+{{- end -}}
+{{- return $out -}}

@@ -9,6 +9,7 @@ import { tagPill } from './ui/pills.js'
 import { isOcd, ocdToDocument, wellKnownUrl } from './ocd.js'
 import { confirmModal, openFormModal, toast } from './ui/modal.js'
 import { menuButton } from './ui/menu.js'
+import '../docs/search.js'
 
 const STORAGE_KEY = 'pivograph:document'
 
@@ -77,6 +78,8 @@ function loadRaw(raw, source) {
   const ocd = isOcd(raw)
   if (ocd) raw = ocdToDocument(raw)
   const { doc, errors, warnings } = parseDocument(raw)
+  // The bundled example stays locked however it is opened (a file, ?src=, the host page).
+  if (doc && isExample(doc)) doc.meta = { ...doc.meta, readOnly: true, source: { format: 'example' } }
   if (!doc) {
     toast(`Invalid ${source}: ${errors[0]}${errors.length > 1 ? ` (+${errors.length - 1})` : ''}`, 'error')
     return { errors, warnings }

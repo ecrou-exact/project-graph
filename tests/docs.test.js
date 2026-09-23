@@ -23,6 +23,23 @@ describe('documentation site', () => {
     expect([...inGuide, ...fromHome].filter((id) => !ids.has(id))).toEqual([])
   })
 
+  it('indexes every section of the guide for the search box', () => {
+    const guide = text('docs/guide.html')
+    const index = JSON.parse(text('docs/search.json'))
+    const sections = [...guide.matchAll(/<h[23] id="([^"]+)"/g)].map((m) => m[1])
+    expect(index.map((e) => e.id)).toEqual(sections)
+    for (const entry of index) {
+      expect(entry.title, entry.id).toBeTruthy()
+      expect(entry.text, entry.id).not.toMatch(/```|\]\(/)
+    }
+    expect(index.find((e) => e.id === 'hugo').text).toContain('without JavaScript')
+    for (const page of ['docs/index.html', 'docs/guide.html']) {
+      expect(text(page)).toContain('data-site-search')
+      expect(text(page)).toContain('<script src="search.js" defer></script>')
+    }
+    expect(text('docs/search.js')).toContain('function search(')
+  })
+
   it('gives AI agents absolute links only', () => {
     const relative = (md) => [...md.matchAll(/\]\(([^)]+)\)/g)].map((m) => m[1]).filter((url) => !/^https?:/.test(url))
     expect(relative(text('llms-full.txt'))).toEqual([])

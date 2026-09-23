@@ -1,0 +1,128 @@
+{{- /*
+  Builds a Pivograph document (the JSON the app reads) from the site.
+
+  Arguments (a dict):
+    page     the current page (required)
+    data     name of a data file: data/pivograph/<name>.json|yaml|toml, a
+             complete Pivograph document. Used as it is.
+    section  path of a section (default: the current page's section). Every
+             page below it whose front matter has a `graph` map becomes a node;
+             the section's own `graph` map gives the title and the types.
+
+  Node pages (front matter):
+    title: Rulezet                         -> label (graph.label overrides)
+    description: …                         -> description (graph.description overrides)
+    tags: [cti, yara]                      -> tags (graph.tags overrides)
+    graph:
+      id: rulezet                          default: the page's file or bundle name
+      type: project
+      url: https://rulezet.org
+      github: rulezet/rulezet-core
+      image: logo.png                      a page resource, a /static path or a URL
+      links: [{ label: Docs, url: … }]
+      details: { … }
+      …any other node field (color, shape, size, imageFit, …)
+      relations:
+        - to: misp                         id of another node
+          label: pushes rules as MISP events
+          type: uses
+          …any other edge field (direction, description, details, …)
+
+  Every node also gets a link back to its page. Relations to an unknown node
+  are dropped with a build warning, so the app never refuses the document.
+  Returns the document (a map).
+*/ -}}
+{{- $page := .page -}}
+{{- $doc := dict -}}
+
+{{- if .data -}}
+  {{- /* hugo.Data since Hugo 0.156 (site.Data is deprecated there), site.Data before. */ -}}
+  {{- $data := dict -}}
+  {{- if ge hugo.Version "0.156.0" -}}{{- $data = hugo.Data -}}{{- else -}}{{- $data = site.Data -}}{{- end -}}
+  {{- $doc = index ($data.pivograph | default dict) .data -}}
+  {{- if not $doc -}}
+    {{- errorf "pivograph: no data file data/pivograph/%s.(json|yaml|toml)" .data -}}
+  {{- end -}}
+{{- else -}}
+  {{- $section := $page.CurrentSection -}}
+  {{- with .section -}}
+    {{- $section = site.GetPage . -}}
+    {{- if not $section -}}{{- errorf "pivograph: no section %q" . -}}{{- end -}}
+  {{- end -}}
+
+  {{- /* The section's graph map: title, description, types, tags, meta. */ -}}
+  {{- $head := partial "pivograph/fields.html" ($section.Params.graph | default dict) -}}
+  {{- $meta := partial "pivograph/fields.html" ($head.meta | default dict) -}}
+  {{- $meta = merge (dict
+      "title" ($head.title | default $section.Title)
+      "description" ($head.description | default $section.Description)
+      "readOnly" true
+    ) $meta -}}
+  {{- with $head.linkDistance -}}{{- $meta = merge $meta (dict "linkDistance" .) -}}{{- end -}}
+  {{- $nodeTypes := dict -}}
+  {{- range $key, $type := $head.nodeTypes -}}
+    {{- $nodeTypes = merge $nodeTypes (dict $key (partial "pivograph/fields.html" $type)) -}}
+  {{- end -}}
+  {{- $edgeTypes := dict -}}
+  {{- range $key, $type := $head.edgeTypes -}}
+    {{- $edgeTypes = merge $edgeTypes (dict $key (partial "pivograph/fields.html" $type)) -}}
+  {{- end -}}
+
+  {{- /* One node per page with a graph map, and its relations. */ -}}
+  {{- $nodes := slice -}}
+  {{- $relations := slice -}}
+  {{- range $p := $section.RegularPagesRecursive -}}
+    {{- with $p.Params.graph -}}
+      {{- $g := partial "pivograph/fields.html" . -}}
+      {{- $id := $g.id | default $p.File.ContentBaseName | default ($p.Title | urlize) -}}
+      {{- $node := dict "id" (string $id) "label" ($g.label | default $p.Title) -}}
+      {{- range $key, $value := $g -}}
+        {{- if not (in (slice "id" "label" "relations" "image" "links") $key) -}}
+          {{- $node = merge $node (dict $key $value) -}}
+        {{- end -}}
+      {{- end -}}
+      {{- with $g.description | default $p.Description -}}{{- $node = merge $node (dict "description" .) -}}{{- end -}}
+      {{- with $g.tags | default $p.Params.tags -}}{{- $node = merge $node (dict "tags" .) -}}{{- end -}}
+      {{- /* A page resource or a site path becomes an absolute URL, so the app (on
+             another site) can load it; other relative paths are the app's own
+             icons (icons/project.svg) and stay as they are. */ -}}
+      {{- with $g.image -}}
+        {{- $src := . -}}
+        {{- with $p.Resources.Get . -}}{{- $src = .Permalink -}}
+        {{- else -}}{{- if hasPrefix . "/" -}}{{- $src = absURL (strings.TrimPrefix "/" .) -}}{{- end -}}{{- end -}}
+        {{- $node = merge $node (dict "image" $src) -}}
+      {{- end -}}
+      {{- $links := slice (dict "label" "Site page" "url" $p.Permalink) -}}
+      {{- range $g.links -}}{{- $links = $links | append (partial "pivograph/fields.html" .) -}}{{- end -}}
+      {{- $node = merge $node (dict "links" $links) -}}
+      {{- $nodes = $nodes | append $node -}}
+      {{- range $g.relations -}}
+        {{- $rel := partial "pivograph/fields.html" . -}}
+        {{- $edge := dict "from" (string $id) "to" (string $rel.to) -}}
+        {{- range $key, $value := $rel -}}
+          {{- if ne $key "to" -}}{{- $edge = merge $edge (dict $key $value) -}}{{- end -}}
+        {{- end -}}
+        {{- $relations = $relations | append (dict "edge" $edge "page" $p) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- $ids := slice -}}
+  {{- range $nodes -}}{{- $ids = $ids | append .id -}}{{- end -}}
+  {{- $edges := slice -}}
+  {{- range $relations -}}
+    {{- if in $ids .edge.to -}}
+      {{- $edges = $edges | append .edge -}}
+    {{- else -}}
+      {{- warnf "pivograph: %s: relation to %q ignored, no page has this graph id" .page.File.Path .edge.to -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- $doc = dict "version" 1 "meta" $meta "nodeTypes" $nodeTypes "edgeTypes" $edgeTypes "nodes" $nodes "edges" $edges -}}
+  {{- with $head.tags -}}
+    {{- $tags := dict -}}
+    {{- range $key, $tag := . -}}{{- $tags = merge $tags (dict $key (partial "pivograph/fields.html" $tag)) -}}{{- end -}}
+    {{- $doc = merge $doc (dict "tags" $tags) -}}
+  {{- end -}}
+{{- end -}}
+{{- return $doc -}}

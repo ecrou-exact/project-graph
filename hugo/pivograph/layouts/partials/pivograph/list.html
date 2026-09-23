@@ -1,0 +1,7 @@
+{{- /* A slice of strings as "a, b and c". */ -}}
+{{- $out := "" -}}
+{{- range $i, $item := . -}}
+  {{- $sep := cond (eq $i 0) "" (cond (eq $i (sub (len $) 1)) " and " ", ") -}}
+  {{- $out = printf "%s%s%s" $out $sep $item -}}
+{{- end -}}
+{{- return $out -}}

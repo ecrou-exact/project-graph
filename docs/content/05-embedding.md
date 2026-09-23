@@ -9,6 +9,10 @@ Pivograph can be shown inside another site with an `<iframe>`, without its top b
 | `sidebar=0` | Hides the side panel. |
 | `tags=0` | Starts with the tag pills hidden. |
 
+The map below is the app embedded in this page, loading the example with `?embed=1&sidebar=0&src=…`:
+
+<iframe class="demo" src="../?embed=1&amp;sidebar=0&amp;src=docs/examples/rulezet.json" title="Live example: projects linked to Rulezet" loading="lazy" allow="fullscreen"></iframe>
+
 ```html
 <iframe
   src="https://ecrou-exact.github.io/project-graph/?embed=1&src=https://example.org/.well-known/open-contributions.json"

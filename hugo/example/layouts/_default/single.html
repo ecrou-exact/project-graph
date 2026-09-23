@@ -1,0 +1,11 @@
+{{ define "main" }}
+<article>
+  <h1>{{ .Title }}</h1>
+  {{ with .Description }}<p>{{ . }}</p>{{ end }}
+  {{ .Content }}
+  {{- /* A project page links back to the graph it belongs to. */ -}}
+  {{ with .Params.graph }}
+  <p><a href="{{ $.CurrentSection.RelPermalink }}#pivograph-{{ .id | default $.File.ContentBaseName | anchorize }}">See it in the graph</a></p>
+  {{ end }}
+</article>
+{{ end }}

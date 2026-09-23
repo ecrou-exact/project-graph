@@ -1,0 +1,67 @@
+{{- /*
+  One relationship as an English sentence: the report protocol of Pivograph
+  (src/report.js, docs "Reports"), so the page reads the same as the app's
+  reports. Keep both in step.
+
+  Arguments: dict "edge" "nodes" "edgeTypes"
+  Returns: dict
+    key     the sentence as HTML, with @@OBJECT@@ in place of its object, so
+            sentences that differ only by their object can be merged
+    object  the object as HTML
+*/ -}}
+{{- $e := .edge -}}
+{{- $type := index (.edgeTypes | default dict) ($e.type | default "") | default dict -}}
+{{- $direction := $e.direction | default $type.direction | default "forward" -}}
+{{- $subject := $e.from -}}
+{{- $object := $e.to -}}
+{{- if eq $direction "backward" -}}{{- $subject = $e.to -}}{{- $object = $e.from -}}{{- end -}}
+
+{{- $name := dict -}}
+{{- range .nodes -}}
+  {{- if eq .id $subject -}}{{- $name = merge $name (dict "subject" (.label | default .id)) -}}{{- end -}}
+  {{- if eq .id $object -}}{{- $name = merge $name (dict "object" (.label | default .id)) -}}{{- end -}}
+{{- end -}}
+{{- $subjectHtml := printf "<strong>%s</strong>" (htmlEscape ($name.subject | default $subject)) -}}
+{{- $objectHtml := printf "<strong>%s</strong>" (htmlEscape ($name.object | default $object)) -}}
+{{- if eq $subject $object -}}{{- $objectHtml = "itself" -}}{{- end -}}
+
+{{- /* The label: the edge's, else its type's, else the type id in words. */ -}}
+{{- $label := trim (string ($e.label | default $type.label | default "")) " " -}}
+{{- if and (not $label) $e.type -}}{{- $label = replaceRE `[_-]+` " " $e.type | strings.TrimSpace -}}{{- end -}}
+{{- /* "federates with (Connector sync)" -> "… with X (Connector sync)" */ -}}
+{{- $aside := "" -}}
+{{- with findRESubmatch `^(.*\S)\s*\(([^()]+)\)$` $label 1 -}}
+  {{- $label = index (index . 0) 1 -}}
+  {{- $aside = index (index . 0) 2 -}}
+{{- end -}}
+
+{{- /* How the label reads between two names (see the table in the docs). */ -}}
+{{- $kind := "noun" -}}
+{{- if not $label -}}
+  {{- $kind = "none" -}}
+{{- else -}}
+  {{- $words := split $label " " -}}
+  {{- $first := index $words 0 -}}
+  {{- $last := index $words (sub (len $words) 1) -}}
+  {{- $tail := slice "of" "to" "with" "in" "on" "for" "from" "by" "into" "at" "as" "about" "onto" "over" "through" -}}
+  {{- $verbs := slice "is" "are" "was" "has" "have" "can" "will" "may" "must" "does" "depends" "uses" "use" -}}
+  {{- if ne $first (lower $first) -}}
+    {{- $kind = "noun" -}}
+  {{- else if or (in $verbs $first) (and (findRE `[^s]s$` $first) (not (findRE `(ous|ss|is|us)$` $first)) (findRE `^[a-z-]+$` $first)) -}}
+    {{- $kind = cond (or (eq (len $words) 1) (in $tail $last)) "verb" "action" -}}
+  {{- else if or (strings.HasSuffix $first "ed") (in $tail $last) -}}
+    {{- $kind = "state" -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $both := cond (eq $direction "both") ", in both directions" "" -}}
+{{- $l := htmlEscape $label -}}
+{{- $key := "" -}}
+{{- if eq $kind "verb" -}}{{- $key = printf "%s %s @@OBJECT@@%s" $subjectHtml $l $both -}}
+{{- else if eq $kind "action" -}}{{- $key = printf "%s %s (%s @@OBJECT@@)" $subjectHtml $l (cond (eq $direction "both") "↔" "→") -}}
+{{- else if eq $kind "state" -}}{{- $key = printf "%s is %s @@OBJECT@@%s" $subjectHtml $l $both -}}
+{{- else if eq $kind "none" -}}{{- $key = printf "%s is linked to @@OBJECT@@%s" $subjectHtml $both -}}
+{{- else -}}{{- $key = printf "%s is linked to @@OBJECT@@%s (%s)" $subjectHtml $both $l -}}
+{{- end -}}
+{{- with $aside -}}{{- $key = printf "%s (%s)" $key (htmlEscape .) -}}{{- end -}}
+{{- return (dict "key" (printf "%s." $key) "object" $objectHtml) -}}

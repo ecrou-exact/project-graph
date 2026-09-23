@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "update:pivotick": "npm install pivotick@latest && node scripts/pivotick-version.mjs",
-    "report": "node scripts/report.mjs"
+    "report": "node scripts/report.mjs",
+    "hugo:example": "node scripts/hugo-example.mjs && hugo server -s hugo/example"
   },
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^7.3.1",

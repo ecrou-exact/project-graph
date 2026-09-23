@@ -18,6 +18,11 @@
       <!-- Three menus, built by main.js: Add (node, edge), Graph (new, open, import), Export. -->
       <div id="header-actions" class="pg-actions" role="toolbar" aria-label="Graph actions"></div>
       <span class="pg-sep"></span>
+      <!-- Search of the documentation (docs/search.js, imported by main.js). -->
+      <form class="site-search" action="docs/guide.html" role="search" data-site-search data-index="docs/search.json" data-base="docs/guide.html">
+        <input type="search" name="q" placeholder="Search the docs" aria-label="Search the documentation" autocomplete="off" role="combobox" aria-controls="app-search-results" aria-expanded="false" aria-autocomplete="list" />
+        <div class="search-results" id="app-search-results" role="listbox" aria-label="Sections of the guide" hidden></div>
+      </form>
       <!-- Same navigation as the documentation site, so app and docs read as one site. -->
       <nav class="pg-site-nav" aria-label="Site">
         <a href="docs/">Home</a>

@@ -26,7 +26,7 @@ const root = new URL('..', import.meta.url).pathname
 const read = (path) => readFileSync(join(root, path), 'utf8')
 
 function slug(text) {
-  return text.toLowerCase().replace(/<[^>]+>/g, '').replace(/&[a-z]+;/g, '')
+  return text.toLowerCase().replace(/<[^>]+>/g, '').replace(/&#?[a-z0-9]+;/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
@@ -70,6 +70,44 @@ function render(markdown) {
   return { html: marked.parse(markdown), toc }
 }
 
+const ENTITIES = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" }
+const decode = (text) => text.replace(/&(amp|lt|gt|quot|#39);/g, (e) => ENTITIES[e])
+
+/**
+ * The search index (docs/search.js): one entry per section (h2, h3) of the
+ * guide, with its anchor, title, parent section and plain text, code included
+ * (field names are what people look for).
+ */
+export function searchIndex(markdown) {
+  const marked = new Marked()
+  const entries = []
+  let h2 = null
+  let current = null
+  for (const token of marked.lexer(markdown)) {
+    if (token.type === 'heading' && (token.depth === 2 || token.depth === 3)) {
+      const html = marked.parseInline(token.text)
+      current = { id: slug(html), title: decode(html.replace(/<[^>]+>/g, '')), text: '' }
+      if (token.depth === 2) h2 = current.title
+      else current.parent = h2
+      entries.push(current)
+    } else if (current) {
+      current.text += ` ${token.raw}`
+    }
+  }
+  for (const entry of entries) {
+    entry.text = decode(entry.text
+      .replace(/```\w*/g, ' ')
+      .replace(/\{\{<\s*(.*?)\s*>\}\}/g, '{{< $1 >}}'.replace(/[<>]/g, ''))
+      .replace(/`([^`]*)`/g, (_, code) => code.replace(/</g, '‹').replace(/>/g, '›'))
+      .replace(/<\/?[a-z][^>]*>/gi, ' ')
+      .replace(/‹/g, '<').replace(/›/g, '>')
+      .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
+      .replace(/[`*|]|^#+|\s#+\s/gm, ' ')
+      .replace(/\s+/g, ' ')).trim()
+  }
+  return entries
+}
+
 function tocHtml(toc) {
   let html = '<ol class="toc-list">'
   let open = false
@@ -92,6 +130,9 @@ function absoluteLinks(markdown) {
     .replace(/\]\(\.\.\/([^)]+)\)/g, `](${SITE}$1)`)
     .replace(/\]\((pivograph\.schema\.json|examples\/[^)]+)\)/g, `](${SITE}docs/$1)`)
     .replace(/\]\(#([^)]+)\)/g, `](${SITE}docs/guide.html#$1)`)
+    // HTML blocks (examples with pictures, live demos)
+    .replace(/(src|href)="\.\.\/([^"]*)"/g, `$1="${SITE}$2"`)
+    .replace(/(src|href)="((?:assets|examples)\/[^"]*)"/g, `$1="${SITE}docs/$2"`)
 }
 
 // One line per guide section, for the home page's index of the guide.
@@ -102,6 +143,7 @@ const SECTION_SUMMARIES = {
   'document-format': 'Every field of meta, nodes, edges, types and tags, with defaults and validation rules.',
   'examples': 'A complete checked map and a minimal one.',
   'open-contributions-descriptor': 'How a .well-known/open-contributions.json file becomes a map.',
+  'hugo': 'Add a graph to a Hugo site: Hugo builds the JSON from its pages, draws it as SVG without JavaScript, and shows the interactive graph with it.',
   'reports': 'Export a map as JSON, Pivotick data, a picture, or a PDF or Markdown report, and how the text is written.',
   'embedding': 'Show a map on another site: iframe parameters and the postMessage protocol.',
   'using-the-app': 'Editing nodes and edges, GitHub details, filters and saving.',
@@ -176,6 +218,8 @@ To map an organization, read the full documentation first and follow its "Mappin
 - [Document format](${SITE}docs/guide.html#document-format): every field of nodes, edges, types, tags and meta, with defaults and validation rules
 - [Open Contributions Descriptor](${SITE}docs/guide.html#open-contributions-descriptor): how an OCD file becomes a map
 - [Embedding](${SITE}docs/guide.html#embedding): iframe parameters and postMessage protocol
+- [Hugo](${SITE}docs/guide.html#hugo): add a graph to any Hugo site. Hugo builds the JSON from the pages (front matter "graph" and "relations") or a data file, draws it as SVG without JavaScript, and shows the interactive graph with it. Includes a step-by-step procedure, a checklist and a prompt for AI agents
+- [Reports](${SITE}docs/guide.html#reports): exports, and the protocol that writes any graph as English text
 
 ## Data
 
@@ -193,16 +237,19 @@ To map an organization, read the full documentation first and follow its "Mappin
     'docs/index.html': home,
     'docs/guide.html': page,
     'docs/site.css': read('docs/site.css'),
+    'docs/search.js': read('docs/search.js'),
+    'docs/search.json': JSON.stringify(searchIndex(markdown)),
     'llms-full.txt': full,
     'llms.txt': index,
     'docs/pivograph.schema.json': read('schema/pivograph.schema.json'),
     'docs/examples/rulezet.json': read('examples/rulezet.json'),
     'docs/examples/minimal.json': read('examples/minimal.json'),
-    'docs/assets/hero.png': readFileSync(join(root, 'docs/assets/hero.png')),
+    // Pictures of the site and the guide.
+    ...Object.fromEntries(readdirSync(join(root, 'docs/assets')).map((f) => [`docs/assets/${f}`, readFileSync(join(root, 'docs/assets', f))])),
   }
 }
 
-const TYPES = { css: 'text/css; charset=utf-8', html: 'text/html; charset=utf-8', txt: 'text/plain; charset=utf-8', json: 'application/json; charset=utf-8', png: 'image/png' }
+const TYPES = { js: 'text/javascript; charset=utf-8', css: 'text/css; charset=utf-8', html: 'text/html; charset=utf-8', txt: 'text/plain; charset=utf-8', json: 'application/json; charset=utf-8', png: 'image/png' }
 
 /** Vite plugin: serves the docs in dev, emits them into dist/ on build. */
 export function docsPlugin() {

@@ -15,6 +15,11 @@
 <body>
   <header class="bar">
     <a class="brand" href="./"><img src="../favicon.svg" alt="" />Pivograph</a>
+    <form class="site-search" action="guide.html" role="search" data-site-search data-index="search.json" data-base="guide.html" data-shortcut>
+      <input type="search" name="q" placeholder="Search the docs" aria-label="Search the documentation" autocomplete="off" role="combobox" aria-controls="search-results" aria-expanded="false" aria-autocomplete="list" />
+      <kbd aria-hidden="true">/</kbd>
+      <div class="search-results" id="search-results" role="listbox" aria-label="Sections of the guide" hidden></div>
+    </form>
     <nav aria-label="Main">
       <a href="#mapping-an-organization" class="hide-sm">Mapping an organization</a>
       <a href="#document-format" class="hide-sm">Format</a>
@@ -41,6 +46,7 @@
       <span><a href="{{repo}}">GitHub</a> &nbsp; <a href="../llms.txt">llms.txt</a> &nbsp; <a href="../llms-full.txt">llms-full.txt</a> &nbsp; <a href="pivograph.schema.json">JSON schema</a></span>
     </div>
   </footer>
+  <script src="search.js" defer></script>
 
   <script>
     // Optional enhancements: the page is complete without them.

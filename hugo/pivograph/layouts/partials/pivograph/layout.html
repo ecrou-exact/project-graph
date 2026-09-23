@@ -1,0 +1,61 @@
+{{- /*
+  Where each node sits in the picture drawn without JavaScript (svg.html).
+
+  With `x` and `y` on every node (the app's JSON export keeps them, with
+  "positions" ticked), the graph is drawn as it was laid out in the app.
+  Otherwise a layout is computed: the most connected node in the centre when
+  it links to at least half of the others, the rest on rings around it.
+
+  Arguments: dict "nodes" "edges" "radius" (a map id -> radius)
+  Returns a map id -> dict "x" "y".
+*/ -}}
+{{- $nodes := .nodes -}}
+{{- $edges := .edges -}}
+{{- $radius := .radius -}}
+{{- $out := dict -}}
+
+{{- $placed := true -}}
+{{- range $nodes -}}{{- if or (not (isset . "x")) (not (isset . "y")) -}}{{- $placed = false -}}{{- end -}}{{- end -}}
+
+{{- if $placed -}}
+  {{- range $nodes -}}{{- $out = merge $out (dict .id (dict "x" (float .x) "y" (float .y))) -}}{{- end -}}
+{{- else -}}
+  {{- /* The hub: the most connected node, first in document order on a tie. */ -}}
+  {{- $hub := "" -}}{{- $best := 0 -}}
+  {{- range $n := $nodes -}}
+    {{- $d := 0 -}}
+    {{- range $edges -}}{{- if and (ne .from .to) (or (eq .from $n.id) (eq .to $n.id)) -}}{{- $d = add $d 1 -}}{{- end -}}{{- end -}}
+    {{- if gt $d $best -}}{{- $best = $d -}}{{- $hub = $n.id -}}{{- end -}}
+  {{- end -}}
+  {{- $count := len $nodes -}}
+  {{- if or (lt $count 3) (lt (mul $best 2) (sub $count 1)) -}}{{- $hub = "" -}}{{- end -}}
+
+  {{- $ring := slice -}}
+  {{- range $nodes -}}{{- if ne .id $hub -}}{{- $ring = $ring | append .id -}}{{- end -}}{{- end -}}
+  {{- with $hub -}}{{- $out = merge $out (dict . (dict "x" 0.0 "y" 0.0)) -}}{{- end -}}
+
+  {{- /* Rings: each node needs its width plus room for its label. */ -}}
+  {{- $maxR := 14.0 -}}
+  {{- range $ring -}}{{- $maxR = math.Max $maxR (float (index $radius .)) -}}{{- end -}}
+  {{- $step := add (mul $maxR 2) 130 -}}
+  {{- $r0 := math.Max 280 (add (mul (float (index $radius $hub | default 0)) 2) (mul $maxR 2) 240) -}}
+  {{- $i := 0 -}}{{- $k := 0 -}}
+  {{- $left := len $ring -}}
+  {{- range seq 50 -}}
+    {{- if gt $left 0 -}}
+      {{- $R := add $r0 (mul $k (add $step 40)) -}}
+      {{- $capacity := int (math.Max 1 (math.Floor (div (mul 2 math.Pi $R) $step))) -}}
+      {{- if eq $k 0 -}}{{- if not $hub -}}{{- $R = math.Max $R (div (mul (float $left) $step) (mul 2 math.Pi)) -}}{{- $capacity = $left -}}{{- end -}}{{- end -}}
+      {{- $n := cond (lt $left $capacity) $left $capacity -}}
+      {{- range $j := seq 0 (sub $n 1) -}}
+        {{- /* Half a step off the top: the space above the hub stays free (for a loop on itself). */ -}}
+        {{- $angle := add (sub (div (mul 2 math.Pi (float $j)) (float $n)) (div math.Pi 2)) (div math.Pi (float $n)) -}}
+        {{- $angle = add $angle (mul $k 0.35) -}}
+        {{- $id := index $ring (add $i $j) -}}
+        {{- $out = merge $out (dict $id (dict "x" (mul $R (math.Cos $angle)) "y" (mul $R (math.Sin $angle)))) -}}
+      {{- end -}}
+      {{- $i = add $i $n -}}{{- $left = sub $left $n -}}{{- $k = add $k 1 -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

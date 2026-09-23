@@ -16,6 +16,8 @@ src/
   snapshot.js    the graph as a PNG picture
   ui/            forms, modals, tag pills, GitHub card, details rendering, DOM helper
 examples/        example maps
+hugo/            the Hugo component (pivograph/: shortcode, partials that build the JSON,
+                 draw the SVG and write the text; script) and its example site (example/)
 schema/          JSON schema of the format
 docs/            this documentation (Markdown, built into docs/index.html and llms-full.txt)
 tests/           Vitest tests
@@ -44,16 +46,19 @@ tests/           Vitest tests
 ## Development
 
 ```bash
-npm run dev              # dev server with hot reload; the docs are served at /docs/
-npm test                 # Vitest: document format, OCD import, icons, reports
+npm run dev              # dev server with hot reload: the app, the docs at /docs/, the Hugo example at /hugo-example/ (needs hugo)
+npm test                 # Vitest: document format, OCD import, icons, reports, and the Hugo component when hugo is installed (or HUGO=/path/to/hugo)
 npm run report -- map.json report.md   # the text report from the command line
-npm run build            # static site in dist/: the app, docs/, llms.txt, llms-full.txt
+npm run hugo:example     # the Hugo example site (needs hugo)
+npm run build            # static site in dist/: the app, docs/, llms.txt, llms-full.txt, hugo-example/ (needs hugo)
 npm run update:pivotick  # install the latest Pivotick
 ```
 
-Every push to `main` runs the tests, builds and deploys to GitHub Pages. A weekly workflow installs the latest Pivotick, runs the tests and the build, and opens a pull request if the version changed.
+Every push to `main` installs Hugo, runs the tests, builds the app, the documentation and the Hugo example site (published at `/hugo-example/`), and deploys to GitHub Pages. A weekly workflow installs the latest Pivotick, runs the tests and the build, and opens a pull request if the version changed.
 
-This documentation is written in `docs/content/*.md`. The build turns it into `docs/index.html` (static HTML, readable without JavaScript) and `llms-full.txt`, and publishes the schema and the examples next to it.
+This documentation is written in `docs/content/*.md`. The build also writes `docs/search.json`, one entry per section, which the search box (`docs/search.js`, on the docs pages and in the app's top bar; `/` focuses it in the docs) searches in the browser.
+
+The build turns the Markdown into `docs/index.html` (static HTML, readable without JavaScript) and `llms-full.txt`, and publishes the schema and the examples next to it.
 
 ## For AI agents
 
@@ -64,5 +69,6 @@ This documentation is written in `docs/content/*.md`. The build turns it into `d
 | [`pivograph.schema.json`](pivograph.schema.json) | JSON schema of the document format. |
 | [`examples/rulezet.json`](examples/rulezet.json) | A complete, checked map. |
 | [`examples/minimal.json`](examples/minimal.json) | The smallest useful map. |
+| [Hugo](#hugo) | To add a graph to a Hugo site: procedure, front-matter reference, checklist and prompt. |
 
 To produce a map, follow [Mapping an organization](#mapping-an-organization), write the document per [Document format](#document-format), and check it against the [validation](#validation) rules. Output only the JSON document.

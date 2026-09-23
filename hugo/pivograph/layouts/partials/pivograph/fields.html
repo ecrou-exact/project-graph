@@ -1,0 +1,21 @@
+{{- /*
+  Hugo lowercases the keys of front matter (imageFit -> imagefit): give
+  Pivograph's field names their case back. Other keys are kept as they are.
+  Argument: a map. Returns a new map.
+*/ -}}
+{{- $names := dict
+  "imagefit" "imageFit" "bordercolor" "borderColor" "borderwidth" "borderWidth"
+  "hidelabel" "hideLabel" "labelcolor" "labelColor" "labelbackground" "labelBackground"
+  "labelsize" "labelSize" "labelfont" "labelFont" "hidebadges" "hideBadges"
+  "githubinfo" "githubInfo" "fullname" "fullName" "pushedat" "pushedAt" "fetchedat" "fetchedAt"
+  "nodetypes" "nodeTypes" "edgetypes" "edgeTypes" "linkdistance" "linkDistance" "readonly" "readOnly"
+-}}
+{{- $out := dict -}}
+{{- range $key, $value := . -}}
+  {{- $name := index $names $key | default $key -}}
+  {{- if and (reflect.IsMap $value) (in (slice "githubInfo") $name) -}}
+    {{- $value = partial "pivograph/fields.html" $value -}}
+  {{- end -}}
+  {{- $out = merge $out (dict $name $value) -}}
+{{- end -}}
+{{- return $out -}}

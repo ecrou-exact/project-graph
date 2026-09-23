@@ -1,6 +1,6 @@
 ## Using the app
 
-**Top bar.** *Add* creates a node or an edge. *Graph* starts a new graph, opens a file (a Pivograph document or an Open Contributions Descriptor), imports an organization from its domain, or loads the Rulezet example. *Export* saves the graph (see [Reports](#reports)).
+**Top bar.** *Search the docs* finds a section of this guide as you type (↑ ↓ and Enter to open it). *Add* creates a node or an edge. *Graph* starts a new graph, opens a file (a Pivograph document or an Open Contributions Descriptor), imports an organization from its domain, or loads the Rulezet example. *Export* saves the graph (see [Reports](#reports)).
 
 **Side panel** (left, resizable by dragging its edge):
 

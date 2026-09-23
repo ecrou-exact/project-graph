@@ -1,0 +1,156 @@
+{{- /*
+  The graph as text: readable without JavaScript, indexed by search engines,
+  read by screen readers. It follows the report protocol of Pivograph
+  (overview, nodes by type, relationships as sentences), in HTML.
+
+  Arguments: dict
+    doc     the Pivograph document (partial "pivograph/document.html")
+    level   heading level of the sections (default 3)
+    app     the app's URL, to show its bundled icons (icons/…)
+*/ -}}
+{{- $doc := .doc -}}
+{{- $level := int (.level | default 3) -}}
+{{- $app := .app | default "" -}}
+{{- $nodes := $doc.nodes | default slice -}}
+{{- $edges := $doc.edges | default slice -}}
+{{- $nodeTypes := $doc.nodeTypes | default dict -}}
+{{- $edgeTypes := $doc.edgeTypes | default dict -}}
+{{- $tags := $doc.tags | default dict -}}
+
+{{- /* Node types in the order they first appear, untyped nodes last. */ -}}
+{{- $typeKeys := slice -}}
+{{- range $nodes -}}{{- $typeKeys = $typeKeys | append (.type | default "") -}}{{- end -}}
+{{- $typeKeys = uniq $typeKeys -}}
+{{- if in $typeKeys "" -}}{{- $typeKeys = (complement (slice "") $typeKeys) | append "" -}}{{- end -}}
+{{- $grouped := or (gt (len $typeKeys) 1) (and $typeKeys (ne (index $typeKeys 0) "")) -}}
+
+{{- /* Overview */ -}}
+{{- $kinds := slice -}}
+{{- range $key := $typeKeys -}}
+  {{- $n := len (where $nodes "type" (cond (eq $key "") nil $key)) -}}
+  {{- if eq $key "" -}}{{- $n = 0 -}}{{- range $nodes -}}{{- if not .type -}}{{- $n = add $n 1 -}}{{- end -}}{{- end -}}{{- end -}}
+  {{- $label := cond (eq $key "") "other node" ((index $nodeTypes $key).label | default (replaceRE `[_-]+` " " $key)) -}}
+  {{- $kinds = $kinds | append (printf "%d %s" $n (partial "pivograph/plural.html" (dict "n" $n "word" (partial "pivograph/lowerfirst.html" $label)))) -}}
+{{- end -}}
+<div class="pivograph-text">
+<p class="pivograph-overview">
+  {{- $nn := len $nodes -}}{{- $ne := len $edges -}}
+  {{- if not $nn -}}This graph is empty.
+  {{- else -}}
+    This graph has {{ $nn }} {{ partial "pivograph/plural.html" (dict "n" $nn "word" "node") }}
+    {{- if $grouped }} ({{ partial "pivograph/list.html" $kinds }}){{ end -}}
+    {{- if $ne }} connected by {{ $ne }} {{ partial "pivograph/plural.html" (dict "n" $ne "word" "relationship") }}.{{ else }} and no relationships.{{ end -}}
+    {{- /* The most connected nodes (two relationships or more). */ -}}
+    {{- $degrees := slice -}}
+    {{- range $i, $node := $nodes -}}
+      {{- $d := 0 -}}
+      {{- range $edges -}}{{- if or (eq .from $node.id) (eq .to $node.id) -}}{{- $d = add $d 1 -}}{{- end -}}{{- end -}}
+      {{- if gt $d 1 -}}{{- $degrees = $degrees | append (dict "name" ($node.label | default $node.id) "d" $d "i" $i) -}}{{- end -}}
+    {{- end -}}
+    {{- with first 3 (sort (sort $degrees "i") "d" "desc") -}}
+      {{- $hubs := slice -}}{{- range . -}}{{- $hubs = $hubs | append (printf "<strong>%s</strong> (%d)" (htmlEscape .name) .d) -}}{{- end }}
+      The most connected {{ cond (gt (len .) 1) "nodes are" "node is" }} {{ partial "pivograph/list.html" $hubs | safeHTML }}.
+    {{- end -}}
+  {{- end -}}
+</p>
+
+{{- range $key := $typeKeys }}
+  {{- $group := slice -}}
+  {{- range $nodes -}}{{- if eq (.type | default "") $key -}}{{- $group = $group | append . -}}{{- end -}}{{- end -}}
+  {{- $typeLabel := cond (eq $key "") "Other" ((index $nodeTypes $key).label | default (replaceRE `[_-]+` " " $key)) -}}
+  {{- if $grouped }}
+<h{{ $level }} class="pivograph-group">{{ partial "pivograph/plural.html" (dict "n" (len $group) "word" $typeLabel) }}</h{{ $level }}>
+  {{- end }}
+  {{- range $node := $group }}
+    {{- $name := $node.label | default $node.id }}
+<article class="pivograph-node" id="pivograph-{{ $node.id | anchorize }}">
+<h{{ add $level (cond $grouped 1 0) }} class="pivograph-node-name">
+  {{- with $node.image -}}
+    {{- $src := . -}}
+    {{- if and $app (not (findRE `^(https?:|data:|/)` .)) -}}{{- $src = printf "%s%s" $app . -}}{{- end -}}
+    <img src="{{ $src }}" alt="" loading="lazy" width="28" height="28">
+  {{- end -}}
+  {{ $name }}</h{{ add $level (cond $grouped 1 0) }}>
+    {{- $intro := "" -}}
+    {{- if $key -}}{{- $intro = printf "%s is %s %s." $name (partial "pivograph/article.html" $typeLabel) (partial "pivograph/lowerfirst.html" $typeLabel) -}}{{- end -}}
+    {{- with $node.description -}}
+      {{- $d := trim . " \n" -}}
+      {{- if not (findRE `[.!?:)»”"]$` $d) -}}{{- $d = printf "%s." $d -}}{{- end -}}
+      {{- $intro = trim (printf "%s %s" $intro $d) " " -}}
+    {{- end }}
+    {{- with $intro }}
+<p>{{ . }}</p>
+    {{- end }}
+    {{- if or $node.url $node.github $node.links }}
+<dl class="pivograph-facts">
+      {{- with $node.url }}<dt>Website</dt><dd><a href="{{ . }}">{{ replaceRE `^https?://(www\.)?` "" . | strings.TrimSuffix "/" }}</a></dd>{{ end -}}
+      {{- with $node.github -}}
+        {{- $info := $node.githubInfo | default dict -}}
+        <dt>Source code</dt><dd><a href="{{ $info.url | default (printf "https://github.com/%s" .) }}">{{ $info.fullName | default . }}</a>
+        {{- with $info.description }}{{ $d := trim . " \n" }} — {{ $d }}{{ if not (findRE `[.!?:)»”"]$` $d) }}.{{ end }}{{ end -}}
+        {{- $facts := slice -}}
+        {{- with $info.stars -}}{{- $facts = $facts | append (printf "%v %s" . (partial "pivograph/plural.html" (dict "n" . "word" "star"))) -}}{{- end -}}
+        {{- with $info.forks -}}{{- $facts = $facts | append (printf "%v %s" . (partial "pivograph/plural.html" (dict "n" . "word" "fork"))) -}}{{- end -}}
+        {{- with $info.issues -}}{{- $facts = $facts | append (printf "%v open %s" . (partial "pivograph/plural.html" (dict "n" . "word" "issue"))) -}}{{- end -}}
+        {{- $clauses := slice -}}
+        {{- with $facts -}}{{- $clauses = $clauses | append (printf "has %s" (partial "pivograph/list.html" .)) -}}{{- end -}}
+        {{- with $info.language -}}{{- $clauses = $clauses | append (printf "is written mainly in %s" .) -}}{{- end -}}
+        {{- with $info.license -}}{{- $clauses = $clauses | append (printf "is licensed under %s" .) -}}{{- end -}}
+        {{- with $info.pushedAt -}}{{- $clauses = $clauses | append (printf "was last updated on %s" (time.Format "2 January 2006" .)) -}}{{- end -}}
+        {{- with $clauses }} The repository {{ partial "pivograph/list.html" . }}.{{ end -}}
+        </dd>
+      {{- end -}}
+      {{- range $node.links }}<dt>{{ .label | default "Link" }}</dt><dd><a href="{{ .url }}">{{ replaceRE `^https?://(www\.)?` "" .url | strings.TrimSuffix "/" }}</a></dd>{{ end -}}
+</dl>
+    {{- end }}
+    {{- with $node.tags }}
+<p class="pivograph-tags">{{ range . }}{{ partial "pivograph/tag.html" (dict "tag" (lower .) "tags" $tags) | safeHTML }} {{ end }}</p>
+    {{- end }}
+    {{- with $node.details }}
+{{ partial "pivograph/details.html" . | safeHTML }}
+    {{- end }}
+    {{- $related := slice -}}
+    {{- range $edges -}}{{- if or (eq .from $node.id) (eq .to $node.id) -}}{{- $related = $related | append . -}}{{- end -}}{{- end -}}
+    {{- with $related }}
+<ul class="pivograph-relations">
+      {{- range partial "pivograph/sentences.html" (dict "edges" . "nodes" $nodes "edgeTypes" $edgeTypes) }}
+  <li>{{ . | safeHTML }}</li>
+      {{- end }}
+</ul>
+    {{- end }}
+</article>
+  {{- end }}
+{{- end }}
+
+{{- with $edges }}
+<h{{ $level }} class="pivograph-group">Relationships</h{{ $level }}>
+  {{- $keys := slice -}}
+  {{- range . -}}{{- $keys = $keys | append (.type | default "") -}}{{- end -}}
+  {{- $keys = uniq $keys -}}
+  {{- if in $keys "" -}}{{- $keys = (complement (slice "") $keys) | append "" -}}{{- end -}}
+  {{- $relGrouped := or (gt (len $keys) 1) (ne (index $keys 0) "") -}}
+  {{- range $key := $keys }}
+    {{- $group := slice -}}
+    {{- range $edges -}}{{- if eq (.type | default "") $key -}}{{- $group = $group | append . -}}{{- end -}}{{- end -}}
+    {{- if $relGrouped }}
+      {{- $label := cond (eq $key "") "Other relationships" ((index $edgeTypes $key).label | default (replaceRE `[_-]+` " " $key)) }}
+<h{{ add $level 1 }} class="pivograph-relation-type">{{ printf "%s%s" (upper (substr $label 0 1)) (substr $label 1) }}</h{{ add $level 1 }}>
+    {{- end }}
+    {{- /* Relationships with nothing more to say are merged; the others keep their own entry. */ -}}
+    {{- $plain := slice -}}{{- $rich := slice -}}
+    {{- range $group -}}
+      {{- if or .description .details -}}{{- $rich = $rich | append . -}}{{- else -}}{{- $plain = $plain | append . -}}{{- end -}}
+    {{- end }}
+<ul class="pivograph-relations">
+    {{- range partial "pivograph/sentences.html" (dict "edges" $plain "nodes" $nodes "edgeTypes" $edgeTypes) }}
+  <li>{{ . | safeHTML }}</li>
+    {{- end }}
+    {{- range $rich }}
+  <li>{{ index (partial "pivograph/sentences.html" (dict "edges" (slice .) "nodes" $nodes "edgeTypes" $edgeTypes)) 0 | safeHTML }}
+      {{- with .description }}<p>{{ . }}</p>{{ end }}
+      {{- with .details }}{{ partial "pivograph/details.html" . | safeHTML }}{{ end }}</li>
+    {{- end }}
+</ul>
+  {{- end }}
+{{- end }}
+</div>

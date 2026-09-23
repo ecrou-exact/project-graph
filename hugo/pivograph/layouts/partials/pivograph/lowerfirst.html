@@ -1,0 +1,4 @@
+{{- /* "Open data" -> "open data"; "MISP instance" and "API" stay (lowerFirst() in src/report.js). */ -}}
+{{- $out := . -}}
+{{- if findRE `^[A-Z][a-z]` . -}}{{- $out = printf "%s%s" (lower (substr . 0 1)) (substr . 1) -}}{{- end -}}
+{{- return $out -}}

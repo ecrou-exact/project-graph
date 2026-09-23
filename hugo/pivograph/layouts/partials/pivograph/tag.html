@@ -1,0 +1,3 @@
+{{- /* A tag as a pill, in the colours the app gives it (tagcolor.html). Arguments: dict "tag" "tags". Returns HTML. */ -}}
+{{- $c := partial "pivograph/tagcolor.html" . -}}
+{{- return (printf `<span class="pivograph-tag" style="background:%s;color:%s">#%s</span>` (htmlEscape $c.color) $c.fg (htmlEscape .tag)) -}}

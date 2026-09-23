@@ -1,0 +1,53 @@
+{{- /*
+  A graph on a page: the text (works without JavaScript), a JSON file built by
+  Hugo, and, when JavaScript runs, the interactive graph in the Pivograph app.
+
+  Arguments: dict
+    page     the current page (required)
+    section  / data   where the graph comes from (see document.html)
+    app      the Pivograph app (default: params.pivograph.app, else the public app)
+    height   of the interactive graph (default "75vh")
+    sidebar  show the app's side panel (default false)
+    tags     show the tag pills on the graph (default true)
+    picture  false to leave out the picture drawn by Hugo (shown without JavaScript)
+    image    a picture of your own (Export → Picture in the app), shown instead of Hugo's
+    title    accessible name of the graph (default: the graph's title)
+    level    heading level of the text's sections (default 3)
+    text     false to leave out the text (not recommended: it is the only
+             version without JavaScript)
+*/ -}}
+{{- $page := .page -}}
+{{- $doc := partial "pivograph/document.html" . -}}
+{{- $app := .app | default site.Params.pivograph.app | default "https://ecrou-exact.github.io/project-graph/" -}}
+{{- if not (strings.HasSuffix $app "/") -}}{{- $app = printf "%s/" $app -}}{{- end -}}
+{{- $key := .data | default (.section | default $page.CurrentSection.Path) | default "graph" | urlize | default "graph" -}}
+{{- $json := resources.FromString (printf "pivograph/%s.json" $key) (jsonify (dict "indent" "  ") $doc) -}}
+{{- $title := .title | default $doc.meta.title | default "Graph" -}}
+{{- $sidebar := cond (eq .sidebar true) "1" "0" -}}
+{{- $tags := cond (eq .tags false) "0" "1" -}}
+<figure class="pivograph" data-pivograph data-src="{{ $json.RelPermalink }}" data-app="{{ $app }}" data-base="{{ site.BaseURL }}"
+  data-height="{{ .height | default "75vh" }}" data-sidebar="{{ $sidebar }}" data-tags="{{ $tags }}" data-title="{{ $title }}">
+  {{- /* The picture, for readers without JavaScript: yours, or drawn by Hugo. */ -}}
+  {{- if .image }}
+  {{- $src := .image -}}{{- with $page.Resources.Get .image -}}{{- $src = .RelPermalink -}}{{- end }}
+  <div class="pivograph-picture"><img src="{{ $src }}" alt="Picture of the graph {{ $title }}"></div>
+  {{- else if ne .picture false }}
+  <div class="pivograph-picture">{{ partial "pivograph/svg.html" (dict "doc" $doc "app" $app "key" $key) | safeHTML }}</div>
+  {{- end }}
+  {{- if ne .text false }}
+  {{ partial "pivograph/text.html" (dict "doc" $doc "level" .level "app" $app) }}
+  {{- end }}
+  <figcaption class="pivograph-caption">
+    {{ $title }}: {{ len $doc.nodes }} nodes, {{ len $doc.edges }} relationships.
+    <a href="{{ $json.RelPermalink }}" download>Data (JSON)</a> ·
+    <a href="{{ $app }}?src={{ $json.Permalink | urlquery }}">Open in Pivograph</a>
+  </figcaption>
+</figure>
+{{- /* The script and the styles. With several graphs on a page they repeat:
+       the browser loads them once, and the script runs once (see its first
+       line). Not deduplicated with .Store, which outlives rebuilds under
+       `hugo server` and would drop them from the page. */ -}}
+{{- $css := resources.Get "pivograph/pivograph.css" | minify | fingerprint -}}
+{{- $js := resources.Get "pivograph/pivograph.js" | js.Build (dict "minify" true) | fingerprint }}
+<link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
+<script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" defer></script>

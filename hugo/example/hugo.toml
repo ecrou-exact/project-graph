@@ -1,0 +1,15 @@
+# Example site for the Pivograph Hugo component (../pivograph).
+#   hugo server -s hugo/example
+baseURL = "http://localhost:1313/"
+title = "Pivograph on Hugo"
+themesDir = ".."
+theme = "pivograph"
+disableKinds = ["taxonomy", "term", "RSS", "sitemap"]
+
+[params.pivograph]
+  # The Pivograph app that draws the interactive graph. Point it to your own
+  # copy (e.g. "/pivograph/", the app's build in static/) to host everything.
+  app = "https://ecrou-exact.github.io/project-graph/"
+
+[markup.goldmark.renderer]
+  unsafe = false

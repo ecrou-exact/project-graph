@@ -1,0 +1,221 @@
+{{- /*
+  The graph drawn as SVG at build time, for pages read without JavaScript:
+  nodes with their shape, colour, logo, label and tag pills; edges with their
+  colour, width, dashes, arrows and labels. Each node is a link to its entry in
+  the text below, and shows its name on hover. With JavaScript, the
+  interactive graph replaces the picture.
+
+  Arguments: dict "doc" "app" (the app's URL, for its bundled icons)
+            "key" (unique on the page: prefixes the ids of markers and clips)
+  Returns HTML.
+*/ -}}
+{{- $doc := .doc -}}
+{{- $app := .app | default "" -}}
+{{- $nodes := $doc.nodes | default slice -}}
+{{- $edges := $doc.edges | default slice -}}
+{{- $nodeTypes := $doc.nodeTypes | default dict -}}
+{{- $edgeTypes := $doc.edgeTypes | default dict -}}
+{{- $tags := $doc.tags | default dict -}}
+{{- $base := site.BaseURL -}}
+
+{{- /* One return, at the end: Hugo before 0.146 accepts nothing else. */ -}}
+{{- $svg := "" -}}
+{{- if $nodes -}}
+
+{{- /* Node looks: the node's field, else its type's, else the app's default. */ -}}
+{{- $looks := dict -}}
+{{- $radius := dict -}}
+{{- range $n := $nodes -}}
+  {{- $t := index $nodeTypes ($n.type | default "") | default dict -}}
+  {{- $size := float ($n.size | default $t.size | default 14) -}}
+  {{- $image := $n.image | default $t.image | default "" -}}
+  {{- if $image -}}
+    {{- if hasPrefix $image $base -}}{{- $image = relURL (strings.TrimPrefix $base $image) -}}
+    {{- else if and $app (not (findRE `^(https?:|data:|/)` $image)) -}}{{- $image = printf "%s%s" $app $image -}}{{- end -}}
+  {{- end -}}
+  {{- $pills := slice -}}
+  {{- if not ($n.hideBadges | default $t.hideBadges) -}}
+    {{- $all := $n.tags | default slice -}}
+    {{- range first 3 $all -}}
+      {{- $c := partial "pivograph/tagcolor.html" (dict "tag" (lower .) "tags" $tags) -}}
+      {{- $pills = $pills | append (dict "text" (lower .) "color" $c.color "fg" $c.fg) -}}
+    {{- end -}}
+    {{- if gt (len $all) 3 -}}{{- $pills = $pills | append (dict "text" (printf "+%d" (sub (len $all) 3)) "color" "#8a94a6" "fg" "#ffffff") -}}{{- end -}}
+  {{- end -}}
+  {{- $looks = merge $looks (dict $n.id (dict
+      "label" ($n.label | default $n.id)
+      "shape" ($n.shape | default $t.shape | default "circle")
+      "color" ($n.color | default $t.color | default "#4f7cff")
+      "borderColor" ($n.borderColor | default $t.borderColor | default "#ffffff")
+      "borderWidth" (float ($n.borderWidth | default $t.borderWidth | default 0))
+      "image" $image
+      "imageFit" ($n.imageFit | default $t.imageFit | default "cover")
+      "hideLabel" ($n.hideLabel | default $t.hideLabel | default false)
+      "labelColor" ($n.labelColor | default $t.labelColor | default "#1c2230")
+      "labelBackground" ($n.labelBackground | default $t.labelBackground | default "none")
+      "labelSize" (float ($n.labelSize | default $t.labelSize | default 14))
+      "pills" $pills
+    )) -}}
+  {{- $radius = merge $radius (dict $n.id $size) -}}
+{{- end -}}
+
+{{- $pos := partial "pivograph/layout.html" (dict "nodes" $nodes "edges" $edges "radius" $radius) -}}
+
+{{- /* Bounds of the picture, labels and pills included. */ -}}
+{{- $minX := 1e9 -}}{{- $minY := 1e9 -}}{{- $maxX := -1e9 -}}{{- $maxY := -1e9 -}}
+{{- range $n := $nodes -}}
+  {{- $p := index $pos $n.id -}}{{- $l := index $looks $n.id -}}{{- $r := index $radius $n.id -}}
+  {{- $half := math.Max $r (mul (float (len $l.label)) $l.labelSize 0.3) 70 -}}
+  {{- $minX = math.Min $minX (sub $p.x $half) -}}{{- $maxX = math.Max $maxX (add $p.x $half) -}}
+  {{- $minY = math.Min $minY (sub $p.y $r 10) -}}
+  {{- $maxY = math.Max $maxY (add $p.y $r (mul $l.labelSize 1.6) (cond (gt (len $l.pills) 0) 44 0)) -}}
+{{- end -}}
+{{- $pad := 40.0 -}}
+{{- $minX = sub $minX $pad -}}{{- $minY = sub $minY $pad 30 -}}{{- $maxX = add $maxX $pad -}}{{- $maxY = add $maxY $pad -}}
+{{- $width := sub $maxX $minX -}}{{- $height := sub $maxY $minY -}}
+
+{{- /* One arrow marker per edge colour (orient auto-start-reverse serves both ends). */ -}}
+{{- $colors := slice -}}
+{{- range $e := $edges -}}
+  {{- $t := index $edgeTypes ($e.type | default "") | default dict -}}
+  {{- $colors = $colors | append ($e.color | default $t.color | default "#8a94a6") -}}
+{{- end -}}
+{{- $colors = uniq $colors -}}
+{{- $uid := printf "pivograph-%s" (.key | default "graph" | anchorize) -}}
+
+{{- /* Edges between the same two nodes are bent apart. */ -}}
+{{- $pairs := slice -}}
+{{- range $edges -}}{{- $pairs = $pairs | append (delimit (sort (slice .from .to)) "\x1f") -}}{{- end -}}
+
+{{- $edgeSvg := "" -}}
+{{- $labelSvg := "" -}}
+{{- range $i, $e := $edges -}}
+  {{- $t := index $edgeTypes ($e.type | default "") | default dict -}}
+  {{- $color := $e.color | default $t.color | default "#8a94a6" -}}
+  {{- $w := float ($e.width | default $t.width | default 2) -}}
+  {{- $dashed := $e.dashed | default $t.dashed | default false -}}
+  {{- $direction := $e.direction | default $t.direction | default "forward" -}}
+  {{- $marker := "" -}}
+  {{- range $ci, $c := $colors -}}{{- if eq $c $color -}}{{- $marker = printf "%s-arrow-%d" $uid $ci -}}{{- end -}}{{- end -}}
+  {{- $markers := "" -}}
+  {{- if in (slice "forward" "both") $direction -}}{{- $markers = printf `%s marker-end="url(#%s)"` $markers $marker -}}{{- end -}}
+  {{- if in (slice "backward" "both") $direction -}}{{- $markers = printf `%s marker-start="url(#%s)"` $markers $marker -}}{{- end -}}
+  {{- $a := index $pos $e.from -}}{{- $b := index $pos $e.to -}}
+  {{- $ra := index $radius $e.from -}}{{- $rb := index $radius $e.to -}}
+  {{- $path := "" -}}{{- $lx := 0.0 -}}{{- $ly := 0.0 -}}
+  {{- if eq $e.from $e.to -}}
+    {{- /* A loop above the node. */ -}}
+    {{- $path = printf "M%.1f,%.1f C%.1f,%.1f %.1f,%.1f %.1f,%.1f" (sub $a.x (mul $ra 0.5)) (sub $a.y (mul $ra 0.87)) (sub $a.x (mul $ra 1.9)) (sub $a.y (mul $ra 3.2)) (add $a.x (mul $ra 1.9)) (sub $a.y (mul $ra 3.2)) (add $a.x (mul $ra 0.5)) (sub $a.y (mul $ra 0.87) 4) -}}
+    {{- $lx = $a.x -}}{{- $ly = sub $a.y (mul $ra 2.55) -}}
+  {{- else -}}
+    {{- $key := index $pairs $i -}}
+    {{- $same := 0 -}}{{- $rank := 0 -}}
+    {{- range $j, $k := $pairs -}}{{- if eq $k $key -}}{{- if lt $j $i -}}{{- $rank = add $rank 1 -}}{{- end -}}{{- $same = add $same 1 -}}{{- end -}}{{- end -}}
+    {{- /* The bend is measured on the pair's own direction, so A→B and B→A part ways. */ -}}
+    {{- $first := index (sort (slice $e.from $e.to)) 0 -}}
+    {{- $p := cond (eq $first $e.from) $a $b -}}{{- $q := cond (eq $first $e.from) $b $a -}}
+    {{- $dx := sub $q.x $p.x -}}{{- $dy := sub $q.y $p.y -}}
+    {{- $len := math.Max 1 (math.Sqrt (add (mul $dx $dx) (mul $dy $dy))) -}}
+    {{- $nx := div (mul -1 $dy) $len -}}{{- $ny := div $dx $len -}}
+    {{- $bend := mul (sub (float $rank) (div (float (sub $same 1)) 2)) 70 -}}
+    {{- $cx := add (div (add $a.x $b.x) 2) (mul $nx $bend) -}}{{- $cy := add (div (add $a.y $b.y) 2) (mul $ny $bend) -}}
+    {{- /* Ends on the rims of the nodes, aimed along the curve. */ -}}
+    {{- $ux := sub $cx $a.x -}}{{- $uy := sub $cy $a.y -}}{{- $ul := math.Max 1 (math.Sqrt (add (mul $ux $ux) (mul $uy $uy))) -}}
+    {{- $vx := sub $b.x $cx -}}{{- $vy := sub $b.y $cy -}}{{- $vl := math.Max 1 (math.Sqrt (add (mul $vx $vx) (mul $vy $vy))) -}}
+    {{- $sx := add $a.x (mul (div $ux $ul) (add $ra 3)) -}}{{- $sy := add $a.y (mul (div $uy $ul) (add $ra 3)) -}}
+    {{- $ex := sub $b.x (mul (div $vx $vl) (add $rb 3)) -}}{{- $ey := sub $b.y (mul (div $vy $vl) (add $rb 3)) -}}
+    {{- if eq $bend 0.0 -}}
+      {{- $path = printf "M%.1f,%.1f L%.1f,%.1f" $sx $sy $ex $ey -}}
+    {{- else -}}
+      {{- $path = printf "M%.1f,%.1f Q%.1f,%.1f %.1f,%.1f" $sx $sy $cx $cy $ex $ey -}}
+    {{- end -}}
+    {{- $lx = add (mul 0.25 $sx) (mul 0.5 $cx) (mul 0.25 $ex) -}}{{- $ly = add (mul 0.25 $sy) (mul 0.5 $cy) (mul 0.25 $ey) -}}
+  {{- end -}}
+  {{- $edgeSvg = printf `%s<path d="%s" fill="none" stroke="%s" stroke-width="%.1f"%s%s/>` $edgeSvg $path (htmlEscape $color) $w (cond $dashed ` stroke-dasharray="7 5"` "") $markers -}}
+
+  {{- /* The label, on its own background, at the middle of the edge. */ -}}
+  {{- $label := trim (string ($e.label | default $t.label | default "")) " " -}}
+  {{- if and $label (not ($e.hideLabel | default $t.hideLabel)) -}}
+    {{- $size := float ($e.labelSize | default $t.labelSize | default 12) -}}
+    {{- $bg := $e.labelBackground | default $t.labelBackground | default "#ffffffe6" -}}
+    {{- $fg := $e.labelColor | default $t.labelColor | default "#333333" -}}
+    {{- $lw := add (mul (float (len $label)) $size 0.56) 12 -}}{{- $lh := mul $size 1.55 -}}
+    {{- if ne $bg "none" -}}
+      {{- $labelSvg = printf `%s<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="3" fill="%s"/>` $labelSvg (sub $lx (div $lw 2)) (sub $ly (div $lh 2)) $lw $lh (htmlEscape $bg) -}}
+    {{- end -}}
+    {{- $labelSvg = printf `%s<text x="%.1f" y="%.1f" font-size="%.1f" fill="%s" text-anchor="middle" dominant-baseline="central">%s</text>` $labelSvg $lx $ly $size (htmlEscape $fg) (htmlEscape $label) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Nodes */ -}}
+{{- $nodeSvg := "" -}}
+{{- range $ni, $n := $nodes -}}
+  {{- $p := index $pos $n.id -}}{{- $l := index $looks $n.id -}}{{- $r := index $radius $n.id -}}
+  {{- $fill := cond (in (slice "transparent" "none" "") $l.color) "none" $l.color -}}
+  {{- $stroke := cond (gt $l.borderWidth 0.0) (printf ` stroke="%s" stroke-width="%.1f"` (htmlEscape $l.borderColor) $l.borderWidth) "" -}}
+  {{- $shape := "" -}}
+  {{- if eq $l.shape "square" -}}
+    {{- $shape = printf `<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="3" fill="%s"%s/>` (mul $r -1) (mul $r -1) (mul $r 2) (mul $r 2) (htmlEscape $fill) $stroke -}}
+  {{- else if eq $l.shape "triangle" -}}
+    {{- $shape = printf `<polygon points="0,%.1f %.1f,%.1f %.1f,%.1f" fill="%s"%s/>` (mul $r -1) (mul $r 0.87) (mul $r 0.5) (mul $r -0.87) (mul $r 0.5) (htmlEscape $fill) $stroke -}}
+  {{- else if eq $l.shape "hexagon" -}}
+    {{- $pts := slice -}}
+    {{- range $k := seq 0 5 -}}{{- $ang := sub (mul (div math.Pi 3) (float $k)) (div math.Pi 2) -}}{{- $pts = $pts | append (printf "%.1f,%.1f" (mul $r (math.Cos $ang)) (mul $r (math.Sin $ang))) -}}{{- end -}}
+    {{- $shape = printf `<polygon points="%s" fill="%s"%s/>` (delimit $pts " ") (htmlEscape $fill) $stroke -}}
+  {{- else -}}
+    {{- $shape = printf `<circle r="%.1f" fill="%s"%s/>` $r (htmlEscape $fill) $stroke -}}
+  {{- end -}}
+  {{- $img := "" -}}
+  {{- with $l.image -}}
+    {{- if eq $l.imageFit "icon" -}}
+      {{- $img = printf `<image href="%s" x="%.1f" y="%.1f" width="%.1f" height="%.1f" preserveAspectRatio="xMidYMid meet"/>` (htmlEscape .) (mul $r -0.6) (mul $r -0.6) (mul $r 1.2) (mul $r 1.2) -}}
+    {{- else if eq $l.imageFit "cover" -}}
+      {{- $clip := printf "%s-clip-%d" $uid $ni -}}
+      {{- $img = printf `<clipPath id="%s"><circle r="%.1f"/></clipPath><image href="%s" x="%.1f" y="%.1f" width="%.1f" height="%.1f" preserveAspectRatio="xMidYMid slice" clip-path="url(#%s)"/>` $clip $r (htmlEscape .) (mul $r -1) (mul $r -1) (mul $r 2) (mul $r 2) $clip -}}
+    {{- else -}}
+      {{- $img = printf `<image href="%s" x="%.1f" y="%.1f" width="%.1f" height="%.1f" preserveAspectRatio="xMidYMid meet"/>` (htmlEscape .) (mul $r -1) (mul $r -1) (mul $r 2) (mul $r 2) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $text := "" -}}
+  {{- $below := add $r 6 -}}
+  {{- if not $l.hideLabel -}}
+    {{- $ty := add $r (mul $l.labelSize 0.95) 4 -}}
+    {{- if ne $l.labelBackground "none" -}}
+      {{- $bw := add (mul (float (len $l.label)) $l.labelSize 0.58) 10 -}}
+      {{- $text = printf `<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="3" fill="%s"/>` (div $bw -2) (sub $ty (mul $l.labelSize 0.8)) $bw (mul $l.labelSize 1.6) (htmlEscape $l.labelBackground) -}}
+    {{- end -}}
+    {{- $text = printf `%s<text y="%.1f" font-size="%.1f" fill="%s" text-anchor="middle" dominant-baseline="central">%s</text>` $text $ty $l.labelSize (htmlEscape $l.labelColor) (htmlEscape $l.label) -}}
+    {{- $below = add $ty (mul $l.labelSize 0.8) 4 -}}
+  {{- end -}}
+  {{- /* Tag pills, in rows centred under the label. */ -}}
+  {{- $pillSvg := "" -}}
+  {{- if $l.pills -}}
+    {{- $rows := slice -}}{{- $row := slice -}}{{- $rowW := 0.0 -}}
+    {{- $maxW := math.Max 150 (add (mul $r 2) 40) -}}
+    {{- range $l.pills -}}
+      {{- $pw := add (mul (float (len .text)) 6.1) 12 -}}
+      {{- if and $row (gt (add $rowW $pw) $maxW) -}}{{- $rows = $rows | append (dict "items" $row "w" (sub $rowW 4)) -}}{{- $row = slice -}}{{- $rowW = 0.0 -}}{{- end -}}
+      {{- $row = $row | append (merge . (dict "w" $pw)) -}}{{- $rowW = add $rowW $pw 4 -}}
+    {{- end -}}
+    {{- $rows = $rows | append (dict "items" $row "w" (sub $rowW 4)) -}}
+    {{- range $ri, $rw := $rows -}}
+      {{- $px := div $rw.w -2 -}}{{- $py := add $below (mul (float $ri) 19) -}}
+      {{- range $rw.items -}}
+        {{- $pillSvg = printf `%s<rect x="%.1f" y="%.1f" width="%.1f" height="16" rx="8" fill="%s"/><text x="%.1f" y="%.1f" font-size="10" font-weight="600" fill="%s" dominant-baseline="central">%s</text>` $pillSvg $px $py .w (htmlEscape .color) (add $px 6) (add $py 8) .fg (htmlEscape .text) -}}
+        {{- $px = add $px .w 4 -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $nodeSvg = printf `%s<a href="#pivograph-%s"><g transform="translate(%.1f,%.1f)"><title>%s</title>%s%s%s%s</g></a>` $nodeSvg (anchorize $n.id) $p.x $p.y (htmlEscape $l.label) $shape $img $text $pillSvg -}}
+{{- end -}}
+
+{{- $defs := "" -}}
+{{- range $ci, $c := $colors -}}
+  {{- $defs = printf `%s<marker id="%s-arrow-%d" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,-5L10,0L0,5" fill="%s"/></marker>` $defs $uid $ci (htmlEscape $c) -}}
+{{- end -}}
+
+{{- $title := $doc.meta.title | default "Graph" -}}
+{{- $svg = printf `<svg class="pivograph-svg" viewBox="%.1f %.1f %.1f %.1f" role="img" aria-labelledby="%s-title %s-desc" font-family="system-ui, 'Segoe UI', Roboto, sans-serif" xmlns="http://www.w3.org/2000/svg"><title id="%s-title">%s</title><desc id="%s-desc">%d nodes and %d relationships, described in the text below.</desc><defs>%s</defs><g class="pivograph-svg-edges">%s</g><g class="pivograph-svg-labels">%s</g><g class="pivograph-svg-nodes">%s</g></svg>`
+    $minX $minY $width $height $uid $uid $uid (htmlEscape $title) $uid (len $nodes) (len $edges) $defs $edgeSvg $labelSvg $nodeSvg -}}
+{{- end -}}
+{{- return $svg -}}

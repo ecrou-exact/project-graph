@@ -1,0 +1,12 @@
+{{- /*
+  Free-form `details` as a nested definition list: keys with "_" turned into
+  spaces, URLs as links, lists joined, nested maps indented.
+  Argument: the details map. Returns HTML.
+*/ -}}
+{{- $out := "" -}}
+{{- range $key, $value := . -}}
+  {{- $label := replace (string $key) "_" " " -}}
+  {{- $label = printf "%s%s" (upper (substr $label 0 1)) (substr $label 1) -}}
+  {{- $out = printf "%s<dt>%s</dt><dd>%s</dd>" $out (htmlEscape $label) (partial "pivograph/value.html" $value) -}}
+{{- end -}}
+{{- return (printf `<dl class="pivograph-details">%s</dl>` $out) -}}

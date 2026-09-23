@@ -1,0 +1,4 @@
+{{- /* "a" or "an" before a word (article() in src/report.js). */ -}}
+{{- $vowel := gt (len (findRE `(?i)^[aeiou]` .)) 0 -}}
+{{- $exception := gt (len (findRE `(?i)^(uni|use|one|eu)` .)) 0 -}}
+{{- return (cond (and $vowel (not $exception)) "an" "a") -}}

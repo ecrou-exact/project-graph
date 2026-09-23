@@ -1,0 +1,26 @@
+{{- /* One detail value as HTML (see details.html). */ -}}
+{{- $v := . -}}
+{{- $out := "" -}}
+{{- if reflect.IsMap $v -}}
+  {{- $out = partial "pivograph/details.html" $v -}}
+{{- else if reflect.IsSlice $v -}}
+  {{- $scalars := true -}}
+  {{- range $v -}}{{- if or (reflect.IsMap .) (reflect.IsSlice .) -}}{{- $scalars = false -}}{{- end -}}{{- end -}}
+  {{- $parts := slice -}}
+  {{- range $v -}}{{- $parts = $parts | append (partial "pivograph/value.html" .) -}}{{- end -}}
+  {{- if $scalars -}}
+    {{- $out = delimit $parts ", " -}}
+  {{- else -}}
+    {{- $out = printf "<ol>%s</ol>" (delimit (apply $parts "printf" "<li>%s</li>" ".") "") -}}
+  {{- end -}}
+{{- else if eq (printf "%T" $v) "bool" -}}
+  {{- $out = cond $v "yes" "no" -}}
+{{- else -}}
+  {{- $s := string $v -}}
+  {{- if findRE `^(https?://|mailto:)\S+$` $s -}}
+    {{- $out = printf `<a href="%s">%s</a>` (htmlEscape $s) (htmlEscape (replaceRE `^(https?://|mailto:)` "" $s)) -}}
+  {{- else -}}
+    {{- $out = htmlEscape $s -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}
