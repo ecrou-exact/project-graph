@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Pivograph document",
+  "description": "A graph of projects and their connections, rendered with Pivotick.",
+  "type": "object",
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "nodeTypes": {
+      "type": "object",
+      "description": "Reusable node styles, keyed by type name.",
+      "additionalProperties": {
+        "$ref": "#/$defs/nodeAppearance"
+      }
+    },
+    "edgeTypes": {
+      "type": "object",
+      "description": "Reusable edge styles, keyed by type name.",
+      "additionalProperties": {
+        "$ref": "#/$defs/edgeAppearance"
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/nodeAppearance"
+          },
+          {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "number"
+                ]
+              },
+              "type": {
+                "type": "string",
+                "description": "Key of nodeTypes."
+              },
+              "description": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "x": {
+                "type": "number",
+                "description": "Saved layout position."
+              },
+              "y": {
+                "type": "number"
+              },
+              "tags": {
+                "description": "#tags shown as pills under the node.",
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "string",
+                    "description": "\"#a #b\""
+                  }
+                ]
+              },
+              "github": {
+                "type": "string",
+                "description": "GitHub repository: owner/repo or a github.com URL. Its details are fetched from the GitHub API."
+              },
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "url"
+                  ],
+                  "properties": {
+                    "label": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/edgeAppearance"
+          },
+          {
+            "type": "object",
+            "required": [
+              "from",
+              "to"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "number"
+                ]
+              },
+              "from": {
+                "type": [
+                  "string",
+                  "number"
+                ],
+                "description": "Source node id."
+              },
+              "to": {
+                "type": [
+                  "string",
+                  "number"
+                ],
+                "description": "Target node id."
+              },
+              "type": {
+                "type": "string",
+                "description": "Key of edgeTypes."
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "tags": {
+      "type": "object",
+      "description": "Tag registry: how each #tag is drawn (as a pill under the node).",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "color": {
+            "$ref": "#/$defs/color"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Name of a bundled Font Awesome Free icon, e.g. shield-halved, github."
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "color": {
+      "type": "string",
+      "description": "Any CSS colour, e.g. #3b63f3."
+    },
+    "nodeAppearance": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "color": {
+          "$ref": "#/$defs/color"
+        },
+        "shape": {
+          "enum": [
+            "circle",
+            "square",
+            "triangle",
+            "hexagon"
+          ]
+        },
+        "size": {
+          "type": "number",
+          "minimum": 1
+        },
+        "image": {
+          "type": "string",
+          "description": "URL, relative path or data: URL."
+        },
+        "imageFit": {
+          "enum": [
+            "cover",
+            "contain",
+            "icon",
+            "frame"
+          ]
+        },
+        "borderColor": {
+          "$ref": "#/$defs/color"
+        },
+        "borderWidth": {
+          "type": "number",
+          "minimum": 0,
+          "description": "0 = no border."
+        },
+        "hideLabel": {
+          "type": "boolean",
+          "description": "Hide the label under the node (e.g. when the image shows the name)."
+        },
+        "labelColor": {
+          "$ref": "#/$defs/color"
+        },
+        "labelBackground": {
+          "type": "string",
+          "description": "CSS colour, or \"none\" for no background."
+        },
+        "labelSize": {
+          "type": "number",
+          "minimum": 1,
+          "description": "Font size in pixels."
+        },
+        "labelFont": {
+          "type": "string",
+          "description": "sans, serif, mono, rounded, condensed — or any CSS font-family."
+        },
+        "hideBadges": {
+          "type": "boolean",
+          "description": "Hide the tag pills."
+        }
+      }
+    },
+    "edgeAppearance": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "color": {
+          "$ref": "#/$defs/color"
+        },
+        "width": {
+          "type": "number",
+          "minimum": 0.5
+        },
+        "dashed": {
+          "type": "boolean"
+        },
+        "direction": {
+          "enum": [
+            "forward",
+            "backward",
+            "both",
+            "none"
+          ],
+          "description": "forward: from → to, backward: to → from, both: ↔, none: no arrow."
+        }
+      }
+    }
+  }
+}

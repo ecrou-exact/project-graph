@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Build a graph of a project's connections from a JSON file, with Pivotick." />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <title>Pivograph</title>
+  </head>
+  <body>
+    <header class="pg-header">
+      <div class="pg-brand">
+        <img src="favicon.svg" alt="" width="22" height="22" />
+        <strong>Pivograph</strong>
+      </div>
+      <input id="doc-title" class="pg-title-input" aria-label="Graph title" placeholder="Graph title" />
+      <nav class="pg-actions" aria-label="Actions">
+        <button id="btn-add-node" class="pg-btn pg-btn-primary">+ Node</button>
+        <button id="btn-add-edge" class="pg-btn pg-btn-primary">+ Edge</button>
+        <span class="pg-sep"></span>
+        <button id="btn-new" class="pg-btn">New</button>
+        <button id="btn-open" class="pg-btn">Open JSON…</button>
+        <button id="btn-example" class="pg-btn">Rulezet example</button>
+        <button id="btn-export" class="pg-btn">Export JSON</button>
+      </nav>
+    </header>
+
+    <main class="pg-layout">
+      <aside class="pg-sidebar">
+        <div id="tabs" class="pg-tabs" role="tablist"></div>
+        <div id="search-row" class="pg-search">
+          <input id="search" type="search" placeholder="Filter…" aria-label="Filter" />
+        </div>
+        <div id="panel" class="pg-panel"></div>
+        <footer class="pg-sidebar-footer">
+          <span id="pivotick-version"></span>
+          <span class="pg-muted">Double-click an item to edit it</span>
+        </footer>
+      </aside>
+      <section id="graph" class="pg-graph" aria-label="Graph"></section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

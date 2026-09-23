@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "meta": {
+    "title": "Projects linked to Rulezet",
+    "description": "Illustrative map of projects linked to Rulezet — adapt and extend it."
+  },
+  "nodeTypes": {
+    "project": { "label": "Project", "color": "#3b63f3", "shape": "hexagon", "size": 26, "image": "icons/project.svg", "imageFit": "icon" },
+    "platform": { "label": "Platform", "color": "#0f9d8a", "shape": "circle", "size": 18, "image": "icons/platform.svg", "imageFit": "icon" },
+    "format": { "label": "Rule format", "color": "#e8833a", "shape": "square", "size": 14, "image": "icons/rule.svg", "imageFit": "icon" },
+    "source": { "label": "Source", "color": "#7c5cd6", "shape": "circle", "size": 16, "image": "icons/code.svg", "imageFit": "icon" },
+    "organization": { "label": "Organization", "color": "#56627a", "shape": "square", "size": 18, "image": "icons/organization.svg", "imageFit": "icon" }
+  },
+  "edgeTypes": {
+    "develops": { "label": "develops", "color": "#56627a", "dashed": true },
+    "supports": { "label": "supports", "color": "#e8833a" },
+    "imports": { "label": "imports from", "color": "#7c5cd6" },
+    "integrates": { "label": "exchanges with", "color": "#0f9d8a", "direction": "both", "width": 3 }
+  },
+  "nodes": [
+    { "id": "rulezet", "label": "Rulezet", "type": "project", "description": "Community platform for sharing and managing detection rules.", "url": "https://rulezet.org", "size": 34 },
+    { "id": "circl", "label": "CIRCL", "type": "organization", "url": "https://www.circl.lu" },
+    { "id": "misp", "label": "MISP", "type": "platform", "description": "Threat intelligence sharing platform.", "url": "https://www.misp-project.org" },
+    { "id": "vulnerability-lookup", "label": "Vulnerability-Lookup", "type": "platform", "description": "Vulnerability lookup and correlation.", "url": "https://vulnerability.circl.lu" },
+    { "id": "pivotick", "label": "Pivotick", "type": "project", "description": "Graph visualization library.", "url": "https://pivotick.github.io/Pivotick/", "size": 20 },
+    { "id": "github", "label": "GitHub repositories", "type": "source", "description": "Public rule repositories." },
+    { "id": "yara", "label": "YARA", "type": "format" },
+    { "id": "sigma", "label": "Sigma", "type": "format" },
+    { "id": "suricata", "label": "Suricata", "type": "format" },
+    { "id": "zeek", "label": "Zeek", "type": "format" }
+  ],
+  "edges": [
+    { "from": "circl", "to": "rulezet", "type": "develops" },
+    { "from": "circl", "to": "misp", "type": "develops" },
+    { "from": "circl", "to": "vulnerability-lookup", "type": "develops" },
+    { "from": "circl", "to": "pivotick", "type": "develops" },
+    { "from": "rulezet", "to": "yara", "type": "supports" },
+    { "from": "rulezet", "to": "sigma", "type": "supports" },
+    { "from": "rulezet", "to": "suricata", "type": "supports" },
+    { "from": "rulezet", "to": "zeek", "type": "supports" },
+    { "from": "rulezet", "to": "github", "type": "imports", "direction": "backward", "label": "imports rules" },
+    { "from": "rulezet", "to": "vulnerability-lookup", "type": "integrates", "label": "CVE references" },
+    { "from": "rulezet", "to": "misp", "type": "integrates", "label": "shares", "dashed": true },
+    { "from": "pivotick", "to": "rulezet", "label": "visualizes", "color": "#d6384b", "direction": "forward" }
+  ]
+}
