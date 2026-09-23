@@ -9,10 +9,10 @@
   </head>
   <body>
     <header class="pg-header">
-      <div class="pg-brand">
+      <a class="pg-brand" href="docs/" title="Pivograph home">
         <img src="favicon.svg" alt="" width="22" height="22" />
         <strong>Pivograph</strong>
-      </div>
+      </a>
       <input id="doc-title" class="pg-title-input" aria-label="Graph title" placeholder="Graph title" />
       <div id="readonly-badge" class="pg-readonly" hidden></div>
       <nav class="pg-actions" aria-label="Actions">
@@ -24,6 +24,13 @@
         <button id="btn-wellknown" class="pg-btn" title="Import an Open Contributions Descriptor (.well-known/open-contributions.json)">Import well-known…</button>
         <button id="btn-example" class="pg-btn">Rulezet example</button>
         <button id="btn-export" class="pg-btn">Export JSON</button>
+        <span class="pg-sep"></span>
+        <!-- Same navigation as the documentation site, so app and docs read as one site. -->
+        <nav class="pg-site-nav" aria-label="Site">
+          <a href="docs/">Home</a>
+          <a href="docs/guide.html">Guide</a>
+          <a href="https://github.com/ecrou-exact/project-graph">GitHub</a>
+        </nav>
       </nav>
     </header>
 

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pivograph — map how an organization fits together</title>
+  <meta name="description" content="Map an organization's projects and their connections as a graph, from one JSON document. Format reference, mapping procedure for AI agents, OCD import, embedding." />
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <link rel="alternate" type="text/markdown" href="../llms-full.txt" title="Full documentation as Markdown" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="site.css" />
+</head>
+<body>
+  <header class="bar">
+    <a class="brand" href="./"><img src="../favicon.svg" alt="" />Pivograph</a>
+    <nav aria-label="Main">
+      <a href="guide.html" class="hide-sm">Guide</a>
+      <a href="guide.html#document-format" class="hide-sm">Format</a>
+      <a href="../">Open the app</a>
+      <a href="{{repo}}">GitHub</a>
+      <button class="theme" type="button" hidden>Theme</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <h1>Draw how an organization fits together.</h1>
+        <p>Pivograph turns one JSON file into an interactive map of an organization's projects, platforms and partners, and of how each one uses the others. Write it by hand, have an AI agent write it from this documentation, or import a published <code>.well-known</code> descriptor.</p>
+        <div class="actions">
+          <a class="button primary" href="../">Open the app</a>
+          <a class="button" href="{{repo}}">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.34c-2.23.49-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.81.06 1.23.83 1.23.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+            Source on GitHub</a>
+          <a class="button" href="guide.html">Read the guide</a>
+        </div>
+      </div>
+      <figure class="map" id="map">
+        <img src="assets/hero.png" alt="Pivograph showing Rulezet in the middle, linked to MISP, Vulnerability-Lookup, CTI-Transmute, Velociraptor, AIL, Flowintel, MISP-Workbench, zsazsa and Pivotick" width="1120" height="790" />
+        <figcaption>
+          <span class="legend">Projects linked to Rulezet, from <a href="examples/rulezet.json">examples/rulezet.json</a></span>
+          <a class="live" href="../">Explore it live</a>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band" aria-labelledby="start">
+    <div class="band-inner">
+      <h2 id="start">Where to start</h2>
+      <div class="starts">
+        <div class="start">
+          <h3>Open the app</h3>
+          <p>It opens on the Rulezet example. Drop your own JSON file on the page, or press <em>New</em> to start from ready-made types, then add nodes and edges with the forms.</p>
+          <p><a href="../">Open the app</a></p>
+        </div>
+        <div class="start">
+          <h3>Import a well-known</h3>
+          <p>If the organization publishes <code>/.well-known/open-contributions.json</code>, <em>Import well-known…</em> turns it into a map in one step: projects, data, standards and relationships.</p>
+          <p><a href="guide.html#open-contributions-descriptor">How the import works</a></p>
+        </div>
+        <div class="start">
+          <h3>Ask an AI agent</h3>
+          <p>Point any AI agent at the guide and name the organization. It follows the mapping procedure and returns one JSON file you open in the app.</p>
+          <p><a href="guide.html#prompt-template">Prompt template</a> &nbsp; <a href="../llms-full.txt">llms-full.txt</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band-plain" aria-labelledby="file">
+    <div class="band-inner split">
+      <div>
+        <h2 id="file">One file for the whole map</h2>
+        <p><strong>Nodes</strong> are the things being mapped: projects, platforms, datasets, partners. <strong>Edges</strong> say how two of them are related, and which way the arrow goes. <strong>Types</strong> give a family of nodes or edges the same look, and <strong>tags</strong> become small pills you can filter by.</p>
+        <p>Any field left out is inherited from the node's type, then from a built-in default, so a map can start with a single node and grow.</p>
+        <p><a href="guide.html#document-format">Every field, with defaults</a> &nbsp; <a href="pivograph.schema.json">JSON schema</a> &nbsp; <a href="examples/minimal.json">minimal.json</a></p>
+      </div>
+      {{snippet}}
+    </div>
+  </section>
+
+  <section class="band" aria-labelledby="guide">
+    <div class="band-inner">
+      <h2 id="guide">The guide</h2>
+      <dl class="guide-index">
+        {{guideIndex}}
+      </dl>
+    </div>
+  </section>
+
+  <footer>
+    <div class="inner">
+      <span>Pivograph — MIT license. Built on <a href="https://pivotick.github.io/Pivotick/">Pivotick</a> {{pivotick}}. Tag icons: <a href="https://fontawesome.com">Font Awesome Free</a> (CC BY 4.0).</span>
+      <span><a href="{{repo}}">GitHub</a> &nbsp; <a href="../llms.txt">llms.txt</a> &nbsp; <a href="../llms-full.txt">llms-full.txt</a> &nbsp; <a href="pivograph.schema.json">JSON schema</a></span>
+    </div>
+  </footer>
+  <script>
+    // Optional enhancements: the page is complete without them.
+    (() => {
+      // Copy buttons on code blocks.
+      for (const block of document.querySelectorAll('.code')) {
+        const button = document.createElement('button')
+        button.type = 'button'
+        button.className = 'copy'
+        button.textContent = 'Copy'
+        button.addEventListener('click', async () => {
+          await navigator.clipboard.writeText(block.querySelector('code').innerText)
+          button.textContent = 'Copied'
+          setTimeout(() => (button.textContent = 'Copy'), 1500)
+        })
+        block.append(button)
+      }
+
+      // Highlight the section being read in the contents.
+      const links = new Map([...document.querySelectorAll('.toc a')].map((a) => [a.hash.slice(1), a]))
+      const observer = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
+          links.forEach((a) => a.classList.remove('active'))
+          links.get(entry.target.id)?.classList.add('active')
+        }
+      }, { rootMargin: '-15% 0px -75% 0px' })
+      document.querySelectorAll('main h2[id], main h3[id]').forEach((h) => observer.observe(h))
+
+      // Contents closed by default on small screens.
+      const toc = document.querySelector('.toc')
+      if (toc && matchMedia('(max-width: 960px)').matches) toc.open = false
+
+      // Theme: follows the system, or the reader's choice.
+      const root = document.documentElement
+      const themeButton = document.querySelector('.theme')
+      const saved = (() => { try { return localStorage.getItem('pivograph-docs-theme') } catch { return null } })()
+      if (saved) root.dataset.theme = saved
+      const current = () => root.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      const label = () => (themeButton.textContent = current() === 'dark' ? 'Light theme' : 'Dark theme')
+      themeButton.hidden = false
+      label()
+      themeButton.addEventListener('click', () => {
+        root.dataset.theme = current() === 'dark' ? 'light' : 'dark'
+        try { localStorage.setItem('pivograph-docs-theme', root.dataset.theme) } catch {}
+        label()
+      })
+    })()
+  </script>
+</body>
+</html>

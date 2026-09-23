@@ -4,6 +4,8 @@ Build a **graph of a project's connections** from a simple JSON file, then edit 
 
 Bundled example: projects linked to **Rulezet** (`examples/rulezet.json`).
 
+**Documentation: [ecrou-exact.github.io/project-graph/docs](https://ecrou-exact.github.io/project-graph/docs/)** — the guide (format reference, a step-by-step procedure to map an organization, OCD import, embedding, architecture), plus [`llms.txt`](https://ecrou-exact.github.io/project-graph/llms.txt) and [`llms-full.txt`](https://ecrou-exact.github.io/project-graph/llms-full.txt) for AI agents.
+
 ## Features
 
 - **Nodes**: label, type, description, link, colour, shape (circle, square, triangle, hexagon), size, image (URL, relative path, embedded local file, or one of the bundled icons), border (colour, width or none), and label (shown or hidden, text colour, background or none, size, font). The node form is split into tabs: Content, Links, Appearance, Border, Label, Badges.
@@ -195,6 +197,8 @@ src/
   ocd.js       Open Contributions Descriptor import
   github.js    GitHub API client (cached)
   ui/          forms, modals, pills, GitHub card, DOM helpers
+docs/          documentation site: content/*.md, home.html, guide.html, site.css
+scripts/docs.mjs  builds docs/index.html, docs/guide.html, llms.txt, llms-full.txt (Vite plugin)
 examples/      example graphs
 schema/        JSON schema of the format
 tests/         Vitest tests for the format

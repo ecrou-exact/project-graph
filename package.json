@@ -18,6 +18,8 @@
     "pivotick": "latest"
   },
   "devDependencies": {
+    "highlight.js": "^11.12.0",
+    "marked": "^18.0.14",
     "vite": "^6.3.5",
     "vitest": "^3.2.4"
   }

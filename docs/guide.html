@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Guide · Pivograph</title>
+  <meta name="description" content="Map an organization's projects and their connections as a graph, from one JSON document. Format reference, mapping procedure for AI agents, OCD import, embedding." />
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <link rel="alternate" type="text/markdown" href="../llms-full.txt" title="Full documentation as Markdown" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="site.css" />
+</head>
+<body>
+  <header class="bar">
+    <a class="brand" href="./"><img src="../favicon.svg" alt="" />Pivograph</a>
+    <nav aria-label="Main">
+      <a href="#mapping-an-organization" class="hide-sm">Mapping an organization</a>
+      <a href="#document-format" class="hide-sm">Format</a>
+      <a href="../">Open the app</a>
+      <a href="{{repo}}">GitHub</a>
+      <button class="theme" type="button" hidden>Theme</button>
+    </nav>
+  </header>
+
+
+  <div class="layout">
+    <details class="toc" open>
+      <summary>Contents</summary>
+      {{toc}}
+    </details>
+    <main id="content">
+{{content}}
+    </main>
+  </div>
+
+  <footer>
+    <div class="inner">
+      <span>Pivograph — MIT license. Built on <a href="https://pivotick.github.io/Pivotick/">Pivotick</a> {{pivotick}}. Tag icons: <a href="https://fontawesome.com">Font Awesome Free</a> (CC BY 4.0).</span>
+      <span><a href="{{repo}}">GitHub</a> &nbsp; <a href="../llms.txt">llms.txt</a> &nbsp; <a href="../llms-full.txt">llms-full.txt</a> &nbsp; <a href="pivograph.schema.json">JSON schema</a></span>
+    </div>
+  </footer>
+
+  <script>
+    // Optional enhancements: the page is complete without them.
+    (() => {
+      // Copy buttons on code blocks.
+      for (const block of document.querySelectorAll('.code')) {
+        const button = document.createElement('button')
+        button.type = 'button'
+        button.className = 'copy'
+        button.textContent = 'Copy'
+        button.addEventListener('click', async () => {
+          await navigator.clipboard.writeText(block.querySelector('code').innerText)
+          button.textContent = 'Copied'
+          setTimeout(() => (button.textContent = 'Copy'), 1500)
+        })
+        block.append(button)
+      }
+
+      // Highlight the section being read in the contents.
+      const links = new Map([...document.querySelectorAll('.toc a')].map((a) => [a.hash.slice(1), a]))
+      const observer = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
+          links.forEach((a) => a.classList.remove('active'))
+          links.get(entry.target.id)?.classList.add('active')
+        }
+      }, { rootMargin: '-15% 0px -75% 0px' })
+      document.querySelectorAll('main h2[id], main h3[id]').forEach((h) => observer.observe(h))
+
+      // Contents closed by default on small screens.
+      const toc = document.querySelector('.toc')
+      if (toc && matchMedia('(max-width: 960px)').matches) toc.open = false
+
+      // Theme: follows the system, or the reader's choice.
+      const root = document.documentElement
+      const themeButton = document.querySelector('.theme')
+      const saved = (() => { try { return localStorage.getItem('pivograph-docs-theme') } catch { return null } })()
+      if (saved) root.dataset.theme = saved
+      const current = () => root.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      const label = () => (themeButton.textContent = current() === 'dark' ? 'Light theme' : 'Dark theme')
+      themeButton.hidden = false
+      label()
+      themeButton.addEventListener('click', () => {
+        root.dataset.theme = current() === 'dark' ? 'light' : 'dark'
+        try { localStorage.setItem('pivograph-docs-theme', root.dataset.theme) } catch {}
+        label()
+      })
+    })()
+  </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "meta": {
+    "title": "Minimal map",
+    "description": "Two types, three nodes, two edges. Arrow = who uses whom."
+  },
+  "nodeTypes": {
+    "project": { "label": "Project", "color": "#3b63f3", "shape": "hexagon", "size": 22, "image": "icons/project.svg", "imageFit": "icon" },
+    "platform": { "label": "Platform", "color": "#0f9d8a", "size": 18, "image": "icons/platform.svg", "imageFit": "icon" }
+  },
+  "edgeTypes": {
+    "uses": { "label": "uses", "color": "#0f9d8a" }
+  },
+  "nodes": [
+    { "id": "rulezet", "label": "Rulezet", "type": "project", "description": "Community platform for sharing and managing detection rules.", "url": "https://rulezet.org", "github": "rulezet/rulezet-core", "tags": ["threat-intelligence", "yara"] },
+    { "id": "misp", "label": "MISP", "type": "platform", "description": "Open source threat intelligence sharing platform.", "url": "https://www.misp-project.org", "github": "MISP/MISP" },
+    { "id": "flowintel", "label": "Flowintel", "type": "project", "description": "Case management platform for analysts.", "github": "flowintel/flowintel" }
+  ],
+  "edges": [
+    { "from": "rulezet", "to": "misp", "type": "uses", "label": "pushes rules as MISP events" },
+    { "from": "flowintel", "to": "rulezet", "type": "uses", "label": "attaches rules to cases" }
+  ]
+}

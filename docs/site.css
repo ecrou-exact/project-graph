@@ -1,0 +1,249 @@
+/* Pivograph documentation site: shared by the home page and the guide. */
+/* Survey-map palette: paper, navy ink, survey blue, grid, contour green, marker yellow. */
+:root {
+  --paper: #fafbfd;
+  --paper-2: #f1f4fa;
+  --ink: #14213d;
+  --ink-soft: #4a5673;
+  --blue: #2f5bea;
+  --grid: #dde4f1;
+  --green: #1f8a70;
+  --yellow: #f2c14e;
+  --code-bg: #f3f6fc;
+  --radius-s: 6px;
+  --radius-m: 12px;
+  --toc: 17rem;
+  --display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --text: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f1830; --paper-2: #16213d; --ink: #e6ecf7; --ink-soft: #a7b3cc;
+    --blue: #86a4ff; --grid: #26335a; --green: #4cc7a2; --yellow: #f2c14e; --code-bg: #131e38;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0f1830; --paper-2: #16213d; --ink: #e6ecf7; --ink-soft: #a7b3cc;
+  --blue: #86a4ff; --grid: #26335a; --green: #4cc7a2; --yellow: #f2c14e; --code-bg: #131e38;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1.075rem/1.7 var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--blue); text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; border-radius: 3px; }
+
+/* --- top bar ---------------------------------------------------------- */
+.bar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 1.5rem;
+  padding: 0.7rem clamp(1rem, 3vw, 2rem);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--grid);
+  font-family: var(--display);
+}
+.brand { display: flex; align-items: center; gap: 0.55rem; font-weight: 800; font-size: 1.15rem; color: var(--ink); text-decoration: none; letter-spacing: -0.01em; }
+.brand img { width: 26px; height: 26px; }
+.bar nav { display: flex; gap: 1.25rem; margin-left: auto; align-items: center; font-weight: 500; font-size: 0.95rem; }
+.bar nav a { color: var(--ink-soft); text-decoration: none; white-space: nowrap; }
+.bar nav a:hover { color: var(--ink); }
+.theme { background: none; border: 1px solid var(--grid); color: var(--ink-soft); border-radius: 999px; padding: 0.2rem 0.7rem; font: inherit; font-size: 0.85rem; cursor: pointer; }
+.theme:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+/* --- hero: the map on survey paper -------------------------------------- */
+.hero {
+  position: relative;
+  padding: clamp(2.5rem, 6vw, 5rem) clamp(1rem, 4vw, 3rem) clamp(2.5rem, 5vw, 4rem);
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
+  border-bottom: 1px solid var(--grid);
+}
+.hero-inner {
+  max-width: 78rem; margin: 0 auto;
+  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(2rem, 4vw, 4rem); align-items: center;
+}
+.hero h1 {
+  font-family: var(--display); font-weight: 800;
+  font-size: clamp(2.6rem, 5.4vw, 4.6rem); line-height: 0.98; letter-spacing: -0.035em;
+  margin: 0 0 1.4rem; max-width: 12ch;
+}
+.hero p { font-size: 1.2rem; line-height: 1.6; color: var(--ink-soft); max-width: 34rem; margin: 0 0 2rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; font-family: var(--display); font-weight: 700; }
+.button {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.8rem 1.25rem; border-radius: var(--radius-s); text-decoration: none;
+  border: 2px solid var(--ink); color: var(--ink); background: var(--paper);
+}
+.button.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+:root[data-theme="dark"] .button.primary { color: #0f1830; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .button.primary { color: #0f1830; } }
+.button:hover { transform: translate(-2px, -2px); box-shadow: 3px 3px 0 var(--ink); }
+@media (prefers-reduced-motion: reduce) { .button:hover { transform: none; } }
+.button svg { width: 1.1em; height: 1.1em; fill: currentColor; }
+
+.map {
+  margin: 0; position: relative;
+  border: 2px solid var(--ink); border-radius: var(--radius-m);
+  background: var(--paper); overflow: hidden;
+  box-shadow: 8px 8px 0 var(--grid);
+  aspect-ratio: 1120 / 790;
+}
+.map img { display: block; width: 100%; height: 100%; object-fit: cover; border: 0; }
+.map figcaption {
+  position: absolute; left: 0.75rem; bottom: 0.75rem; right: 0.75rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  font: 500 0.85rem/1.3 var(--display);
+}
+.map .legend { background: var(--paper); border: 1px solid var(--grid); border-radius: var(--radius-s); padding: 0.35rem 0.6rem; color: var(--ink-soft); }
+.live { font: 700 0.85rem var(--display); padding: 0.45rem 0.85rem; border-radius: var(--radius-s); border: 2px solid var(--ink); background: var(--yellow); color: #14213d; text-decoration: none; white-space: nowrap; }
+.live:hover { box-shadow: 2px 2px 0 var(--ink); }
+
+/* --- layout: contents + reading column ----------------------------------- */
+.layout { display: grid; grid-template-columns: var(--toc) minmax(0, 1fr); gap: clamp(2rem, 4vw, 4rem); max-width: 78rem; margin: 0 auto; padding: 3rem clamp(1rem, 4vw, 3rem) 5rem; }
+.toc { position: sticky; top: 4.5rem; align-self: start; max-height: calc(100vh - 6rem); overflow: auto; font-family: var(--display); font-size: 0.92rem; }
+.toc summary { font-weight: 700; cursor: pointer; margin-bottom: 0.6rem; list-style: none; }
+.toc summary::-webkit-details-marker { display: none; }
+.toc-list, .toc-list ol { list-style: none; margin: 0; padding: 0; }
+.toc-list > li { margin-bottom: 0.9rem; }
+.toc-list > li > a { font-weight: 700; color: var(--ink); }
+.toc-list ol { margin-top: 0.3rem; padding-left: 0.8rem; border-left: 2px solid var(--grid); }
+.toc-list ol li { margin: 0.15rem 0; }
+.toc a { color: var(--ink-soft); text-decoration: none; display: block; padding: 0.1rem 0.5rem; border-radius: 4px; margin-left: -0.5rem; }
+.toc a:hover { color: var(--ink); background: var(--paper-2); }
+.toc a.active { color: var(--blue); background: var(--paper-2); }
+
+main { min-width: 0; max-width: 46rem; }
+main h2 {
+  font-family: var(--display); font-weight: 800; font-size: clamp(1.9rem, 3vw, 2.4rem); line-height: 1.1; letter-spacing: -0.02em;
+  margin: 4.5rem 0 1rem; padding-top: 1.2rem; border-top: 2px solid var(--ink);
+}
+main h2:first-child { margin-top: 0; }
+main h3 { font-family: var(--display); font-weight: 700; font-size: 1.3rem; line-height: 1.25; margin: 2.4rem 0 0.6rem; }
+h2, h3 { position: relative; }
+.anchor { position: absolute; left: -1.3em; width: 1.3em; text-decoration: none; opacity: 0; color: var(--ink-soft); }
+.anchor::before { content: '#'; }
+h2:hover .anchor, h3:hover .anchor, .anchor:focus-visible { opacity: 1; }
+h2 .anchor { top: 1.2rem; }
+main p, main li { max-width: 68ch; }
+main ul, main ol { padding-left: 1.3rem; }
+main li { margin: 0.35rem 0; }
+main li::marker { color: var(--ink-soft); }
+main strong { font-weight: 600; }
+main :not(pre) > code {
+  font: 0.86em var(--mono); background: var(--code-bg); border: 1px solid var(--grid);
+  padding: 0.08em 0.35em; border-radius: 4px; overflow-wrap: anywhere;
+}
+main input[type=checkbox] { accent-color: var(--green); margin-right: 0.4rem; }
+main ul:has(> li > input[type=checkbox]) { list-style: none; padding-left: 0.2rem; }
+
+/* Code blocks: the JSON is the product here, so it gets room and a clear frame. */
+.code { position: relative; margin: 1.3rem 0 1.6rem; }
+.code pre {
+  margin: 0; padding: 1.1rem 1.2rem; overflow: auto;
+  background: var(--code-bg); border: 1px solid var(--grid); border-left: 4px solid var(--blue); border-radius: var(--radius-s);
+  font: 0.86rem/1.6 var(--mono); tab-size: 2;
+}
+.code-lang { position: absolute; right: 0.6rem; top: 0.45rem; font: 600 0.72rem var(--mono); color: var(--ink-soft); }
+.copy { position: absolute; right: 0.6rem; bottom: 0.5rem; font: 600 0.75rem var(--display); color: var(--ink-soft); background: var(--paper); border: 1px solid var(--grid); border-radius: 4px; padding: 0.15rem 0.5rem; cursor: pointer; }
+.copy:hover { color: var(--ink); }
+.hljs-attr { color: var(--blue); }
+.hljs-string { color: var(--green); }
+.hljs-number, .hljs-literal { color: #b5540c; }
+:root[data-theme="dark"] .hljs-number, :root[data-theme="dark"] .hljs-literal { color: var(--yellow); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .hljs-number, :root:not([data-theme="light"]) .hljs-literal { color: var(--yellow); } }
+.hljs-keyword, .hljs-built_in, .hljs-tag, .hljs-name { color: #9d2b6b; }
+:root[data-theme="dark"] .hljs-keyword, :root[data-theme="dark"] .hljs-tag, :root[data-theme="dark"] .hljs-name { color: #f08bbf; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .hljs-keyword, :root:not([data-theme="light"]) .hljs-tag, :root:not([data-theme="light"]) .hljs-name { color: #f08bbf; } }
+.hljs-comment { color: var(--ink-soft); font-style: italic; }
+
+/* Tables of fields: the field name column reads like a legend key. */
+.table-wrap { overflow-x: auto; margin: 1.2rem 0 1.6rem; border: 1px solid var(--grid); border-radius: var(--radius-s); }
+table { border-collapse: collapse; width: 100%; font-size: 0.95rem; line-height: 1.5; }
+th { text-align: left; font: 700 0.85rem var(--display); background: var(--paper-2); color: var(--ink-soft); padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--grid); }
+td { padding: 0.55rem 0.8rem; border-top: 1px solid var(--grid); vertical-align: top; }
+tr:first-child td { border-top: 0; }
+td:first-child { white-space: nowrap; }
+td:first-child code { background: color-mix(in srgb, var(--yellow) 30%, transparent); border-color: transparent; }
+
+blockquote { margin: 1.4rem 0; padding: 0.8rem 1.1rem; border-left: 4px solid var(--green); background: color-mix(in srgb, var(--green) 9%, transparent); border-radius: 0 var(--radius-s) var(--radius-s) 0; }
+blockquote p { margin: 0.3rem 0; }
+
+footer { border-top: 1px solid var(--grid); padding: 2rem clamp(1rem, 4vw, 3rem); font: 0.9rem/1.6 var(--display); color: var(--ink-soft); }
+footer .inner { max-width: 78rem; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; justify-content: space-between; }
+
+@media (max-width: 520px) {
+  /* The theme still follows the system; the switch is dropped to keep the bar on one line. */
+  .theme { display: none; }
+  .brand { font-size: 1.05rem; }
+}
+@media (max-width: 960px) {
+  .hero-inner { grid-template-columns: 1fr; }
+  .layout { grid-template-columns: 1fr; padding-top: 1.5rem; }
+  .toc { position: static; max-height: none; border: 1px solid var(--grid); border-radius: var(--radius-s); padding: 0.8rem 1rem; }
+  .toc summary { margin: 0; }
+  .toc[open] summary { margin-bottom: 0.8rem; }
+  .bar nav .hide-sm { display: none; }
+  .bar { gap: 0.75rem; }
+  .bar nav { gap: 0.9rem; font-size: 0.9rem; }
+  .anchor { display: none; }
+}
+
+/* --- home page ------------------------------------------------------------- */
+
+.band { padding: clamp(3rem, 6vw, 5rem) clamp(1rem, 4vw, 3rem); border-bottom: 1px solid var(--grid); }
+.band-plain { background: var(--paper-2); }
+.band-inner { max-width: 78rem; margin: 0 auto; }
+.band h2 {
+  font-family: var(--display); font-weight: 800; font-size: clamp(1.9rem, 3vw, 2.5rem);
+  line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 2rem;
+}
+.band h3 { font-family: var(--display); font-weight: 700; font-size: 1.3rem; margin: 0 0 0.6rem; }
+.band p { max-width: 62ch; }
+.band :not(pre) > code { font: 0.86em var(--mono); background: var(--code-bg); border: 1px solid var(--grid); padding: 0.08em 0.35em; border-radius: 4px; }
+
+/* Three ways in: a choice, so columns side by side, divided by the map's grid lines. */
+.starts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.start { padding: 0 2rem; border-left: 2px solid var(--grid); }
+.start:first-child { padding-left: 0; border-left: 0; }
+.start p { margin: 0 0 1rem; }
+.start p:last-child { font-family: var(--display); font-weight: 700; }
+
+.split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(2rem, 4vw, 4rem); align-items: start; }
+.split .code { margin: 0; }
+.split .code pre { background: var(--paper); }
+
+/* The guide's contents, read like a map legend: name, then what you will find. */
+.guide-index { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 3rem; }
+.guide-index > div { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: 1rem; padding: 0.9rem 0; border-top: 1px solid var(--grid); }
+.guide-index dt { font-family: var(--display); font-weight: 700; }
+.guide-index dt a { color: var(--ink); text-decoration: none; }
+.guide-index dt a:hover { color: var(--blue); text-decoration: underline; }
+.guide-index dd { margin: 0; color: var(--ink-soft); font-size: 0.98rem; line-height: 1.5; }
+
+@media (max-width: 1100px) {
+  .guide-index { grid-template-columns: 1fr; }
+}
+@media (max-width: 860px) {
+  .starts { grid-template-columns: 1fr; gap: 2rem; }
+  .start { padding: 0 0 0 1rem; border-left: 2px solid var(--grid); }
+  .start:first-child { padding-left: 1rem; border-left: 2px solid var(--grid); }
+  .split { grid-template-columns: 1fr; }
+  .guide-index > div { grid-template-columns: 1fr; gap: 0.2rem; }
+}
