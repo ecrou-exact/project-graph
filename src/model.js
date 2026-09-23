@@ -34,12 +34,12 @@ const NODE_LOOK = [
   'hideLabel', 'labelColor', 'labelBackground', 'labelSize', 'labelFont',
   'hideBadges',
 ]
-export const NODE_FIELDS = ['label', 'type', 'description', 'url', 'github', 'links', 'tags', ...NODE_LOOK]
+export const NODE_FIELDS = ['label', 'type', 'description', 'url', 'github', 'links', 'tags', 'details', ...NODE_LOOK]
 export const TAG_FIELDS = ['color', 'icon']
 
 // Colours given to tags that have no colour of their own (picked from the name).
 export const TAG_PALETTE = ['#3b63f3', '#0f9d8a', '#e8833a', '#d6384b', '#7c5cd6', '#2f9e44', '#c2860b', '#56627a']
-export const EDGE_FIELDS = ['label', 'type', 'description', 'direction', 'color', 'width', 'dashed']
+export const EDGE_FIELDS = ['label', 'type', 'description', 'details', 'direction', 'color', 'width', 'dashed']
 export const NODE_TYPE_FIELDS = ['label', ...NODE_LOOK]
 export const EDGE_TYPE_FIELDS = ['label', 'color', 'width', 'dashed', 'direction']
 
@@ -97,6 +97,7 @@ export function compact(obj, allowed) {
     const value = obj[key]
     if (value === undefined || value === null || value === '') continue
     if (Array.isArray(value) && value.length === 0) continue
+    if (isPlainObject(value) && Object.keys(value).length === 0) continue
     out[key] = value
   }
   return out
@@ -167,7 +168,7 @@ export function parseDocument(raw) {
     ids.add(id)
     const github = n.github === undefined || n.github === '' ? undefined : parseGithub(n.github)
     if (n.github && !github) warnings.push(`Node "${id}": "${n.github}" is not a GitHub repository (owner/repo).`)
-    const node = { id, ...compact({ ...n, tags: parseTags(n.tags), github, links: parseLinks(n.links) }, NODE_FIELDS) }
+    const node = { id, ...compact({ ...n, tags: parseTags(n.tags), github, links: parseLinks(n.links), details: parseDetails(n.details) }, NODE_FIELDS) }
     if (node.label === undefined) node.label = id
     if (node.shape && !SHAPES.includes(node.shape)) {
       warnings.push(`Node "${id}": unknown shape "${node.shape}", ignored.`)
@@ -194,7 +195,7 @@ export function parseDocument(raw) {
       id = uniqueId(id, edgeIds)
     }
     edgeIds.add(id)
-    const edge = { id, from, to, ...compact(e, EDGE_FIELDS) }
+    const edge = { id, from, to, ...compact({ ...e, details: parseDetails(e.details) }, EDGE_FIELDS) }
     if (edge.direction && !DIRECTIONS[edge.direction]) {
       warnings.push(`Edge "${id}": unknown direction "${edge.direction}", ignored.`)
       delete edge.direction
@@ -238,6 +239,38 @@ export function parseLinks(input) {
     .map((link) => (typeof link === 'string' ? { url: link } : link))
     .filter((link) => link && typeof link.url === 'string' && link.url.trim())
     .map((link) => compact({ label: link.label?.trim?.(), url: link.url.trim() }))
+}
+
+/**
+ * Free-form extra fields shown in the details panel. Values are strings,
+ * numbers, booleans, lists, or nested objects of those (e.g. an OCD project's
+ * "repository": { "url": …, "license": … }), kept in their original order.
+ * Empty values are dropped.
+ */
+export function parseDetails(input, depth = 0) {
+  if (!isPlainObject(input) || depth > 5) return {}
+  const out = {}
+  for (const [key, value] of Object.entries(input)) {
+    const name = String(key).trim()
+    if (!name) continue
+    const clean = detailValue(value, depth)
+    if (clean !== undefined) out[name] = clean
+  }
+  return out
+}
+
+function detailValue(value, depth) {
+  if (typeof value === 'string') return value.trim() ? value : undefined
+  if (typeof value === 'number' || typeof value === 'boolean') return value
+  if (Array.isArray(value)) {
+    const items = value.map((v) => detailValue(v, depth + 1)).filter((v) => v !== undefined)
+    return items.length ? items : undefined
+  }
+  if (isPlainObject(value)) {
+    const nested = parseDetails(value, depth + 1)
+    return Object.keys(nested).length ? nested : undefined
+  }
+  return undefined
 }
 
 /** "#security #cve, open source" (or an array) -> ['security', 'cve', 'open-source'] */

@@ -103,6 +103,31 @@
                     }
                   }
                 }
+              },
+              "details": {
+                "type": "object",
+                "description": "Extra fields shown in the details panel.",
+                "additionalProperties": {
+                  "oneOf": [
+                    {
+                      "type": [
+                        "string",
+                        "number",
+                        "boolean"
+                      ]
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": [
+                          "string",
+                          "number",
+                          "boolean"
+                        ]
+                      }
+                    }
+                  ]
+                }
               }
             }
           }
@@ -149,6 +174,31 @@
               },
               "description": {
                 "type": "string"
+              },
+              "details": {
+                "type": "object",
+                "description": "Extra fields shown in the details panel.",
+                "additionalProperties": {
+                  "oneOf": [
+                    {
+                      "type": [
+                        "string",
+                        "number",
+                        "boolean"
+                      ]
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": [
+                          "string",
+                          "number",
+                          "boolean"
+                        ]
+                      }
+                    }
+                  ]
+                }
               }
             }
           }

@@ -6,6 +6,7 @@ import { DIRECTIONS, TAG_FIELDS, compact, parseDocument, resolveEdge, resolveNod
 import { h } from './ui/dom.js'
 import { edgeFields, nodeFields, tagFields, typeFields } from './ui/forms.js'
 import { tagPill } from './ui/pills.js'
+import { isOcd, ocdToDocument, wellKnownUrl } from './ocd.js'
 import { confirmModal, openFormModal, toast } from './ui/modal.js'
 
 const STORAGE_KEY = 'pivograph:document'
@@ -41,14 +42,81 @@ function loadDocument(doc) {
 }
 
 function loadRaw(raw, source) {
+  // An Open Contributions Descriptor (.well-known/open-contributions.json) is
+  // converted into a graph first.
+  const ocd = isOcd(raw)
+  if (ocd) raw = ocdToDocument(raw)
   const { doc, errors, warnings } = parseDocument(raw)
   if (!doc) {
     toast(`Invalid ${source}: ${errors[0]}${errors.length > 1 ? ` (+${errors.length - 1})` : ''}`, 'error')
     return { errors, warnings }
   }
   loadDocument(doc)
-  if (warnings.length) toast(`${warnings.length} avertissement(s) : ${warnings[0]}`, 'warning')
+  if (warnings.length) toast(`${warnings.length} warning(s): ${warnings[0]}`, 'warning')
+  else if (ocd) toast(`Open Contributions Descriptor imported: ${describeCounts(doc)}.`)
   return { errors, warnings }
+}
+
+function describeCounts(doc) {
+  const count = (type, word) => {
+    const n = doc.nodes.filter((node) => node.type === type).length
+    return n ? `${n} ${word}${n === 1 ? '' : 's'}` : null
+  }
+  return [count('project', 'project'), count('dataset', 'dataset'), count('standard', 'standard'),
+    count('external-organization', 'related organization'), count('external-project', 'related project')]
+    .filter(Boolean).join(', ') || 'no items'
+}
+
+const OCD_SAMPLES = {
+  'MISP Project': 'https://raw.githubusercontent.com/ossbase-org/Open-Contributions-Descriptor/main/samples/misp.json',
+  'AIL Project': 'https://raw.githubusercontent.com/ossbase-org/Open-Contributions-Descriptor/main/samples/ail-project.json',
+  flowintel: 'https://raw.githubusercontent.com/ossbase-org/Open-Contributions-Descriptor/main/samples/flowintel.json',
+}
+
+/** Loads an OCD file from a domain ("misp-project.org") or a URL. */
+async function importWellKnown() {
+  const values = await openFormModal({
+    title: 'Import an Open Contributions Descriptor',
+    submitLabel: 'Import',
+    build: (body) => {
+      const input = h('input', { type: 'text', placeholder: 'example.org or https://example.org/.well-known/open-contributions.json' })
+      const resolved = h('small', { class: 'pg-muted' })
+      const update = () => (resolved.textContent = input.value.trim() ? `Will fetch ${wellKnownUrl(input.value)}` : '')
+      input.addEventListener('input', update)
+      const error = h('div', { class: 'pg-form-error', hidden: true })
+      body.append(error,
+        h('div', { class: 'pg-field pg-field-wide' },
+          h('label', {}, 'Domain or URL'), input, resolved,
+          h('small', { class: 'pg-muted' },
+            'The site must allow cross-origin requests (CORS). If it doesn’t, download the file and use Open JSON… or drop it on the page.')),
+        h('div', { class: 'pg-field pg-field-wide' },
+          h('label', {}, 'Official samples'),
+          h('div', { class: 'pg-row pg-wrap' }, Object.entries(OCD_SAMPLES).map(([name, url]) => h('button', {
+            type: 'button', class: 'pg-btn', onclick: () => { input.value = url; update() },
+          }, name)))))
+      return {
+        values: () => ({ url: wellKnownUrl(input.value) }),
+        validate: () => (input.value.trim() ? null : 'Enter a domain or a URL.'),
+        showError: (message) => {
+          error.textContent = message ?? ''
+          error.hidden = !message
+        },
+      }
+    },
+  })
+  if (!values) return
+  let raw
+  try {
+    const response = await fetch(values.url, { headers: { Accept: 'application/json' } })
+    if (!response.ok) throw new Error(`the server answered ${response.status}`)
+    raw = await response.json()
+  } catch (error) {
+    const reason = error instanceof TypeError ? 'network error or cross-origin request blocked (CORS)' : error.message
+    return toast(`Could not load ${values.url}: ${reason}.`, 'error')
+  }
+  if (!isOcd(raw) && !Array.isArray(raw?.nodes)) return toast('This file is neither an Open Contributions Descriptor nor a Pivograph graph.', 'error')
+  if (view.nodes().length && !(await confirmModal('Replace the current graph with the imported one?', { confirmLabel: 'Replace', danger: false }))) return
+  loadRaw(raw, values.url)
 }
 
 function currentDocument() {
@@ -437,6 +505,54 @@ function renderSidebar() {
 
 // --- wiring ------------------------------------------------------------------------
 
+const SIDEBAR_KEY = 'pivograph:sidebar-width'
+
+/** Drag (or arrow keys on) the panel's edge to resize it; the width is remembered. */
+function bindSidebarResizer() {
+  const handle = document.getElementById('sidebar-resizer')
+  const root = document.documentElement
+  const clamp = (w) => Math.round(Math.min(Math.max(w, 280), window.innerWidth * 0.6))
+  const apply = (w) => root.style.setProperty('--sidebar', `${clamp(w)}px`)
+  const save = () => {
+    try {
+      localStorage.setItem(SIDEBAR_KEY, String(document.querySelector('.pg-sidebar').offsetWidth))
+    } catch {
+      // storage unavailable: the width just isn't remembered
+    }
+  }
+  try {
+    const saved = Number(localStorage.getItem(SIDEBAR_KEY))
+    if (saved) apply(saved)
+  } catch {
+    // storage unavailable: keep the default width
+  }
+  handle.addEventListener('pointerdown', (event) => {
+    event.preventDefault()
+    handle.setPointerCapture(event.pointerId)
+    handle.classList.add('is-dragging')
+    document.body.classList.add('pg-resizing')
+    const move = (e) => apply(e.clientX)
+    const up = () => {
+      handle.classList.remove('is-dragging')
+      document.body.classList.remove('pg-resizing')
+      handle.removeEventListener('pointermove', move)
+      handle.removeEventListener('pointerup', up)
+      save()
+    }
+    handle.addEventListener('pointermove', move)
+    handle.addEventListener('pointerup', up)
+  })
+  handle.addEventListener('keydown', (event) => {
+    const step = event.shiftKey ? 60 : 20
+    const width = document.querySelector('.pg-sidebar').offsetWidth
+    if (event.key === 'ArrowLeft') apply(width - step)
+    else if (event.key === 'ArrowRight') apply(width + step)
+    else return
+    event.preventDefault()
+    save()
+  })
+}
+
 function bindHeader() {
   document.getElementById('doc-title').addEventListener('input', (e) => {
     state.meta.title = e.target.value
@@ -445,6 +561,7 @@ function bindHeader() {
   })
   document.getElementById('btn-new').addEventListener('click', newDocument)
   document.getElementById('btn-open').addEventListener('click', pickFile)
+  document.getElementById('btn-wellknown').addEventListener('click', importWellKnown)
   document.getElementById('btn-example').addEventListener('click', loadExample)
   document.getElementById('btn-export').addEventListener('click', exportJson)
   document.getElementById('btn-add-node').addEventListener('click', addNode)
@@ -454,6 +571,7 @@ function bindHeader() {
     renderSidebar()
   })
   document.getElementById('pivotick-version').textContent = `Pivotick ${pivotickPackage.version}`
+  bindSidebarResizer()
 
   // Drop a JSON file anywhere to open it.
   window.addEventListener('dragover', (e) => e.preventDefault())

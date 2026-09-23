@@ -11,6 +11,7 @@ import { badgeIconSvg } from './badgeIcons.js'
 import { tagPills } from './ui/pills.js'
 import { fetchRepo } from './github.js'
 import { link, linkList, repoCard, repoError } from './ui/githubCard.js'
+import { detailEntries } from './ui/details.js'
 import { loadIcon, isIconLoaded, tintedIcon } from './icons.js'
 
 const ARROW = {
@@ -85,6 +86,13 @@ export class GraphView {
       },
       UI: {
         mode: 'full',
+        filter: {
+          facets: this.filterFacets(doc),
+          edgeFacets: [{
+            key: 'type', label: 'Relationship',
+            accessor: (edge) => this.edgeTypeLabel(edge.getData().type),
+          }],
+        },
         mainHeader: {
           nodeHeaderMap: {
             title: (n) => n.getData().label || String(n.id),
@@ -139,6 +147,52 @@ export class GraphView {
     }
   }
 
+  /**
+   * Pivotick's filter panel. Option lists are functions, so they are read from
+   * the live graph each time the panel opens (tags added since are offered).
+   */
+  filterFacets(doc) {
+    const sorted = (values) => [...values].filter(Boolean).sort((a, b) => String(a).localeCompare(String(b)))
+    const facets = [
+      {
+        key: 'tags', label: 'Tags', type: 'multiselect',
+        options: (graph) => {
+          const all = new Set(Object.keys(this.hooks.getTypes().tags ?? {}))
+          for (const node of graph.getNodes()) for (const tag of node.getData().tags ?? []) all.add(tag)
+          return sorted(all).map((tag) => ({ label: `#${tag}`, value: tag }))
+        },
+      },
+      {
+        key: 'type', label: 'Type', type: 'multiselect',
+        options: (graph) => sorted(new Set(graph.getNodes().map((n) => n.getData().type)))
+          .map((type) => ({ label: this.hooks.getTypes().nodeTypes[type]?.label || type, value: type })),
+      },
+      { key: 'label', label: 'Label', type: 'text', matchMode: 'partial' },
+      { key: 'description', label: 'Description', type: 'text', matchMode: 'partial' },
+    ]
+    // Facets for well-known detail fields (OCD projects), offered when present.
+    const detailFacets = [
+      { key: 'status', label: 'Status', read: (d) => d?.status },
+      { key: 'license', label: 'License', read: (d) => d?.repository?.license ?? d?.license },
+    ]
+    for (const { key, label, read } of detailFacets) {
+      if (!doc.nodes.some((n) => read(n.details) !== undefined)) continue
+      facets.push({
+        key, label, type: 'multiselect',
+        accessor: (node) => read(node.getData().details),
+        options: (graph) => sorted(new Set(graph.getNodes().map((n) => read(n.getData().details))))
+          .map((value) => ({ label: String(value), value: String(value) })),
+      })
+    }
+    return facets
+  }
+
+  edgeTypeLabel(type) {
+    if (!type) return '(no type)'
+    const def = this.hooks.getTypes().edgeTypes[type]
+    return def?.label || type
+  }
+
   // --- reading -------------------------------------------------------------
 
   /** Tooltip / details panel entries; async when there is a GitHub repo to fetch. */
@@ -146,15 +200,21 @@ export class GraphView {
     const data = node.getData()
     const { nodeTypes, tags } = this.hooks.getTypes()
     const type = data.type && nodeTypes[data.type]
-    const entries = propertyList([
-      ['id', String(node.id)],
-      ['label', data.label],
-      ['type', type ? type.label || data.type : data.type],
-      ['description', data.description],
-      ['tags', data.tags?.length ? tagPills(data.tags, tags) : undefined],
-      ['website', data.url && link(data.url)],
-      ['links', data.links?.length ? linkList(data.links) : undefined],
-    ])
+    // Same order as an OCD item: identity, its own fields, then tags and links.
+    const entries = [
+      ...propertyList([
+        ['id', String(node.id)],
+        ['label', data.label],
+        ['type', type ? type.label || data.type : data.type],
+        ['description', data.description],
+      ]),
+      ...detailEntries(data.details),
+      ...propertyList([
+        ['tags', data.tags?.length ? tagPills(data.tags, tags) : undefined],
+        ['website', data.url && link(data.url)],
+        ['links', data.links?.length ? linkList(data.links) : undefined],
+      ]),
+    ]
     if (!data.github) return entries
     const github = (value) => [...entries, { name: 'GitHub', value }]
     return fetchRepo(data.github)
@@ -174,7 +234,7 @@ export class GraphView {
       ['label', edgeLabel(data, types)],
       ['type', type ? type.label || data.type : data.type],
       ['description', data.description],
-    ])
+    ]).concat(detailEntries(data.details))
   }
 
   nodes() {
@@ -340,7 +400,7 @@ export class GraphView {
     for (const node of this.liveNodes()) {
       const group = node.getGraphElement()
       if (!group) continue
-      const pills = nodePills(node.getData(), nodeTypes, tags)
+      const pills = visiblePills(nodePills(node.getData(), nodeTypes, tags))
       const existing = group.querySelector(':scope > .pg-pills')
       const top = pillsTop(group)
       const key = JSON.stringify([pills, top])
@@ -514,6 +574,16 @@ function pillsTop(group) {
   return Math.round(box.y + box.height + 4)
 }
 
+/** At most `max` pills under a node: beyond that, the first ones and a "+N" pill. */
+function visiblePills(pills, max = 4) {
+  if (pills.length <= max) return pills
+  const shown = pills.slice(0, max - 1)
+  const rest = pills.slice(max - 1)
+  return [...shown, {
+    name: `+${rest.length}`, color: '#8a94a6', fg: '#ffffff', title: rest.map((p) => `#${p.name}`).join(' '),
+  }]
+}
+
 function svg(tag, attrs = {}) {
   const el = document.createElementNS(SVG_NS, tag)
   for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, value)
@@ -526,7 +596,7 @@ function drawPillRow(pills, top) {
   const items = pills.map((pill) => {
     const g = svg('g', { class: 'pg-pill' })
     const title = svg('title')
-    title.textContent = `#${pill.name}`
+    title.textContent = pill.title ?? `#${pill.name}`
     const text = svg('text', {
       class: 'pg-pill-text', 'dominant-baseline': 'central', 'font-size': PILL.font, fill: pill.fg,
     })

@@ -10,6 +10,8 @@ Bundled example: projects linked to **Rulezet** (`examples/rulezet.json`).
 - **Edges**: label, type, colour, width, solid/dashed line, and **arrow direction**: `→`, `←`, `↔` or no arrow.
 - **Tags**: `#tags` on a node become coloured pills under it, with a colour and an optional icon (a curated set of Font Awesome Free icons, picked from a grid) per tag, shared by every node with that tag. Existing tags are suggested when typing; pills can be hidden per node or per type. A Tags tab lists and edits them.
 - **Links**: a website, a GitHub repository and any number of other links per node. For the GitHub repository, the details panel and tooltip show its description, stars, forks, open issues, language, licence, topics and last update, fetched from the GitHub API (cached for 6 hours; the API allows 60 unauthenticated requests per hour).
+- **Details**: any extra key / value fields on a node or an edge (license, maintainers, formats…), shown in the details panel and tooltip, edited in the Details tab.
+- **Open Contributions Descriptor import**: open, drop or paste a `.well-known/open-contributions.json` file (or use *Import well-known…* with a domain or URL) and it becomes a graph — see below.
 - **Types**: a node or edge type defines default styling; every element can override it.
   *New* starts a graph with ready-to-use types (one per bundled icon, plus common relations such as *uses*, *depends on*, *integrates with*), all editable in the Types tab.
 - **Two synchronised ways to edit**:
@@ -17,6 +19,8 @@ Bundled example: projects linked to **Rulezet** (`examples/rulezet.json`).
   - Pivotick's tools: *Create ▸ Add node* (click on the canvas) and *Add edge* (click source, then target) open **the same form modal**; so do *Edit node* and *Edit edge*.
 - Built-in **JSON editor** (JSON tab) with validation and error messages.
 - Import (button, or drag & drop a `.json` file) and JSON export (with or without positions, to keep the layout).
+- Pivotick's **Filter Graph** panel filters by tags (every tag in the graph is offered), type, label, description and — for OCD projects — status and license; relationships can be toggled by type.
+- Resizable side panel: drag its edge (or focus it and use the arrow keys); the width is remembered.
 - Autosave in the browser.
 
 ## Getting started
@@ -37,6 +41,26 @@ npm run build      # static site in dist/
 - `npm run update:pivotick` installs the latest published version and prints the installed version next to the one on npm.
 - The **Update Pivotick** GitHub workflow (`.github/workflows/update-pivotick.yml`) does this every Monday: it installs the latest version, runs the tests and the build, and opens a pull request if the version changed.
 - The version in use is shown at the bottom of the sidebar.
+
+## Open Contributions Descriptor (OCD)
+
+[OCD](https://github.com/ossbase-org/Open-Contributions-Descriptor) is a machine-readable description of an organization's open source projects, open data, open standards participation and relationships, published at `https://<domain>/.well-known/open-contributions.json` (see also [OCD Viewer](https://github.com/ossbase-org/ocd-viewer)).
+
+Pivograph recognizes an OCD file wherever a JSON file is accepted (*Open JSON…*, drag & drop, the JSON tab) and converts it:
+
+| OCD | Graph |
+|---|---|
+| `organization` | central *Organization* node: description, homepage, domain, country, links, plus `contacts` (emails, URLs) and `policies` as links |
+| `projects[]` | *Project* nodes, linked from the organization: description, `tags` as pills, GitHub repository (so the GitHub card), all links (project page, docs, releases, issues, good first issues, changelog, security policy…), license, status, maintainers and custom fields in the details; `archived` / `disabled` become tags |
+| `open_data[]` | *Open data* nodes (“publishes”): license, publisher, formats, update frequency, URLs |
+| `open_standards[]` | *Open standard* nodes (“participates in”): working groups as tags, contributions as links |
+| `relationships[]` | *External organization* / *External project* nodes, linked with the relationship type (`maintains`, `co_maintains`, `supports`, `contributes_to`, `sponsors`, `upstream_of`, `downstream_of`, `member_of`, `affiliated_with`); `since`, `until`, evidence and contacts in the edge details |
+
+*Import well-known…* fetches the file from a domain (`misp-project.org` → `https://misp-project.org/.well-known/open-contributions.json`) or a URL, and offers the official samples (MISP, AIL, flowintel). The site must allow cross-origin requests; otherwise download the file and open it.
+
+Each item keeps its OCD structure in the node's `details` (status, repository { url, license, type, clone }, links, participate, governance, release, custom fields…), so the details panel reads section by section like OCD Viewer, and unknown or future fields are kept. The details form edits nested fields by path (`repository.url`).
+
+The result is an ordinary Pivograph graph: it can be edited, restyled and exported like any other. Under a node, at most three tag pills are drawn plus a “+N” pill; the details panel lists them all.
 
 ## JSON format
 
@@ -77,6 +101,7 @@ Full schema: [`schema/pivograph.schema.json`](schema/pivograph.schema.json).
 | `links` | other links: `[{ "label": "Docs", "url": "https://…" }]` |
 | `tags` | `["security", "cve"]` (or `"#security #cve"`) |
 | `hideBadges` | `true` hides the tag pills |
+| `details` | extra fields: `{ "License": "MIT", "Maintainers": ["alice", "bob"] }` (strings, numbers, booleans or lists of them) |
 | `color` | any CSS colour |
 | `shape` | `circle`, `square`, `triangle`, `hexagon` |
 | `size` | radius in pixels |
@@ -113,6 +138,7 @@ Icons are Font Awesome Free names (`src/badgeIcons.js` lists the bundled ones).
 | `direction` | `forward` (from → to, default), `backward` (to → from), `both`, `none` |
 | `color`, `width`, `dashed` | line appearance |
 | `description` | free text |
+| `details` | extra fields, as for nodes |
 
 Style precedence: **element value** > **type value** > built-in default. Node types accept every appearance field above (border and label included).
 
@@ -127,7 +153,9 @@ src/
   model.js     JSON format: validation, type inheritance, conversion to/from Pivotick
   graph.js     Pivotick instance: styles, arrow markers, wiring of the native tools
   main.js      app shell: sidebar, import/export, autosave
-  ui/          forms, modals, DOM helpers
+  ocd.js       Open Contributions Descriptor import
+  github.js    GitHub API client (cached)
+  ui/          forms, modals, pills, GitHub card, DOM helpers
 examples/      example graphs
 schema/        JSON schema of the format
 tests/         Vitest tests for the format

@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import {
   MARKER_END, MARKER_START, NO_MARKER,
-  edgeLabel, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, parseDocument, parseGithub, parseLinks, parseTags, readableOn, tagLook, resolveNode, slugify, starterDocument, toRawEdge, toRawNode, uniqueId,
+  edgeLabel, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, parseDetails, parseDocument, parseGithub, parseLinks, parseTags, readableOn, tagLook, resolveNode, slugify, starterDocument, toRawEdge, toRawNode, uniqueId,
 } from '../src/model.js'
+import { flattenDetails, unflattenDetails } from '../src/ui/forms.js'
 
 const example = JSON.parse(readFileSync(new URL('../examples/rulezet.json', import.meta.url), 'utf8'))
 
@@ -199,5 +200,21 @@ describe('links and GitHub', () => {
     expect(doc.nodes[0]).toMatchObject({ github: 'MISP/MISP', links: [{ url: 'https://misp-project.org' }] })
     expect(doc.nodes[1].github).toBeUndefined()
     expect(warnings[0]).toMatch(/not a GitHub repository/)
+  })
+})
+
+describe('details', () => {
+  it('keeps values, lists and nested objects, dropping empty ones', () => {
+    expect(parseDetails({ License: 'MIT', Maintainers: ['a', '', 'b'], Empty: '', Nested: { a: 1, b: '', c: {} }, Stars: 3, Fn: () => 1 }))
+      .toEqual({ License: 'MIT', Maintainers: ['a', 'b'], Nested: { a: 1 }, Stars: 3 })
+  })
+
+  it('round-trips nested details through the path-based form rows', () => {
+    const details = { status: 'active', repository: { url: 'https://x', type: 'git' }, contributions: [{ type: 'editor', title: 'T' }], formats: ['json', 'csv'] }
+    const rows = flattenDetails(details)
+    expect(rows).toContainEqual(['repository.url', 'https://x', false])
+    expect(rows).toContainEqual(['contributions.0.title', 'T', false])
+    expect(rows).toContainEqual(['formats', ['json', 'csv'], true])
+    expect(unflattenDetails(rows.map(([path, value]) => [path, value]))).toEqual(details)
   })
 })

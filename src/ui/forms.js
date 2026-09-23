@@ -2,7 +2,7 @@
 import { h } from './dom.js'
 import {
   DEFAULT_EDGE, DEFAULT_NODE, DIRECTIONS, IMAGE_FITS, LABEL_FONTS, SHAPES,
-  parseGithub, parseLinks, parseTags, resolveEdge, resolveNode, slugify, tagLook, uniqueId,
+  parseDetails, parseGithub, parseLinks, parseTags, resolveEdge, resolveNode, slugify, tagLook, uniqueId,
 } from '../model.js'
 import { fetchRepo } from '../github.js'
 import { repoCard, repoError } from './githubCard.js'
@@ -265,6 +265,70 @@ function linksInput(field, value) {
   }
 }
 
+/**
+ * Free-form details as path / value rows. Nested fields are edited as paths
+ * ("repository.url", "contributions.0.title") and rebuilt on save; a list of
+ * simple values is edited as "a, b, c".
+ */
+function detailsInput(field, value) {
+  const list = h('div', { class: 'pg-links-edit' })
+  const addRow = (path = '', val = '', isList = false) => {
+    const k = h('input', { type: 'text', placeholder: 'Field (e.g. license, repository.url)' })
+    const v = h('input', { type: 'text', placeholder: isList ? 'a, b, c' : 'Value' })
+    k.value = path
+    v.value = isList ? val.join(', ') : String(val)
+    const row = h('div', { class: 'pg-link-row', dataset: { list: isList ? '1' : '' } }, k, v,
+      h('button', { type: 'button', class: 'pg-icon-btn pg-icon-danger', title: 'Remove', onclick: () => row.remove() }, '✕'))
+    list.append(row)
+    return row
+  }
+  for (const [path, val, isList] of flattenDetails(value ?? {})) addRow(path, val, isList)
+  const add = h('button', { type: 'button', class: 'pg-btn', onclick: () => addRow().querySelector('input').focus() }, '+ Add field')
+  return {
+    el: h('div', { class: 'pg-links-field' }, list, add),
+    get: () => {
+      const rows = [...list.children].map((row) => {
+        const [k, v] = row.querySelectorAll('input')
+        const text = v.value.trim()
+        return [k.value.trim(), row.dataset.list ? text.split(',').map((x) => x.trim()).filter(Boolean) : text]
+      })
+      const details = parseDetails(unflattenDetails(rows))
+      return Object.keys(details).length ? details : undefined
+    },
+  }
+}
+
+/** { a: { b: 1 }, l: [{ x: 2 }], t: ['p', 'q'] } -> [['a.b', 1, false], ['l.0.x', 2, false], ['t', ['p', 'q'], true]] */
+export function flattenDetails(value, prefix = '') {
+  const rows = []
+  for (const [key, v] of Object.entries(value)) {
+    const path = prefix ? `${prefix}.${key}` : key
+    if (Array.isArray(v) && v.every((x) => x === null || typeof x !== 'object')) rows.push([path, v, true])
+    else if (v && typeof v === 'object') rows.push(...flattenDetails(v, path))
+    else rows.push([path, v, false])
+  }
+  return rows
+}
+
+/** The inverse of flattenDetails: numeric path segments become array indexes. */
+export function unflattenDetails(rows) {
+  const root = {}
+  for (const [path, value] of rows) {
+    const parts = path.split('.').map((p) => p.trim()).filter(Boolean)
+    if (!parts.length) continue
+    let node = root
+    parts.forEach((part, i) => {
+      if (i === parts.length - 1) {
+        node[part] = value
+        return
+      }
+      node[part] ??= /^\d+$/.test(parts[i + 1]) ? [] : {}
+      node = node[part]
+    })
+  }
+  return root
+}
+
 /** Image as URL / relative path / embedded data URL, with preview and bundled icons. */
 function imageInput(field, value) {
   const listId = `pg-icons-${Math.random().toString(36).slice(2)}`
@@ -325,7 +389,7 @@ function segmentedInput(field, value) {
 const WIDGETS = {
   text: textInput, number: numberInput, select: selectInput, color: colorInput,
   colorChoice: colorChoiceInput, image: imageInput, segmented: segmentedInput,
-  icon: iconInput, tags: tagsInput, github: githubInput, links: linksInput,
+  icon: iconInput, tags: tagsInput, github: githubInput, links: linksInput, details: detailsInput,
 }
 
 /**
@@ -502,6 +566,11 @@ export function nodeFields(container, init, ctx) {
       hint: 'Its description, stars, language, licence and last update are shown in the node details.',
     },
     { key: 'links', label: 'Other links', type: 'links', wide: true },
+    { section: 'Details' },
+    {
+      key: 'details', label: 'Extra fields', type: 'details', wide: true,
+      hint: 'Anything else worth showing in the node details: license, status, maintainers…',
+    },
     { section: 'Appearance' },
     { key: 'color', label: 'Colour', type: 'color', inherited: inherited.color },
     {
@@ -586,7 +655,9 @@ export function edgeFields(container, init, ctx) {
       key: 'dashed', label: 'Line', type: 'select',
       options: [['', `inherited (${inherited.dashed ? 'dashed' : 'solid'})`], ['false', 'Solid'], ['true', 'Dashed']],
     },
+    { section: 'Details' },
     { key: 'description', label: 'Description', type: 'text', multiline: true, wide: true },
+    { key: 'details', label: 'Extra fields', type: 'details', wide: true },
   ], { ...values, dashed: values.dashed === undefined ? '' : String(values.dashed) }, { firstTab: 'Content' })
 
   if (!editing && !values.to && ctx.nodes.length > 1) {
