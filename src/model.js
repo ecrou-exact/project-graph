@@ -6,7 +6,8 @@
 
 export const FORMAT_VERSION = 1
 
-export const SHAPES = ['circle', 'square', 'triangle', 'hexagon']
+// `card`: a rounded box with the image and the label inside (as in a drawn diagram).
+export const SHAPES = ['circle', 'square', 'triangle', 'hexagon', 'card']
 export const IMAGE_FITS = ['cover', 'contain', 'icon', 'frame']
 export const DIRECTIONS = {
   forward: { symbol: '→', label: 'Source → target' },
@@ -22,6 +23,8 @@ export const LABEL_FONTS = {
   mono: { label: 'Monospace', css: 'ui-monospace, Menlo, Consolas, monospace' },
   rounded: { label: 'Rounded', css: 'ui-rounded, "Nunito", "Arial Rounded MT Bold", sans-serif' },
   condensed: { label: 'Condensed', css: '"Arial Narrow", "Roboto Condensed", sans-serif' },
+  // Excalidraw's hand-drawn font, bundled (public/fonts, src/fonts.js).
+  hand: { label: 'Hand-drawn', css: 'Virgil, "Segoe Print", "Comic Sans MS", cursive' },
 }
 
 export const DEFAULT_NODE = { color: '#4f7cff', shape: 'circle', size: 14 }
@@ -30,11 +33,13 @@ export const DEFAULT_EDGE = { color: '#8a94a6', width: 2, direction: 'forward' }
 // Node appearance keys a type can provide too.
 const NODE_LOOK = [
   'color', 'shape', 'size', 'image', 'imageFit',
+  // card shape only: box size, inner space, image height, image beside or above the label
+  'width', 'height', 'padding', 'imageSize', 'imagePosition',
   'borderColor', 'borderWidth',
   'hideLabel', 'labelColor', 'labelBackground', 'labelSize', 'labelFont',
   'hideBadges',
 ]
-export const NODE_FIELDS = ['label', 'type', 'description', 'url', 'github', 'githubInfo', 'links', 'tags', 'details', ...NODE_LOOK]
+export const NODE_FIELDS = ['label', 'subtitle', 'type', 'description', 'url', 'graph', 'github', 'githubInfo', 'links', 'tags', 'details', ...NODE_LOOK]
 export const TAG_FIELDS = ['color', 'icon']
 
 // Colours given to tags that have no colour of their own (picked from the name).
@@ -46,6 +51,25 @@ const EDGE_LOOK = [
 ]
 export const EDGE_FIELDS = ['label', 'type', 'description', 'details', ...EDGE_LOOK]
 export const NODE_TYPE_FIELDS = ['label', ...NODE_LOOK]
+
+// Sections: titled frames drawn behind the graph, for the picture only (they
+// hold no nodes). Position and size are in graph coordinates.
+export const SECTION_FIELDS = ['title', 'x', 'y', 'width', 'height', 'color', 'fill', 'borderColor', 'titleSize', 'titleFont', 'underline']
+export const DEFAULT_SECTION = { width: 400, height: 240, titleSize: 22 }
+
+// What a card node looks like when the node and its type don't say.
+export const DEFAULT_CARD = { color: '#ffffff', borderColor: '#9aa3b5', borderWidth: 2, padding: 16, imageSize: 56, labelSize: 15 }
+export const IMAGE_POSITIONS = ['top', 'left']
+
+// Arrows: drawn by Pivograph like sections, from / to a node, a section or a
+// free point. `at` places the end on the target's box: [0, 0] is its top-left
+// corner, [1, 1] its bottom-right; without it, the end sits on the border facing the other end.
+export const ARROW_FIELDS = [
+  'from', 'to', 'label', 'description', 'direction', 'route',
+  'color', 'width', 'dashed', 'labelColor', 'labelSize', 'labelFont', 'labelBackground', 'labelOffset',
+]
+export const ROUTES = ['straight', 'elbow']
+export const DEFAULT_ARROW = { color: '#343a40', width: 2, direction: 'forward', route: 'straight', labelSize: 14 }
 export const EDGE_TYPE_FIELDS = ['label', ...EDGE_LOOK]
 
 // Edge shapes, and Pivotick's name for each ("auto" curves only parallel edges).
@@ -68,6 +92,8 @@ export function emptyDocument() {
     nodeTypes: {},
     edgeTypes: {},
     tags: {},
+    sections: [],
+    arrows: [],
     nodes: [],
     edges: [],
   }
@@ -167,6 +193,21 @@ export function parseDocument(raw) {
     }
   }
 
+  if (raw.sections !== undefined) {
+    if (!Array.isArray(raw.sections)) errors.push('"sections" must be an array.')
+    else {
+      const sectionIds = new Set()
+      raw.sections.forEach((sec, i) => {
+        if (!isPlainObject(sec)) return warnings.push(`sections[${i}] is not an object, ignored.`)
+        const section = parseSection(sec)
+        if (!section) return warnings.push(`sections[${i}] needs numbers "x" and "y", ignored.`)
+        section.id = uniqueId(sec.id ?? section.title ?? 'section', sectionIds)
+        sectionIds.add(section.id)
+        doc.sections.push(section)
+      })
+    }
+  }
+
   if (raw.nodes !== undefined && !Array.isArray(raw.nodes)) errors.push('"nodes" must be an array.')
   if (raw.edges !== undefined && !Array.isArray(raw.edges)) errors.push('"edges" must be an array.')
   if (errors.length) return { doc: null, errors, warnings }
@@ -220,7 +261,89 @@ export function parseDocument(raw) {
     doc.edges.push(edge)
   })
 
+  if (raw.arrows !== undefined) {
+    if (!Array.isArray(raw.arrows)) errors.push('"arrows" must be an array.')
+    else {
+      const sectionIds = new Set(doc.sections.map((sec) => sec.id))
+      const arrowIds = new Set()
+      raw.arrows.forEach((input, i) => {
+        if (!isPlainObject(input)) return warnings.push(`arrows[${i}] is not an object, ignored.`)
+        const arrow = parseArrow(input, ids, sectionIds)
+        if (typeof arrow === 'string') return warnings.push(`arrows[${i}]: ${arrow}, ignored.`)
+        arrow.id = uniqueId(input.id ?? 'arrow', arrowIds)
+        arrowIds.add(arrow.id)
+        doc.arrows.push(arrow)
+      })
+    }
+  }
+
   return { doc: errors.length ? null : doc, errors, warnings }
+}
+
+/**
+ * An arrow with its ends checked, or the reason it can't be drawn (a string).
+ * An end is { node, at? }, { section, at? } or { x, y }.
+ */
+export function parseArrow(input, nodeIds, sectionIds) {
+  const from = parseArrowEnd(input.from, nodeIds, sectionIds)
+  const to = parseArrowEnd(input.to, nodeIds, sectionIds)
+  if (typeof from === 'string') return `"from" ${from}`
+  if (typeof to === 'string') return `"to" ${to}`
+  const arrow = compact({ ...input, from, to }, ARROW_FIELDS)
+  if (arrow.direction && !DIRECTIONS[arrow.direction]) delete arrow.direction
+  if (arrow.route && !ROUTES.includes(arrow.route)) delete arrow.route
+  if (arrow.dashed !== undefined) arrow.dashed = isTrue(arrow.dashed)
+  const offset = pair(arrow.labelOffset)
+  if (offset) arrow.labelOffset = offset.map(Math.round)
+  else delete arrow.labelOffset
+  return { id: undefined, ...arrow }
+}
+
+function parseArrowEnd(end, nodeIds, sectionIds) {
+  if (!isPlainObject(end)) return 'must be { node }, { section } or { x, y }'
+  const at = pair(end.at)
+  const placed = (target) => (at ? { ...target, at: at.map((v) => Math.round(Math.min(1, Math.max(0, v)) * 1000) / 1000) } : target)
+  if (end.node !== undefined) {
+    const id = String(end.node)
+    return nodeIds.has(id) ? placed({ node: id }) : `points to the missing node "${id}"`
+  }
+  if (end.section !== undefined) {
+    const id = String(end.section)
+    return sectionIds.has(id) ? placed({ section: id }) : `points to the missing section "${id}"`
+  }
+  const x = Number(end.x)
+  const y = Number(end.y)
+  return Number.isFinite(x) && Number.isFinite(y) ? { x: Math.round(x), y: Math.round(y) } : 'must be { node }, { section } or { x, y }'
+}
+
+/** [a, b] of finite numbers, or null. */
+function pair(value) {
+  return Array.isArray(value) && value.length === 2 && value.every((v) => Number.isFinite(Number(v))) ? value.map(Number) : null
+}
+
+/** Arrow attributes with the defaults filled in. */
+export function resolveArrow(arrow) {
+  return { ...DEFAULT_ARROW, ...compact(arrow) }
+}
+
+/** A section with its fields cleaned up, or null without a position. */
+export function parseSection(input) {
+  const x = Number(input.x)
+  const y = Number(input.y)
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null
+  const section = compact({ ...input, x: Math.round(x), y: Math.round(y) }, SECTION_FIELDS)
+  for (const key of ['width', 'height', 'titleSize']) {
+    const value = Number(section[key])
+    if (Number.isFinite(value) && value > 0) section[key] = Math.round(value)
+    else delete section[key]
+  }
+  if (section.underline !== undefined) section.underline = isTrue(section.underline)
+  return { id: input.id === undefined ? undefined : String(input.id), ...section }
+}
+
+/** Section attributes with the defaults filled in. */
+export function resolveSection(section) {
+  return { ...DEFAULT_SECTION, ...compact(section) }
 }
 
 /** Node attributes after applying its type's defaults. */
@@ -335,8 +458,25 @@ export function readableOn(color) {
   return lum > 0.6 ? '#1c2230' : '#ffffff'
 }
 
+/** Resolved look of a card node: the node's and its type's values, then the card defaults. */
+export function cardLook(data, nodeTypes) {
+  const type = (data.type && nodeTypes?.[data.type]) || {}
+  const a = { ...DEFAULT_CARD, ...compact(type, NODE_TYPE_FIELDS), ...compact(data, NODE_FIELDS) }
+  // A type made for round nodes has a white border: on a white card, fall back to grey.
+  if (!data.borderColor && !type.borderColor) a.borderColor = DEFAULT_CARD.borderColor
+  return {
+    ...a,
+    hideLabel: isTrue(a.hideLabel),
+    imagePosition: IMAGE_POSITIONS.includes(a.imagePosition) ? a.imagePosition : 'top',
+    font: a.labelFont ? LABEL_FONTS[a.labelFont]?.css ?? a.labelFont : undefined,
+    textColor: a.labelColor ?? readableOn(a.color),
+  }
+}
+
 export function nodeStyle(data, nodeTypes) {
   const a = resolveNode(data, nodeTypes)
+  // A card is HTML drawn by graph.js (Pivotick's `html` channel): no shape behind it.
+  if (a.shape === 'card') return { shape: 'none', color: cardLook(data, nodeTypes).color, size: 4 }
   const style = {
     color: a.color,
     shape: SHAPES.includes(a.shape) ? a.shape : DEFAULT_NODE.shape,
@@ -420,6 +560,9 @@ export function fromGraph(graph, base, withPositions = true) {
     nodeTypes: base.nodeTypes,
     edgeTypes: base.edgeTypes,
     tags: base.tags ?? {},
+    // Sections are drawn by Pivograph, not Pivotick: they come from the base.
+    sections: (base.sections ?? []).map((s) => ({ ...s })),
+    arrows: (base.arrows ?? []).map((a) => structuredClone(a)),
     nodes: [],
     edges: [],
   }

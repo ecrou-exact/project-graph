@@ -6,13 +6,14 @@ import { h } from './dom.js'
  * @param {string} options.title
  * @param {(body: HTMLElement) => { values(): object, validate(): string|null, showError(m: string|null): void }} options.build
  * @param {string} [options.submitLabel]
+ * @param {boolean} [options.wide] a larger dialog, e.g. to paste a file's text
  * @returns {Promise<object|null>} the form values, or null when cancelled
  */
-export function openFormModal({ title, build, submitLabel = 'Save' }) {
+export function openFormModal({ title, build, submitLabel = 'Save', wide = false }) {
   return new Promise((resolve) => {
     const body = h('div', { class: 'pg-form' })
     const form = build(body)
-    const dialog = h('dialog', { class: 'pg-modal' },
+    const dialog = h('dialog', { class: `pg-modal${wide ? ' pg-modal-wide' : ''}` },
       h('form', { method: 'dialog', onsubmit: submit },
         h('header', { class: 'pg-modal-header' },
           h('h2', {}, title),

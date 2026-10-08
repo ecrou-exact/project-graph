@@ -1,0 +1,524 @@
+{
+  "version": 1,
+  "meta": {
+    "title": "NGSOTI SOC stack",
+    "description": "The open source SOC stack of NGSOTI, with Rulezet added: sensors feed telemetry to the Tenzir pipeline, which detects with indicators from MISP and opens cases. Arrows show where the data flows. Drawn as a diagram: fixed layout, card nodes, sections and arrows, in Excalidraw's hand-drawn font.",
+    "fixedLayout": true
+  },
+  "nodeTypes": {
+    "box": {
+      "label": "Tool",
+      "shape": "card",
+      "color": "#ffffff",
+      "borderColor": "#9aa3b5",
+      "borderWidth": 2,
+      "padding": 16,
+      "labelSize": 18,
+      "labelFont": "hand"
+    },
+    "step": {
+      "label": "Pipeline step",
+      "shape": "card",
+      "color": "#ffffff",
+      "borderColor": "#1e1e1e",
+      "borderWidth": 2,
+      "width": 172,
+      "height": 64,
+      "padding": 8,
+      "labelSize": 21,
+      "labelFont": "hand",
+      "labelColor": "#1e1e1e"
+    },
+    "case": {
+      "label": "Case",
+      "shape": "card",
+      "color": "#ffe3e3",
+      "borderColor": "#e03131",
+      "borderWidth": 2,
+      "labelColor": "#e03131",
+      "labelSize": 21,
+      "labelFont": "hand"
+    }
+  },
+  "edgeTypes": {},
+  "tags": {},
+  "sections": [
+    {
+      "id": "title",
+      "title": "NGSOTI SOC stack",
+      "x": 540,
+      "y": 8,
+      "width": 460,
+      "height": 76,
+      "titleSize": 40,
+      "color": "#1e1e1e",
+      "underline": false,
+      "fill": "none",
+      "borderColor": "none",
+      "titleFont": "hand"
+    },
+    {
+      "id": "top",
+      "x": 20,
+      "y": 115,
+      "width": 1460,
+      "height": 355
+    },
+    {
+      "id": "incident-response",
+      "title": "Incident response",
+      "x": 31,
+      "y": 110,
+      "width": 663,
+      "height": 66,
+      "titleSize": 26,
+      "color": "#1971c2",
+      "fill": "none",
+      "borderColor": "none",
+      "titleFont": "hand"
+    },
+    {
+      "id": "cyber-threat-intelligence",
+      "title": "Cyber threat intelligence",
+      "x": 791,
+      "y": 110,
+      "width": 688,
+      "height": 66,
+      "titleSize": 26,
+      "color": "#e8590c",
+      "fill": "none",
+      "borderColor": "none",
+      "titleFont": "hand"
+    },
+    {
+      "id": "pipeline",
+      "x": 20,
+      "y": 590,
+      "width": 1460,
+      "height": 170
+    },
+    {
+      "id": "sensors",
+      "title": "Sensors",
+      "x": 20,
+      "y": 835,
+      "width": 1460,
+      "height": 240,
+      "titleSize": 26,
+      "titleFont": "hand",
+      "color": "#5c6373",
+      "underline": false
+    }
+  ],
+  "nodes": [
+    {
+      "id": "case",
+      "label": "Cyber Security\nCase",
+      "type": "case",
+      "width": 180,
+      "height": 100,
+      "description": "A security case opened when the pipeline detects something, followed up in flowintel.",
+      "x": 205,
+      "y": 295
+    },
+    {
+      "id": "flowintel",
+      "label": "flowintel",
+      "type": "box",
+      "image": "logos/flowintel.png",
+      "imageSize": 100,
+      "hideLabel": true,
+      "width": 180,
+      "height": 176,
+      "description": "Case management platform for analysts: documents the analysis of each case.",
+      "url": "https://github.com/flowintel/flowintel",
+      "github": "flowintel/flowintel",
+      "x": 540,
+      "y": 295
+    },
+    {
+      "id": "misp",
+      "label": "MISP",
+      "type": "box",
+      "image": "logos/misp.png",
+      "imageSize": 56,
+      "subtitle": "Threat Sharing",
+      "hideLabel": true,
+      "width": 230,
+      "height": 190,
+      "description": "Open source threat intelligence sharing platform: stores the indicators (IoCs) and sightings.",
+      "url": "https://www.misp-project.org",
+      "github": "MISP/MISP",
+      "x": 945,
+      "y": 295,
+      "labelFont": "sans"
+    },
+    {
+      "id": "ail",
+      "label": "AIL Project",
+      "type": "box",
+      "image": "logos/ail.png",
+      "imageSize": 96,
+      "hideLabel": true,
+      "width": 170,
+      "height": 110,
+      "padding": 10,
+      "description": "Analysis Information Leak framework: monitors leaks and dark web sources to expand threat actor knowledge.",
+      "url": "https://www.ail-project.org",
+      "github": "ail-project/ail-framework",
+      "x": 1375,
+      "y": 235
+    },
+    {
+      "id": "rulezet",
+      "label": "Rulezet",
+      "type": "box",
+      "image": "logos/rulezet.png",
+      "imageSize": 96,
+      "hideLabel": true,
+      "width": 170,
+      "height": 110,
+      "padding": 10,
+      "description": "Community platform for sharing and managing detection rules (YARA, Sigma, Suricata…).",
+      "url": "https://rulezet.org",
+      "github": "rulezet/rulezet-core",
+      "x": 1375,
+      "y": 360
+    },
+    {
+      "id": "tenzir",
+      "label": "TENZIR",
+      "type": "box",
+      "image": "logos/ngsoti/tenzir.png",
+      "imageSize": 52,
+      "imagePosition": "left",
+      "color": "transparent",
+      "borderWidth": 0,
+      "padding": 4,
+      "labelSize": 38,
+      "labelColor": "#111111",
+      "description": "Security data pipeline: acquires, normalizes, enriches the telemetry, detects and routes the results.",
+      "url": "https://tenzir.com",
+      "github": "tenzir/tenzir",
+      "x": 183,
+      "y": 675,
+      "labelFont": "sans"
+    },
+    {
+      "id": "acquire",
+      "label": "Acquire",
+      "type": "step",
+      "x": 466,
+      "y": 675
+    },
+    {
+      "id": "normalize",
+      "label": "Normalize",
+      "type": "step",
+      "x": 672,
+      "y": 675
+    },
+    {
+      "id": "enrich",
+      "label": "Enrich",
+      "type": "step",
+      "x": 878,
+      "y": 675
+    },
+    {
+      "id": "detect",
+      "label": "Detect",
+      "type": "step",
+      "x": 1084,
+      "y": 675
+    },
+    {
+      "id": "route",
+      "label": "Route",
+      "type": "step",
+      "x": 1290,
+      "y": 675
+    },
+    {
+      "id": "kunai",
+      "label": "Kunai",
+      "subtitle": "Linux endpoint",
+      "type": "box",
+      "image": "logos/circl/kunai-project.png",
+      "imageSize": 56,
+      "imagePosition": "left",
+      "width": 300,
+      "height": 140,
+      "description": "Linux endpoint sensor: security events from the kernel (eBPF).",
+      "url": "https://why.kunai.rocks",
+      "github": "kunai-project/kunai",
+      "x": 205,
+      "y": 980,
+      "labelSize": 22
+    },
+    {
+      "id": "zeek",
+      "label": "Zeek",
+      "subtitle": "Network logs",
+      "type": "box",
+      "image": "logos/ngsoti/zeek.png",
+      "imageSize": 84,
+      "hideLabel": true,
+      "width": 300,
+      "height": 140,
+      "description": "Network security monitor: rich logs of the network traffic.",
+      "url": "https://zeek.org",
+      "github": "zeek/zeek",
+      "x": 575,
+      "y": 980
+    },
+    {
+      "id": "suricata",
+      "label": "SURICATA",
+      "subtitle": "Network IDS alerts",
+      "type": "box",
+      "image": "logos/ngsoti/suricata.png",
+      "imageSize": 60,
+      "labelSize": 15,
+      "width": 300,
+      "height": 140,
+      "padding": 10,
+      "description": "Network intrusion detection system: alerts on the traffic.",
+      "url": "https://suricata.io",
+      "github": "OISF/suricata",
+      "x": 945,
+      "y": 980
+    },
+    {
+      "id": "d4",
+      "label": "D4 Project",
+      "subtitle": "Blackhole traffic",
+      "type": "box",
+      "image": "logos/circl/d4-project.png",
+      "imageSize": 80,
+      "hideLabel": true,
+      "width": 300,
+      "height": 140,
+      "description": "Distributed sensor network: collects blackhole (darknet) traffic.",
+      "url": "https://www.d4-project.org",
+      "github": "D4-project/d4-core",
+      "x": 1315,
+      "y": 980
+    }
+  ],
+  "edges": [],
+  "arrows": [
+    {
+      "id": "1-document-analysis",
+      "from": {
+        "node": "case"
+      },
+      "to": {
+        "node": "flowintel"
+      },
+      "label": "1) Document\nanalysis",
+      "color": "#343a40",
+      "labelFont": "hand",
+      "labelSize": 15
+    },
+    {
+      "id": "2-document-detections",
+      "from": {
+        "node": "flowintel"
+      },
+      "to": {
+        "node": "misp"
+      },
+      "label": "2) Document\ndetections\n(IoCs)",
+      "color": "#343a40",
+      "labelFont": "hand",
+      "labelSize": 15
+    },
+    {
+      "id": "3-expand-knowledge",
+      "from": {
+        "node": "ail",
+        "at": [
+          0,
+          0.5
+        ]
+      },
+      "to": {
+        "node": "misp",
+        "at": [
+          1,
+          0.184
+        ]
+      },
+      "label": "3) Expand threat\nactor knowledge",
+      "color": "#343a40",
+      "labelFont": "hand",
+      "labelSize": 15
+    },
+    {
+      "id": "rulezet-misp",
+      "from": {
+        "node": "rulezet",
+        "at": [
+          0,
+          0.5
+        ]
+      },
+      "to": {
+        "node": "misp",
+        "at": [
+          1,
+          0.842
+        ]
+      },
+      "label": "Push detection rules\nas MISP events",
+      "color": "#e8590c",
+      "dashed": true,
+      "description": "Admins register MISP servers in Rulezet; a rule or bundle is pushed as a MISP object or event (with tags and CVE attributes) through PyMISP.",
+      "labelFont": "hand",
+      "labelSize": 15
+    },
+    {
+      "id": "4-feed-detections",
+      "from": {
+        "node": "misp",
+        "at": [
+          0.5,
+          1
+        ]
+      },
+      "to": {
+        "section": "pipeline"
+      },
+      "direction": "both",
+      "label": "4) Feed detections\n(IoCs) & sightings",
+      "color": "#1c5cff",
+      "labelSize": 18,
+      "labelFont": "hand"
+    },
+    {
+      "id": "5-detect",
+      "from": {
+        "section": "pipeline"
+      },
+      "to": {
+        "node": "case",
+        "at": [
+          0.5,
+          1
+        ]
+      },
+      "label": "5) Detect",
+      "color": "#1c5cff",
+      "labelSize": 18,
+      "labelFont": "hand",
+      "labelOffset": [
+        0,
+        40
+      ]
+    },
+    {
+      "id": "acquire-normalize",
+      "from": {
+        "node": "acquire"
+      },
+      "to": {
+        "node": "normalize"
+      },
+      "color": "#1c2230"
+    },
+    {
+      "id": "normalize-enrich",
+      "from": {
+        "node": "normalize"
+      },
+      "to": {
+        "node": "enrich"
+      },
+      "color": "#1c2230"
+    },
+    {
+      "id": "enrich-detect",
+      "from": {
+        "node": "enrich"
+      },
+      "to": {
+        "node": "detect"
+      },
+      "color": "#1c2230"
+    },
+    {
+      "id": "detect-route",
+      "from": {
+        "node": "detect"
+      },
+      "to": {
+        "node": "route"
+      },
+      "color": "#1c2230"
+    },
+    {
+      "id": "telemetry-kunai",
+      "from": {
+        "node": "kunai",
+        "at": [
+          0.5,
+          0
+        ]
+      },
+      "to": {
+        "section": "pipeline"
+      },
+      "color": "#1c5cff",
+      "label": "Telemetry: events, logs, alerts",
+      "labelOffset": [
+        170,
+        -40
+      ],
+      "labelSize": 18,
+      "labelFont": "hand"
+    },
+    {
+      "id": "telemetry-zeek",
+      "from": {
+        "node": "zeek",
+        "at": [
+          0.5,
+          0
+        ]
+      },
+      "to": {
+        "section": "pipeline"
+      },
+      "color": "#1c5cff"
+    },
+    {
+      "id": "telemetry-suricata",
+      "from": {
+        "node": "suricata",
+        "at": [
+          0.5,
+          0
+        ]
+      },
+      "to": {
+        "section": "pipeline"
+      },
+      "color": "#1c5cff"
+    },
+    {
+      "id": "telemetry-d4",
+      "from": {
+        "node": "d4",
+        "at": [
+          0.5,
+          0
+        ]
+      },
+      "to": {
+        "section": "pipeline"
+      },
+      "color": "#1c5cff"
+    }
+  ]
+}

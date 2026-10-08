@@ -7,6 +7,7 @@ graph:
   id: "rulezet"
   type: "organisation"
   url: "https://rulezet.org/"
+  graph: "/circl/rulezet"
   github: "rulezet/rulezet-core"
   githubInfo:
     fullName: "rulezet/rulezet-core"
@@ -35,3 +36,7 @@ graph:
     most_starred_repositories: ["rulezet-core (55 stars)", "rulezet-cast (6 stars)", "rulezet-workshop (3 stars)", "rulezet-rulesets (1 stars)", "rulezet-scripts (1 stars)"]
   image: "logo.png"
 ---
+
+The graph of Rulezet: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-rulezet" >}}

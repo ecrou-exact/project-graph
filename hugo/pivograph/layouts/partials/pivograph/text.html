@@ -7,7 +7,10 @@
     doc     the Pivograph document (partial "pivograph/document.html")
     level   heading level of the sections (default 3)
     app     the app's URL, to show its bundled icons (icons/…)
+    relations  true to write the relationships as sentences, under each node
+               and in their own section (default false: the overview only counts them)
 */ -}}
+{{- $withRelations := eq .relations true -}}
 {{- $doc := .doc -}}
 {{- $level := int (.level | default 3) -}}
 {{- $app := .app | default "" -}}
@@ -81,8 +84,9 @@
     {{- with $intro }}
 <p>{{ . }}</p>
     {{- end }}
-    {{- if or $node.url $node.github $node.links }}
+    {{- if or $node.url $node.github $node.links $node.graph }}
 <dl class="pivograph-facts">
+      {{- with $node.graph }}{{ if hasPrefix . site.BaseURL }}<dt>Its graph</dt><dd><a href="{{ relURL (strings.TrimPrefix site.BaseURL .) }}">The graph of {{ $name }}</a></dd>{{ end }}{{ end -}}
       {{- with $node.url }}<dt>Website</dt><dd><a href="{{ . }}">{{ replaceRE `^https?://(www\.)?` "" . | strings.TrimSuffix "/" }}</a></dd>{{ end -}}
       {{- with $node.github -}}
         {{- $info := $node.githubInfo | default dict -}}
@@ -111,18 +115,18 @@
     {{- end }}
     {{- $related := slice -}}
     {{- range $edges -}}{{- if or (eq .from $node.id) (eq .to $node.id) -}}{{- $related = $related | append . -}}{{- end -}}{{- end -}}
-    {{- with $related }}
+    {{- if and $withRelations $related }}{{ with $related }}
 <ul class="pivograph-relations">
       {{- range partial "pivograph/sentences.html" (dict "edges" . "nodes" $nodes "edgeTypes" $edgeTypes) }}
   <li>{{ . | safeHTML }}</li>
       {{- end }}
 </ul>
-    {{- end }}
+    {{- end }}{{ end }}
 </article>
   {{- end }}
 {{- end }}
 
-{{- with $edges }}
+{{- if $withRelations }}{{ with $edges }}
 <h{{ $level }} class="pivograph-group">Relationships</h{{ $level }}>
   {{- $keys := slice -}}
   {{- range . -}}{{- $keys = $keys | append (.type | default "") -}}{{- end -}}
@@ -152,5 +156,5 @@
     {{- end }}
 </ul>
   {{- end }}
-{{- end }}
+{{- end }}{{ end }}
 </div>

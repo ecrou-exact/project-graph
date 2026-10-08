@@ -5,14 +5,16 @@ import { Pivotick, Node, Edge } from 'pivotick'
 import 'pivotick/dist/pivotick.css'
 import {
   MARKER_END, MARKER_START, NODE_FIELDS, EDGE_FIELDS,
-  compact, edgeLabel, edgeLabelLook, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, toRawEdge, toRawNode,
+  compact, edgeLabel, edgeLabelLook, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, resolveNode, toRawEdge, toRawNode,
 } from './model.js'
 import { badgeIconSvg } from './badgeIcons.js'
-import { faPenToSquare } from '@fortawesome/free-solid-svg-icons'
+import { faDiagramProject, faPenToSquare } from '@fortawesome/free-solid-svg-icons'
 import { tagPills } from './ui/pills.js'
 import { link, linkList, repoCard, repoLink } from './ui/githubCard.js'
 import { detailEntries } from './ui/details.js'
 import { loadIcon, isIconLoaded, tintedIcon } from './icons.js'
+import { DrawingLayer } from './drawing.js'
+import { cardElement } from './cards.js'
 
 const ARROW = {
   pathD: 'M0,-5L10,0L0,5',
@@ -27,18 +29,33 @@ const ARROW = {
 }
 
 /** The plain-data part of Pivograph's Pivotick options: layout and arrow markers. */
+// Past this many nodes, a graph is spread out a little more: slightly longer
+// links and repulsion (Pivotick's default is -150), so that dozens of projects
+// around one organisation stay apart without the graph becoming tiny once fitted.
+export const BIG_GRAPH = 30
+
 export function pivotickOptions(doc) {
+  // Longer links leave room for the node and edge labels; a document with
+  // big nodes or long edge labels can ask for more with meta.linkDistance.
+  const distance = Number(doc.meta?.linkDistance) || 150
+  const big = (doc.nodes?.length ?? 0) > BIG_GRAPH
+  // A drawn diagram (meta.fixedLayout): nodes stay exactly at their x / y.
+  if (doc.meta?.fixedLayout) {
+    return { isDirected: true, simulation: { enabled: false }, render: { markerStyleMap: markers() } }
+  }
   return {
     isDirected: true,
-    // Longer links leave room for the node and edge labels; a document with
-    // big nodes or long edge labels can ask for more with meta.linkDistance.
-    simulation: { d3LinkDistance: Number(doc.meta?.linkDistance) || 150, d3CollideRadiusMultiplier: 2.2 },
-    render: {
-      markerStyleMap: {
-        [MARKER_END]: { ...ARROW, orient: 'auto' },
-        [MARKER_START]: { ...ARROW, orient: 'auto-start-reverse' },
-      },
-    },
+    simulation: big
+      ? { d3LinkDistance: Math.max(distance, 190), d3ManyBodyStrength: -250, d3CollideRadiusMultiplier: 2.4 }
+      : { d3LinkDistance: distance, d3CollideRadiusMultiplier: 2.2 },
+    render: { markerStyleMap: markers() },
+  }
+}
+
+function markers() {
+  return {
+    [MARKER_END]: { ...ARROW, orient: 'auto' },
+    [MARKER_START]: { ...ARROW, orient: 'auto-start-reverse' },
   }
 }
 
@@ -54,6 +71,11 @@ export class GraphView {
    * @param {(message: string) => Promise<boolean>} hooks.confirm
    * @param {() => void} hooks.onChange called after any change of nodes/edges
    * @param {() => void} [hooks.onFilterChange] called when the graph's filters change
+   * @param {(node: object) => void} [hooks.openGraph] opens the graph a node points to (its `graph` field)
+   * @param {() => void} [hooks.onDrawingChange] called after a section or an arrow was moved or resized
+   * @param {(id: string) => void} [hooks.editSection] opens the section form
+   * @param {(id: string) => void} [hooks.editArrow] opens the arrow form
+   * @param {(id: string) => void} [hooks.deleteArrow] deletes an arrow
    */
   constructor(container, hooks) {
     this.container = container
@@ -65,10 +87,23 @@ export class GraphView {
     this.iconsArrived = false
     this.pillObserver = null
     this.pillFrame = null
-    this.showPills = true
+    this.showPills = false
     this.readOnly = false
     this.labelSheet = document.createElement('style')
     document.head.append(this.labelSheet)
+    this.drawing = new DrawingLayer({
+      getSections: () => this.hooks.getTypes().sections ?? [],
+      getArrows: () => this.hooks.getTypes().arrows ?? [],
+      editable: () => !this.readOnly,
+      onChange: () => this.hooks.onDrawingChange?.(),
+      onEditSection: (id) => this.hooks.editSection?.(id),
+      onEditArrow: (id) => this.hooks.editArrow?.(id),
+      onDeleteArrow: (id) => this.hooks.deleteArrow?.(id),
+      nodeBox: (id) => this.nodeBox(id),
+      nodeAt: (x, y) => this.nodeAt(x, y),
+    })
+    this.restyleTimer = null
+    this.liftedLabels = new WeakMap() // Pivotick edge group -> its label, moved to the front
   }
 
   load(doc) {
@@ -83,6 +118,7 @@ export class GraphView {
     // Read-only documents (e.g. an imported well-known): no editing affordance at all.
     const readOnly = Boolean(doc.meta?.readOnly)
     this.readOnly = readOnly
+    this.fixedLayout = Boolean(doc.meta?.fixedLayout)
     const editable = { enabled: !readOnly }
     const base = pivotickOptions(doc)
     this.graph = new Pivotick(mount, data, {
@@ -139,7 +175,17 @@ export class GraphView {
         // Right-click on a node: Pivotick's entries, then ours (lists are appended).
         contextMenu: {
           menuNode: {
-            menu: readOnly ? [] : [{
+            menu: [{
+              text: 'Open its graph',
+              title: 'Open the graph of this node',
+              svgIcon: faIconSvg(faDiagramProject),
+              variant: 'outline-primary',
+              visible: (node) => Boolean(this.hooks.openGraph && node?.getData?.().graph),
+              onclick: (_event, node) => {
+                const target = Array.isArray(node) ? node[0] : node
+                if (target) this.hooks.openGraph(target.getData())
+              },
+            }, ...(readOnly ? [] : [{
               text: 'Edit node',
               title: 'Edit this node',
               svgIcon: faIconSvg(faPenToSquare),
@@ -148,7 +194,7 @@ export class GraphView {
                 const target = Array.isArray(node) ? node[0] : node
                 if (target) this.editNode(String(target.id))
               },
-            }],
+            }])],
           },
         },
         tooltip: {
@@ -166,6 +212,20 @@ export class GraphView {
         onEdgeDbclick: (_event, edge) => this.editEdge(String(edge.id)),
       },
     })
+
+    // Sections and arrows: see drawing.js.
+    this.drawing.attach(this.graph.renderer.getZoomGroup())
+    // Arrows follow the nodes they're attached to; edge labels go to the front.
+    this.moveObserver?.disconnect()
+    this.moveObserver = new MutationObserver((records) => {
+      // Our own drawing changes the DOM too: only Pivotick's changes matter.
+      const ours = (node) => node.closest?.('.pg-drawing-back, .pg-drawing-front, .pg-edge-labels')
+      if (records.every((r) => ours(r.target))) return
+      this.drawing.schedule()
+      this.scheduleLabels()
+    })
+    this.moveObserver.observe(mount, { subtree: true, childList: true, attributes: true, attributeFilter: ['transform', 'class', 'style'] })
+    this.scheduleLabels()
 
     // Tag pills live inside each node's SVG group; Pivotick rebuilds that group's
     // content on every redraw, so draw them again whenever it does.
@@ -298,6 +358,7 @@ export class GraphView {
         ['label', data.label],
         ['type', type ? type.label || data.type : data.type],
         ['description', data.description],
+        ['graph', data.graph && this.hooks.openGraph ? graphButton(data, this.hooks.openGraph) : undefined],
       ]),
       ...detailEntries(data.details),
       ...propertyList([
@@ -349,7 +410,7 @@ export class GraphView {
   addNode(values) {
     const raw = this.withStyle(toRawNode(values, this.hooks.getTypes()))
     if (raw.x === undefined) Object.assign(raw, this.freeSpot())
-    this.graph.addNode(raw)
+    this.graph.addNode(pinned(raw, { meta: { fixedLayout: this.fixedLayout } }))
     // A graph's first nodes land wherever the empty view happened to be: frame them.
     const count = this.nodes().length
     if (count <= 3) this.graph.renderer.fitAndCenterWhenSettled(1)
@@ -424,6 +485,11 @@ export class GraphView {
    */
   nodeStyleFor(data) {
     const style = nodeStyle(data, this.hooks.getTypes().nodeTypes)
+    if (resolveNode(data, this.hooks.getTypes().nodeTypes).shape === 'card') {
+      // Read from the node, not `data`: the style outlives edits made through Pivotick.
+      style.html = (node) => cardElement(node.getData(), this.hooks.getTypes().nodeTypes, () => this.scheduleRestyle())
+      return style
+    }
     if (style.imagePath && style.imageFit === 'icon') {
       const path = style.imagePath
       const tinted = tintedIcon(path, style.color, style.shape)
@@ -431,6 +497,85 @@ export class GraphView {
       else if (!isIconLoaded(path)) this.awaitIcon(path)
     }
     return style
+  }
+
+  /** Redraws every node soon, once (a card's image arrived: it must be measured again). */
+  scheduleRestyle() {
+    clearTimeout(this.restyleTimer)
+    this.restyleTimer = setTimeout(() => this.graph && this.restyleAll(), 30)
+  }
+
+  /** A node's box in graph coordinates: its shape, or its card (not its label). */
+  nodeBox(id) {
+    const node = this.liveNodes().find((n) => String(n.id) === String(id))
+    if (!node || !Number.isFinite(node.x) || !Number.isFinite(node.y)) return null
+    const group = node.getGraphElement?.()
+    const shape = group?.querySelector(':scope > foreignObject, :scope > .node')
+    if (shape) {
+      const box = shape.getBBox()
+      if (box.width && box.height) return { x: node.x + box.x, y: node.y + box.y, width: box.width, height: box.height }
+    }
+    const size = Number(node.getData().size) || 14
+    return { x: node.x - size, y: node.y - size, width: size * 2, height: size * 2 }
+  }
+
+  /** The id of the node under a screen point, or null. */
+  nodeAt(clientX, clientY) {
+    for (const el of document.elementsFromPoint(clientX, clientY)) {
+      const group = el.closest?.('.pvt-node')
+      if (!group) continue
+      const node = this.liveNodes().find((n) => `node-${n.domID}` === group.id)
+      if (node) return String(node.id)
+    }
+    return null
+  }
+
+  scheduleLabels() {
+    if (this.labelFrame) return
+    this.labelFrame = requestAnimationFrame(() => {
+      this.labelFrame = null
+      this.liftEdgeLabels()
+    })
+  }
+
+  /**
+   * Pivotick draws each edge's label inside the edge's group, so the edges and
+   * nodes drawn after it cover it. Each label is shown by a copy in a layer in
+   * front (same coordinates there), kept in step with the original — which
+   * Pivotick keeps moving, and which stays in place, hidden (style.css).
+   */
+  liftEdgeLabels() {
+    const front = this.drawing.front
+    if (!front?.isConnected) return
+    let layer = front.parentNode.querySelector(':scope > .pg-edge-labels')
+    if (!layer) {
+      layer = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+      layer.setAttribute('class', 'pg-edge-labels')
+    }
+    if (layer.nextSibling !== front) front.before(layer)
+    const shown = new Set()
+    for (const original of front.parentNode.querySelectorAll('.pvt-edge-group > .label-container')) {
+      let copy = this.liftedLabels.get(original)
+      // A new label, or one whose content Pivotick redrew: copy it again.
+      if (!copy || copy.pgSource !== original.innerHTML) {
+        const next = original.cloneNode(true)
+        next.pgSource = original.innerHTML
+        if (copy) copy.replaceWith(next)
+        copy = next
+        this.liftedLabels.set(original, copy)
+      }
+      if (copy.parentNode !== layer) layer.append(copy)
+      const transform = original.getAttribute('transform') ?? ''
+      if (copy.getAttribute('transform') !== transform) copy.setAttribute('transform', transform)
+      // Hidden with its edge (filters).
+      const style = getComputedStyle(original.parentNode)
+      const display = style.display === 'none' || style.visibility === 'hidden' ? 'none' : ''
+      if (copy.style.display !== display) copy.style.display = display
+      if (copy.style.opacity !== style.opacity) copy.style.opacity = style.opacity
+      shown.add(copy)
+    }
+    // Copies of labels that are gone (edge deleted).
+    for (const copy of [...layer.children]) if (!shown.has(copy)) copy.remove()
   }
 
   /** Restyles once when a pending icon arrives — one redraw per batch, not per node. */
@@ -454,7 +599,8 @@ export class GraphView {
   toPivotickFile(doc) {
     const { nodes, edges } = this.toPivotickData(doc)
     return {
-      nodes,
+      // A card is drawn by a function, which a file can't hold: a square with its label instead.
+      nodes: nodes.map((n) => (n.style.html ? { ...n, style: nodeStyle({ ...n.data, shape: 'square' }, doc.nodeTypes) } : n)),
       edges: edges.map((e) => {
         const label = edgeLabelLook(e.data, doc.edgeTypes).hidden ? '' : edgeLabel(e.data, doc.edgeTypes)
         const { label: _own, ...data } = e.data
@@ -470,7 +616,7 @@ export class GraphView {
    */
   toPivotickData(doc) {
     return {
-      nodes: doc.nodes.map((n) => this.withStyle(toRawNode(n, doc))),
+      nodes: doc.nodes.map((n) => pinned(this.withStyle(toRawNode(n, doc)), doc)),
       edges: doc.edges.map((e) => toRawEdge(e, doc)),
     }
   }
@@ -672,6 +818,15 @@ export class GraphView {
   }
 }
 
+/**
+ * In a fixed layout, a node with a position is pinned there (fx / fy): even
+ * with the simulation off, Pivotick runs warm-up ticks on the first layout.
+ */
+function pinned(raw, doc) {
+  if (!doc.meta?.fixedLayout || !Number.isFinite(raw.x) || !Number.isFinite(raw.y)) return raw
+  return { ...raw, fx: raw.x, fy: raw.y }
+}
+
 function sameData(a, b) {
   return JSON.stringify(a ?? {}) === JSON.stringify(b ?? {})
 }
@@ -785,6 +940,17 @@ function drawPillRow(pills, top) {
   layout()
   requestAnimationFrame(layout)
   return row
+}
+
+/** The button that opens the graph a node points to. */
+function graphButton(data, openGraph) {
+  const button = document.createElement('button')
+  button.type = 'button'
+  button.className = 'pg-btn pg-graph-btn'
+  button.innerHTML = faIconSvg(faDiagramProject)
+  button.append(`Open the graph of ${data.label}`)
+  button.addEventListener('click', () => openGraph(data))
+  return button
 }
 
 /** A Font Awesome icon as SVG markup in the current text colour (for Pivotick menus). */

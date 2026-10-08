@@ -4,7 +4,7 @@ A site built with [Hugo](https://gohugo.io) can show a graph with the Pivograph 
 
 | | Without JavaScript | With JavaScript |
 |---|---|---|
-| Picture | The graph **drawn by Hugo as SVG** at build time: nodes with their shape, colour, logo, label and tag pills; edges with their colour, dashes, arrows and labels. A node is a link to its entry in the text, and shows its name on hover. | The **interactive graph** (the Pivograph app in an iframe) replaces the picture: zoom, drag, search, filters by tag, type and relationship, details panel. If the app can't load, the picture comes back. |
+| Picture | The graph **drawn by Hugo as SVG** at build time: nodes with their shape, colour, logo and label; edges with their colour, dashes, arrows and labels. A node is a link to the page of its own graph (`graph.graph`), else to its entry in the text, and shows its name on hover. | The **interactive graph** (the Pivograph app in an iframe) replaces the picture: zoom, drag, search, filters by tag, type and relationship, details panel. If the app can't load, the picture comes back. |
 | Text | The graph written out: every node with its links, GitHub facts, tags and details, and every relationship as a sentence ([report protocol](#the-report-protocol)). Read by search engines and screen readers. | The same text, folded under *Read the graph as text*. |
 | Data | `/pivograph/<name>.json`, linked under the graph. | The same file, handed to the app. |
 
@@ -74,7 +74,7 @@ hugo/example/
    {{ partial "pivograph/embed.html" (dict "page" . "section" "/projects") }}
    ```
 
-5. **Check**: run `hugo`. It must print no `WARN` from pivograph. Then open the page: with JavaScript you get the interactive graph; add `?pivograph=static` to the address (or turn JavaScript off) to see the version without JavaScript, the picture drawn by Hugo and the text. That choice holds for the browser tab, and the site's links keep it, until `?pivograph=interactive`.
+5. **Check**: run `hugo`. It must print no `WARN` from pivograph. Then open the page: with JavaScript you get the interactive graph; click *Without JavaScript* in the switch above the graph (it adds `?pivograph=static` to the address), or turn JavaScript off, to see the version without JavaScript, the picture drawn by Hugo and the text; *Interactive* brings the graph back. That choice holds for the browser tab, and the site's links keep it, until `?pivograph=interactive`.
 
 Requirements: Hugo 0.130 or later, standard or extended edition. Nothing to install with npm, no build step besides Hugo.
 
@@ -130,6 +130,7 @@ graph:
 | node page | `graph.id` | node `id` | the file name (`misp.md`) or bundle name (`misp/index.md`) |
 | node page | `graph.label`, `graph.description`, `graph.tags` | override the three above | |
 | node page | `graph.image` | node `image`: a page resource (`logo.png`), a site path (`/images/x.png`), a URL, or an icon of the app (`icons/tool.svg`) | |
+| node page | `graph.graph` | node `graph`: the path of the page that shows this node's own graph (`/circl/misp`), written as that page's address. Without JavaScript the node links to that page; with JavaScript, *Open its graph* in the app goes there. The CIRCL example uses it: each organisation's page shows its projects with `{{< pivograph data="circl-<id>" >}}`. | |
 | node page | `graph.x`, `graph.y` | the node's position, used by the app and by the picture | computed |
 | node page | `graph.<field>` | any other [node field](#nodes): `type`, `url`, `github`, `links`, `details`, `color`, `shape`, `size`, `imageFit`, `githubInfo`… | |
 | node page | `graph.relations[]` | edges from this node: `to` (required) and any [edge field](#edges): `label`, `type`, `direction`, `description`, `details`, `color`, `dashed`… | |
@@ -163,9 +164,10 @@ The shortcode and the partial take the same parameters.
 | `section` | the current section | Build the graph from another section: `section="/projects"`. |
 | `data` | | Use `data/pivograph/<name>.*` instead of pages. |
 | `app` | `params.pivograph.app`, else `https://ecrou-exact.github.io/project-graph/` | The Pivograph app that draws the interactive graph. |
-| `height` | `75vh` | Height of the interactive graph. |
+| `height` | `85vh` | Height of the interactive graph. The graph takes the width of its container: give it the whole width of the page for big graphs (the example site keeps only its text in a narrow column). |
 | `sidebar` | `false` | Show the app's side panel (node list, tags, types). |
-| `tags` | `true` | Show the tag pills on the interactive graph. |
+| `tags` | `false` | `true` shows the tag pills, on the interactive graph and in the picture drawn by Hugo. |
+| `relations` | `false` | `true` writes the relationships as sentences in the text, under each node and in a *Relationships* section. By default the text only counts them. |
 | `picture` | `true` | `false` leaves out the picture drawn by Hugo. |
 | `image` | | A picture of your own (e.g. *Export → Picture* in the app) shown instead of Hugo's. |
 | `level` | `3` | Heading level of the text's sections. |

@@ -1,0 +1,1526 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2026-09-24T06:18:54Z",
+  "organization": {
+    "name": "CIRCL - Computer Incident Response Center Luxembourg",
+    "domain": "circl.lu",
+    "description": "CIRCL is the CERT (Computer Emergency Response Team/Computer Security Incident Response Team) for the private sector, communes and non-governmental entities.",
+    "links": {
+      "homepage": "https://www.circl.lu",
+      "github_org": "https://github.com/CIRCL"
+    }
+  },
+  "projects": [
+    {
+      "name": "AIL-framework",
+      "description": "AIL framework - Analysis Information Leak framework. Project moved to https://github.com/ail-project",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/AIL-framework",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/AIL-framework.git"
+      },
+      "links": {
+        "project_page": "https://github.com/ail-project/ail-framework",
+        "releases": "https://github.com/CIRCL/AIL-framework/releases"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/AIL-framework/releases",
+        "security_policy": "https://github.com/CIRCL/AIL-framework/security/policy"
+      },
+      "tags": [
+        "ail-framework",
+        "analysis",
+        "data-mining",
+        "information-leak",
+        "information-security",
+        "leak",
+        "privacy",
+        "security",
+        "security-incidents"
+      ]
+    },
+    {
+      "name": "Circlean",
+      "description": "USB key cleaner",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/Circlean",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/Circlean.git"
+      },
+      "links": {
+        "project_page": "https://www.circl.lu/projects/CIRCLean/",
+        "releases": "https://github.com/CIRCL/Circlean/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/Circlean/issues",
+        "good_first_issues": "https://github.com/CIRCL/Circlean/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/Circlean/releases",
+        "security_policy": "https://github.com/CIRCL/Circlean/security/policy"
+      },
+      "tags": [
+        "security",
+        "usb-cleaner",
+        "usb-devices",
+        "usb-keys"
+      ]
+    },
+    {
+      "name": "url-abuse",
+      "description": "URL Abuse - A Versatile Software for URL review, analysis and black-list reporting",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/url-abuse",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/url-abuse.git"
+      },
+      "links": {
+        "project_page": "http://www.circl.lu/services/urlabuse/",
+        "releases": "https://github.com/CIRCL/url-abuse/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/url-abuse/issues",
+        "good_first_issues": "https://github.com/CIRCL/url-abuse/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/url-abuse/releases",
+        "security_policy": "https://github.com/CIRCL/url-abuse/security/policy"
+      },
+      "tags": [
+        "csirt-activities",
+        "security-testing",
+        "security-tools",
+        "url-abuse"
+      ]
+    },
+    {
+      "name": "bgp-ranking",
+      "description": "BGP ranking is a free software to calculate the security ranking of Internet Service Provider (ASN).",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/bgp-ranking",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/bgp-ranking.git"
+      },
+      "links": {
+        "project_page": "http://bgpranking.circl.lu/",
+        "releases": "https://github.com/CIRCL/bgp-ranking/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/bgp-ranking/issues",
+        "good_first_issues": "https://github.com/CIRCL/bgp-ranking/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/bgp-ranking/releases",
+        "security_policy": "https://github.com/CIRCL/bgp-ranking/security/policy"
+      }
+    },
+    {
+      "name": "potiron",
+      "description": "Potiron - Normalize, Index and Visualize Network Capture",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/potiron",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/potiron.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/potiron/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/potiron/issues",
+        "good_first_issues": "https://github.com/CIRCL/potiron/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/potiron/releases",
+        "security_policy": "https://github.com/CIRCL/potiron/security/policy"
+      },
+      "tags": [
+        "graph",
+        "information-security",
+        "information-visualization",
+        "network-analysis",
+        "network-capture",
+        "pcap",
+        "tshark"
+      ]
+    },
+    {
+      "name": "PyPDNS",
+      "description": "Client API to query any Passive DNS implementation following the Passive DNS - Common Output Format.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/PyPDNS",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/PyPDNS.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/PyPDNS/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/PyPDNS/issues",
+        "good_first_issues": "https://github.com/CIRCL/PyPDNS/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/PyPDNS/releases",
+        "security_policy": "https://github.com/CIRCL/PyPDNS/security/policy"
+      }
+    },
+    {
+      "name": "factual-rules-generator",
+      "description": "Factual-rules-generator is an open source project which aims to generate YARA rules about installed software from a machine.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/factual-rules-generator",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/factual-rules-generator.git"
+      },
+      "links": {
+        "project_page": "https://circl.github.io/factual-rules-generator/",
+        "releases": "https://github.com/CIRCL/factual-rules-generator/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/factual-rules-generator/issues",
+        "good_first_issues": "https://github.com/CIRCL/factual-rules-generator/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/factual-rules-generator/releases",
+        "security_policy": "https://github.com/CIRCL/factual-rules-generator/security/policy"
+      },
+      "tags": [
+        "computer-forensics",
+        "dfir",
+        "yara",
+        "yara-rules"
+      ]
+    },
+    {
+      "name": "compliance",
+      "description": "Legal, procedural and policies document templates for operating an IRT",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/compliance",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/compliance.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/compliance/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/compliance/issues",
+        "good_first_issues": "https://github.com/CIRCL/compliance/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/compliance/releases",
+        "security_policy": "https://github.com/CIRCL/compliance/security/policy"
+      },
+      "tags": [
+        "csirt-activities",
+        "gdpr",
+        "incident-response",
+        "legal",
+        "privacy",
+        "privacy-notice"
+      ]
+    },
+    {
+      "name": "douglas-quaid",
+      "description": "Open source software for image correlation, distance and analysis",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/douglas-quaid",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/douglas-quaid.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/douglas-quaid/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/douglas-quaid/issues",
+        "good_first_issues": "https://github.com/CIRCL/douglas-quaid/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/douglas-quaid/releases",
+        "security_policy": "https://github.com/CIRCL/douglas-quaid/security/policy"
+      },
+      "tags": [
+        "image-analysis",
+        "image-classification",
+        "image-correlation",
+        "screenshot-analysis"
+      ]
+    },
+    {
+      "name": "PyCIRCLean",
+      "description": "Python library used by CIRCLean (the USB sanitizer) and others",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/PyCIRCLean",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/PyCIRCLean.git"
+      },
+      "links": {
+        "project_page": "https://www.circl.lu/projects/CIRCLean/",
+        "releases": "https://github.com/CIRCL/PyCIRCLean/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/PyCIRCLean/issues",
+        "good_first_issues": "https://github.com/CIRCL/PyCIRCLean/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/PyCIRCLean/releases",
+        "security_policy": "https://github.com/CIRCL/PyCIRCLean/security/policy"
+      }
+    },
+    {
+      "name": "pcapdj",
+      "description": "pcapdj - dispatch pcap files",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/pcapdj",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/pcapdj.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/pcapdj/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/pcapdj/issues",
+        "good_first_issues": "https://github.com/CIRCL/pcapdj/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/pcapdj/releases",
+        "security_policy": "https://github.com/CIRCL/pcapdj/security/policy"
+      },
+      "tags": [
+        "network-analysis",
+        "network-capture",
+        "pcap",
+        "suricata",
+        "tcp-reassembly"
+      ]
+    },
+    {
+      "name": "carl-hauser",
+      "description": "Open Source testing framework for image correlation, distance and analysis",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/carl-hauser",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/carl-hauser.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/carl-hauser/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/carl-hauser/issues",
+        "good_first_issues": "https://github.com/CIRCL/carl-hauser/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/carl-hauser/releases",
+        "security_policy": "https://github.com/CIRCL/carl-hauser/security/policy"
+      }
+    },
+    {
+      "name": "yara-validator",
+      "description": "Validates yara rules and tries to repair the broken ones.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/yara-validator",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/yara-validator.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/yara-validator/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/yara-validator/issues",
+        "good_first_issues": "https://github.com/CIRCL/yara-validator/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/yara-validator/releases",
+        "security_policy": "https://github.com/CIRCL/yara-validator/security/policy"
+      },
+      "tags": [
+        "dfir",
+        "yara",
+        "yara-rules"
+      ]
+    },
+    {
+      "name": "forensic-tools",
+      "description": "CIRCL system forensic tools or a jumble of tools to support forensic  ",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/forensic-tools",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/forensic-tools.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/forensic-tools/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/forensic-tools/issues",
+        "good_first_issues": "https://github.com/CIRCL/forensic-tools/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/forensic-tools/releases",
+        "security_policy": "https://github.com/CIRCL/forensic-tools/security/policy"
+      },
+      "tags": [
+        "dfir",
+        "digital-forensics",
+        "forensic",
+        "forensic-analysis"
+      ]
+    },
+    {
+      "name": "traceroute-circl",
+      "description": "Traceroute improved wrapper for CSIRT and CERT operators",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/traceroute-circl",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/traceroute-circl.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/traceroute-circl/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/traceroute-circl/issues",
+        "good_first_issues": "https://github.com/CIRCL/traceroute-circl/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/traceroute-circl/releases",
+        "security_policy": "https://github.com/CIRCL/traceroute-circl/security/policy"
+      }
+    },
+    {
+      "name": "vt-tools",
+      "description": "Tools for VirusTotal",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/vt-tools",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/vt-tools.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/vt-tools/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/vt-tools/issues",
+        "good_first_issues": "https://github.com/CIRCL/vt-tools/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/vt-tools/releases",
+        "security_policy": "https://github.com/CIRCL/vt-tools/security/policy"
+      }
+    },
+    {
+      "name": "urlquery_python_api",
+      "description": "Python API for URL Query",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/urlquery_python_api",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/urlquery_python_api.git"
+      },
+      "links": {
+        "project_page": "http://urlquery.net/index.php",
+        "releases": "https://github.com/CIRCL/urlquery_python_api/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/urlquery_python_api/issues",
+        "good_first_issues": "https://github.com/CIRCL/urlquery_python_api/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/urlquery_python_api/releases",
+        "security_policy": "https://github.com/CIRCL/urlquery_python_api/security/policy"
+      }
+    },
+    {
+      "name": "IMAP-Proxy",
+      "description": "Modular IMAP proxy (including PyCIRCLeanMail and MISP forward modules)",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/IMAP-Proxy",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/IMAP-Proxy.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/IMAP-Proxy/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/IMAP-Proxy/issues",
+        "good_first_issues": "https://github.com/CIRCL/IMAP-Proxy/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/IMAP-Proxy/releases",
+        "security_policy": "https://github.com/CIRCL/IMAP-Proxy/security/policy"
+      },
+      "tags": [
+        "circlean",
+        "imap",
+        "imap-protocol",
+        "imap-proxy",
+        "proxy",
+        "security"
+      ]
+    },
+    {
+      "name": "PyEUPI",
+      "description": "Client API to query the Phishing Initiative service API",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/PyEUPI",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/PyEUPI.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/PyEUPI/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/PyEUPI/issues",
+        "good_first_issues": "https://github.com/CIRCL/PyEUPI/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/PyEUPI/releases",
+        "security_policy": "https://github.com/CIRCL/PyEUPI/security/policy"
+      }
+    },
+    {
+      "name": "email-abuse",
+      "description": "Email Abuse - A Versatile Software for Email review, analysis and reporting",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/email-abuse",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/email-abuse.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/email-abuse/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/email-abuse/issues",
+        "good_first_issues": "https://github.com/CIRCL/email-abuse/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/email-abuse/releases",
+        "security_policy": "https://github.com/CIRCL/email-abuse/security/policy"
+      }
+    },
+    {
+      "name": "Drone-Forensic",
+      "description": "Drone and UAV Digital Forensic",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/Drone-Forensic",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/Drone-Forensic.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/Drone-Forensic/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/Drone-Forensic/issues",
+        "good_first_issues": "https://github.com/CIRCL/Drone-Forensic/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/Drone-Forensic/releases",
+        "security_policy": "https://github.com/CIRCL/Drone-Forensic/security/policy"
+      },
+      "tags": [
+        "dfir",
+        "drone",
+        "forensic"
+      ]
+    },
+    {
+      "name": "bgpranking-redis-api",
+      "description": "API to access the Redis database of a BGP Ranking instance.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/bgpranking-redis-api",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/bgpranking-redis-api.git"
+      },
+      "links": {
+        "project_page": "http://circl.github.com/bgpranking-redis-api/code/API.html",
+        "releases": "https://github.com/CIRCL/bgpranking-redis-api/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/bgpranking-redis-api/issues",
+        "good_first_issues": "https://github.com/CIRCL/bgpranking-redis-api/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/bgpranking-redis-api/releases",
+        "security_policy": "https://github.com/CIRCL/bgpranking-redis-api/security/policy"
+      }
+    },
+    {
+      "name": "PyRichHeader",
+      "description": "A Python parser for Rich Headers",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/PyRichHeader",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/PyRichHeader.git"
+      },
+      "links": {
+        "project_page": "http://trendystephen.blogspot.com/2008/01/rich-header.html",
+        "releases": "https://github.com/CIRCL/PyRichHeader/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/PyRichHeader/issues",
+        "good_first_issues": "https://github.com/CIRCL/PyRichHeader/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/PyRichHeader/releases",
+        "security_policy": "https://github.com/CIRCL/PyRichHeader/security/policy"
+      }
+    },
+    {
+      "name": "circl-threat-intel-workshop",
+      "description": "This repository contains hands-on Jupyter notebooks for learning threat intelligence analysis using CIRCL's open source tools and services. The workshop covers essential platforms and APIs for cybersecurity professionals and researchers.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/circl-threat-intel-workshop",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/circl-threat-intel-workshop.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/circl-threat-intel-workshop/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/circl-threat-intel-workshop/issues",
+        "good_first_issues": "https://github.com/CIRCL/circl-threat-intel-workshop/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/circl-threat-intel-workshop/releases",
+        "security_policy": "https://github.com/CIRCL/circl-threat-intel-workshop/security/policy"
+      },
+      "tags": [
+        "circl",
+        "cybersecurity",
+        "jupyter-notebook",
+        "misp",
+        "threat-hunting",
+        "threat-intel",
+        "threat-intelligence"
+      ]
+    },
+    {
+      "name": "factual-rules",
+      "description": "Factual rules are YARA rules to find legitimate software on raw disk acquisition.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/factual-rules",
+        "license": "BSD-2-Clause",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/factual-rules.git"
+      },
+      "links": {
+        "project_page": "https://circl.github.io/factual-rules/",
+        "releases": "https://github.com/CIRCL/factual-rules/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/factual-rules/issues",
+        "good_first_issues": "https://github.com/CIRCL/factual-rules/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/factual-rules/releases",
+        "security_policy": "https://github.com/CIRCL/factual-rules/security/policy"
+      },
+      "tags": [
+        "dfir",
+        "dfir-automation",
+        "yara-forensics",
+        "yara-rules",
+        "yara-signatures"
+      ]
+    },
+    {
+      "name": "pe32-cert-dump",
+      "description": "Dump and parse embedded certificates from Windows binaries",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/pe32-cert-dump",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/pe32-cert-dump.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/pe32-cert-dump/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/pe32-cert-dump/issues",
+        "good_first_issues": "https://github.com/CIRCL/pe32-cert-dump/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/pe32-cert-dump/releases",
+        "security_policy": "https://github.com/CIRCL/pe32-cert-dump/security/policy"
+      }
+    },
+    {
+      "name": "PyCIRCLeanMail",
+      "description": "Standalone CIRCLean/KittenGroomer code to sanitize emails.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/PyCIRCLeanMail",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/PyCIRCLeanMail.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/PyCIRCLeanMail/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/PyCIRCLeanMail/issues",
+        "good_first_issues": "https://github.com/CIRCL/PyCIRCLeanMail/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/PyCIRCLeanMail/releases",
+        "security_policy": "https://github.com/CIRCL/PyCIRCLeanMail/security/policy"
+      }
+    },
+    {
+      "name": "volatility-misp",
+      "description": "Volatility plugin to interface with MISP",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/volatility-misp",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/volatility-misp.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/volatility-misp/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/volatility-misp/issues",
+        "good_first_issues": "https://github.com/CIRCL/volatility-misp/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/volatility-misp/releases",
+        "security_policy": "https://github.com/CIRCL/volatility-misp/security/policy"
+      },
+      "tags": [
+        "misp",
+        "volatility",
+        "yara"
+      ]
+    },
+    {
+      "name": "open-data-security",
+      "description": "open-data-security description format is a simple JSON format to describe dataset released as open data by security researchers, security vendors or CSIRTs",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/open-data-security",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/open-data-security.git"
+      },
+      "links": {
+        "project_page": "https://circl.github.io/open-data-security/",
+        "releases": "https://github.com/CIRCL/open-data-security/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/open-data-security/issues",
+        "good_first_issues": "https://github.com/CIRCL/open-data-security/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/open-data-security/releases",
+        "security_policy": "https://github.com/CIRCL/open-data-security/security/policy"
+      },
+      "tags": [
+        "csirts",
+        "dataset",
+        "json-format",
+        "opendata"
+      ]
+    },
+    {
+      "name": "pbtc",
+      "description": "Passive Bitcoin Project",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/pbtc",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/pbtc.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/pbtc/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/pbtc/issues",
+        "good_first_issues": "https://github.com/CIRCL/pbtc/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/pbtc/releases",
+        "security_policy": "https://github.com/CIRCL/pbtc/security/policy"
+      }
+    },
+    {
+      "name": "hackathon",
+      "description": "Website for hackathon.hack.lu - 0x04 virtual hackathon",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/hackathon",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/hackathon.git"
+      },
+      "links": {
+        "project_page": "https://hackathon.hack.lu/",
+        "releases": "https://github.com/CIRCL/hackathon/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/hackathon/issues",
+        "good_first_issues": "https://github.com/CIRCL/hackathon/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/hackathon/releases",
+        "security_policy": "https://github.com/CIRCL/hackathon/security/policy"
+      }
+    },
+    {
+      "name": "lnf-tools",
+      "description": "lnf-tools is a set of Perl, Python libraries and C code to analyze and process large set of Netflow records. ",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/lnf-tools",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/lnf-tools.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/lnf-tools/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/lnf-tools/issues",
+        "good_first_issues": "https://github.com/CIRCL/lnf-tools/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/lnf-tools/releases",
+        "security_policy": "https://github.com/CIRCL/lnf-tools/security/policy"
+      },
+      "tags": [
+        "netflow",
+        "network-analysis",
+        "network-forensic"
+      ]
+    },
+    {
+      "name": "misp-darwin",
+      "description": "Improving human readability of MISP threat intelligence",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/misp-darwin",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/misp-darwin.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/misp-darwin/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/misp-darwin/issues",
+        "good_first_issues": "https://github.com/CIRCL/misp-darwin/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/misp-darwin/releases",
+        "security_policy": "https://github.com/CIRCL/misp-darwin/security/policy"
+      }
+    },
+    {
+      "name": "dma-frontend",
+      "description": "Pre-pre-pre Beta DMA frontend",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/dma-frontend",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/dma-frontend.git"
+      },
+      "links": {
+        "project_page": "https://circl.lu/services/",
+        "releases": "https://github.com/CIRCL/dma-frontend/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/dma-frontend/issues",
+        "good_first_issues": "https://github.com/CIRCL/dma-frontend/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/dma-frontend/releases",
+        "security_policy": "https://github.com/CIRCL/dma-frontend/security/policy"
+      },
+      "tags": [
+        "cuckoo",
+        "frontend-web",
+        "malware-analysis"
+      ]
+    },
+    {
+      "name": "hash-whitelist-lookup",
+      "description": "No description provided.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/hash-whitelist-lookup",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/hash-whitelist-lookup.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/hash-whitelist-lookup/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/hash-whitelist-lookup/issues",
+        "good_first_issues": "https://github.com/CIRCL/hash-whitelist-lookup/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/hash-whitelist-lookup/releases",
+        "security_policy": "https://github.com/CIRCL/hash-whitelist-lookup/security/policy"
+      }
+    },
+    {
+      "name": "mpss-micmgmt",
+      "description": "mpss-micmgmt v3.6.1 (Intel Xeon Phi Coprocessor) for Ubuntu LTS 14.04 Trusty",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/mpss-micmgmt",
+        "license": "LGPL-2.1",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/mpss-micmgmt.git"
+      },
+      "links": {
+        "project_page": "https://www.circl.lu/pub/tr-43/",
+        "releases": "https://github.com/CIRCL/mpss-micmgmt/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/mpss-micmgmt/issues",
+        "good_first_issues": "https://github.com/CIRCL/mpss-micmgmt/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/mpss-micmgmt/releases",
+        "security_policy": "https://github.com/CIRCL/mpss-micmgmt/security/policy"
+      }
+    },
+    {
+      "name": "ODFCleaner",
+      "description": "Python module to cleanup ODF files.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/ODFCleaner",
+        "license": "MIT",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/ODFCleaner.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/ODFCleaner/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/ODFCleaner/issues",
+        "good_first_issues": "https://github.com/CIRCL/ODFCleaner/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/ODFCleaner/releases",
+        "security_policy": "https://github.com/CIRCL/ODFCleaner/security/policy"
+      },
+      "tags": [
+        "cleanup-odf-files",
+        "odf",
+        "odfcleaner",
+        "security"
+      ]
+    },
+    {
+      "name": "PyACDC",
+      "description": "Data clearing house API for the Advanced Cyber Defence Centre (ACDC).",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/PyACDC",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/PyACDC.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/PyACDC/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/PyACDC/issues",
+        "good_first_issues": "https://github.com/CIRCL/PyACDC/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/PyACDC/releases",
+        "security_policy": "https://github.com/CIRCL/PyACDC/security/policy"
+      }
+    },
+    {
+      "name": "PasswordTest",
+      "description": "Web application to test your password",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/PasswordTest",
+        "license": "Apache-2.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/PasswordTest.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/PasswordTest/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/PasswordTest/issues",
+        "good_first_issues": "https://github.com/CIRCL/PasswordTest/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/PasswordTest/releases",
+        "security_policy": "https://github.com/CIRCL/PasswordTest/security/policy"
+      }
+    },
+    {
+      "name": "pypretalx",
+      "description": "Query Pretalx via the API.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/pypretalx",
+        "license": "Apache-2.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/pypretalx.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/pypretalx/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/pypretalx/issues",
+        "good_first_issues": "https://github.com/CIRCL/pypretalx/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/pypretalx/releases",
+        "security_policy": "https://github.com/CIRCL/pypretalx/security/policy"
+      }
+    },
+    {
+      "name": "revoker",
+      "description": "Revoke active sessions",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/revoker",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/revoker.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/revoker/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/revoker/issues",
+        "good_first_issues": "https://github.com/CIRCL/revoker/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/revoker/releases",
+        "security_policy": "https://github.com/CIRCL/revoker/security/policy"
+      }
+    },
+    {
+      "name": "ail-packer",
+      "description": "Packer Scripts to generate AIL-framework VMs",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/ail-packer",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/ail-packer.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/ail-packer/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/ail-packer/issues",
+        "good_first_issues": "https://github.com/CIRCL/ail-packer/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/ail-packer/releases",
+        "security_policy": "https://github.com/CIRCL/ail-packer/security/policy"
+      }
+    },
+    {
+      "name": "elfinsight",
+      "description": "Utility that collects and aggregates information on ELF files.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/elfinsight",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/elfinsight.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/elfinsight/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/elfinsight/issues",
+        "good_first_issues": "https://github.com/CIRCL/elfinsight/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/elfinsight/releases",
+        "security_policy": "https://github.com/CIRCL/elfinsight/security/policy"
+      }
+    },
+    {
+      "name": "libscif",
+      "description": "libscif v3.6.1 (Intel Xeon Phi Coprocessor) for Ubuntu LTS 14.04 Trusty",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/libscif",
+        "license": "LGPL-2.1",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/libscif.git"
+      },
+      "links": {
+        "project_page": "https://www.circl.lu/pub/tr-43/",
+        "releases": "https://github.com/CIRCL/libscif/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/libscif/issues",
+        "good_first_issues": "https://github.com/CIRCL/libscif/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/libscif/releases",
+        "security_policy": "https://github.com/CIRCL/libscif/security/policy"
+      }
+    },
+    {
+      "name": "circlean-pi-gen",
+      "description": "No description provided.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/circlean-pi-gen",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/circlean-pi-gen.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/circlean-pi-gen/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/circlean-pi-gen/issues",
+        "good_first_issues": "https://github.com/CIRCL/circlean-pi-gen/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/circlean-pi-gen/releases",
+        "security_policy": "https://github.com/CIRCL/circlean-pi-gen/security/policy"
+      }
+    },
+    {
+      "name": "lookyloo-packer",
+      "description": "Packer Scripts to generate LookyLoo VMs",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/lookyloo-packer",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/lookyloo-packer.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/lookyloo-packer/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/lookyloo-packer/issues",
+        "good_first_issues": "https://github.com/CIRCL/lookyloo-packer/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/lookyloo-packer/releases",
+        "security_policy": "https://github.com/CIRCL/lookyloo-packer/security/policy"
+      }
+    },
+    {
+      "name": "mpss-modules",
+      "description": "MPSS module v3.6.1 (Intel Xeon Phi Coprocessor), with patches for linux-3.19 on Ubuntu LTS 14.04 Trusty",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/mpss-modules",
+        "license": "GPL-2.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/mpss-modules.git"
+      },
+      "links": {
+        "project_page": "https://www.circl.lu/pub/tr-43/",
+        "releases": "https://github.com/CIRCL/mpss-modules/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/mpss-modules/issues",
+        "good_first_issues": "https://github.com/CIRCL/mpss-modules/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/mpss-modules/releases",
+        "security_policy": "https://github.com/CIRCL/mpss-modules/security/policy"
+      }
+    },
+    {
+      "name": "douglas-quaid-results",
+      "description": "Results of Douglas-Quaid",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/douglas-quaid-results",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/douglas-quaid-results.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/douglas-quaid-results/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/douglas-quaid-results/issues",
+        "good_first_issues": "https://github.com/CIRCL/douglas-quaid-results/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/douglas-quaid-results/releases",
+        "security_policy": "https://github.com/CIRCL/douglas-quaid-results/security/policy"
+      }
+    },
+    {
+      "name": "douglas-quaid-tests",
+      "description": "Tests files for douglas-quaid",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/douglas-quaid-tests",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/douglas-quaid-tests.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/douglas-quaid-tests/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/douglas-quaid-tests/issues",
+        "good_first_issues": "https://github.com/CIRCL/douglas-quaid-tests/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/douglas-quaid-tests/releases",
+        "security_policy": "https://github.com/CIRCL/douglas-quaid-tests/security/policy"
+      }
+    },
+    {
+      "name": "junk-ip-indexer",
+      "description": "Experiments indexing with IP and related attributes",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/junk-ip-indexer",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/junk-ip-indexer.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/junk-ip-indexer/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/junk-ip-indexer/issues",
+        "good_first_issues": "https://github.com/CIRCL/junk-ip-indexer/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/junk-ip-indexer/releases",
+        "security_policy": "https://github.com/CIRCL/junk-ip-indexer/security/policy"
+      }
+    },
+    {
+      "name": "miccheck",
+      "description": "miccheck v3.6.1 (Intel Xeon Phi Coprocessor) for Ubuntu LTS 14.04 Trusty ",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/miccheck",
+        "license": "LGPL-2.1",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/miccheck.git"
+      },
+      "links": {
+        "project_page": "https://www.circl.lu/pub/tr-43/",
+        "releases": "https://github.com/CIRCL/miccheck/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/miccheck/issues",
+        "good_first_issues": "https://github.com/CIRCL/miccheck/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/miccheck/releases",
+        "security_policy": "https://github.com/CIRCL/miccheck/security/policy"
+      }
+    },
+    {
+      "name": "miclib",
+      "description": "miclib v3.6.1 (Intel Xeon Phi Coprocessor) for Ubuntu LTS 14.04 Trusty (extracted from mpss-micmgmt)",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/miclib",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/miclib.git"
+      },
+      "links": {
+        "project_page": "https://www.circl.lu/pub/tr-43/",
+        "releases": "https://github.com/CIRCL/miclib/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/miclib/issues",
+        "good_first_issues": "https://github.com/CIRCL/miclib/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/miclib/releases",
+        "security_policy": "https://github.com/CIRCL/miclib/security/policy"
+      }
+    },
+    {
+      "name": "mpss-daemon",
+      "description": "mpss-daemon v3.6.1 (Intel Xeon Phi Coprocessor) for Ubuntu LTS 14.04 Trusty",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/mpss-daemon",
+        "license": "GPL-2.0",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/mpss-daemon.git"
+      },
+      "links": {
+        "project_page": "https://www.circl.lu/pub/tr-43/",
+        "releases": "https://github.com/CIRCL/mpss-daemon/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/mpss-daemon/issues",
+        "good_first_issues": "https://github.com/CIRCL/mpss-daemon/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/mpss-daemon/releases",
+        "security_policy": "https://github.com/CIRCL/mpss-daemon/security/policy"
+      }
+    },
+    {
+      "name": "openpgp-keys-filterlists",
+      "description": "OpenPGP keys filterlists maintained by CIRCL",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/openpgp-keys-filterlists",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/openpgp-keys-filterlists.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/openpgp-keys-filterlists/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/openpgp-keys-filterlists/issues",
+        "good_first_issues": "https://github.com/CIRCL/openpgp-keys-filterlists/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/openpgp-keys-filterlists/releases",
+        "security_policy": "https://github.com/CIRCL/openpgp-keys-filterlists/security/policy"
+      },
+      "tags": [
+        "openpgp",
+        "openpgp-key-fingerprints",
+        "openpgp-keyserver"
+      ]
+    },
+    {
+      "name": "pisax-website",
+      "description": "pisax.org website",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/pisax-website",
+        "license": "MIT",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/pisax-website.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/pisax-website/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/pisax-website/issues",
+        "good_first_issues": "https://github.com/CIRCL/pisax-website/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/pisax-website/releases",
+        "security_policy": "https://github.com/CIRCL/pisax-website/security/policy"
+      }
+    },
+    {
+      "name": "rss.circl.lu",
+      "description": "rss.circl.lu - All about RSS and Atom from circl.lu",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/rss.circl.lu",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/rss.circl.lu.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/rss.circl.lu/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/rss.circl.lu/issues",
+        "good_first_issues": "https://github.com/CIRCL/rss.circl.lu/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/rss.circl.lu/releases",
+        "security_policy": "https://github.com/CIRCL/rss.circl.lu/security/policy"
+      }
+    },
+    {
+      "name": "TestCasesCIRClean",
+      "description": "A bunch of files to test if CIRCLean works properly. Contains malicious documents.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/TestCasesCIRClean",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/TestCasesCIRClean.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/TestCasesCIRClean/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/TestCasesCIRClean/issues",
+        "good_first_issues": "https://github.com/CIRCL/TestCasesCIRClean/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/TestCasesCIRClean/releases",
+        "security_policy": "https://github.com/CIRCL/TestCasesCIRClean/security/policy"
+      }
+    },
+    {
+      "name": "ZIBE",
+      "description": "Extracted from https://steemit.com/shadowbrokers/@theshadowbrokers/lost-in-translation",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/ZIBE",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/ZIBE.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/ZIBE/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/ZIBE/issues",
+        "good_first_issues": "https://github.com/CIRCL/ZIBE/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/ZIBE/releases",
+        "security_policy": "https://github.com/CIRCL/ZIBE/security/policy"
+      }
+    },
+    {
+      "name": "cti-summit",
+      "description": "cti-summit",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/cti-summit",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/cti-summit.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/cti-summit/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/cti-summit/issues",
+        "good_first_issues": "https://github.com/CIRCL/cti-summit/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/cti-summit/releases",
+        "security_policy": "https://github.com/CIRCL/cti-summit/security/policy"
+      }
+    },
+    {
+      "name": "log4j-recon",
+      "description": "No description provided.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/log4j-recon",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/log4j-recon.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/log4j-recon/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/log4j-recon/issues",
+        "good_first_issues": "https://github.com/CIRCL/log4j-recon/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/log4j-recon/releases",
+        "security_policy": "https://github.com/CIRCL/log4j-recon/security/policy"
+      }
+    },
+    {
+      "name": "nisduc-website",
+      "description": "https://www.nisduc.eu",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/nisduc-website",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/nisduc-website.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/nisduc-website/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/nisduc-website/issues",
+        "good_first_issues": "https://github.com/CIRCL/nisduc-website/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/nisduc-website/releases",
+        "security_policy": "https://github.com/CIRCL/nisduc-website/security/policy"
+      }
+    },
+    {
+      "name": "PyCIRCLean_tests",
+      "description": "Test files for pycirclean",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/CIRCL/PyCIRCLean_tests",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/CIRCL/PyCIRCLean_tests.git"
+      },
+      "links": {
+        "releases": "https://github.com/CIRCL/PyCIRCLean_tests/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/CIRCL/PyCIRCLean_tests/issues",
+        "good_first_issues": "https://github.com/CIRCL/PyCIRCLean_tests/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/CIRCL/PyCIRCLean_tests/releases",
+        "security_policy": "https://github.com/CIRCL/PyCIRCLean_tests/security/policy"
+      }
+    }
+  ],
+  "extensions": {}
+}

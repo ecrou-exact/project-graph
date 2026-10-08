@@ -1,0 +1,287 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2026-09-24T06:23:04Z",
+  "organization": {
+    "name": "Kunai Project",
+    "domain": "why.kunai.rocks",
+    "links": {
+      "homepage": "https://why.kunai.rocks",
+      "github_org": "https://github.com/kunai-project"
+    }
+  },
+  "projects": [
+    {
+      "name": "kunai",
+      "description": "Threat-hunting tool for Linux",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/kunai-project/kunai",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/kunai-project/kunai.git"
+      },
+      "links": {
+        "project_page": "https://why.kunai.rocks",
+        "releases": "https://github.com/kunai-project/kunai/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/kunai-project/kunai/issues",
+        "good_first_issues": "https://github.com/kunai-project/kunai/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/kunai-project/kunai/releases",
+        "security_policy": "https://github.com/kunai-project/kunai/security/policy"
+      },
+      "tags": [
+        "ebpf",
+        "linux",
+        "security-monitoring",
+        "threat-detection",
+        "threat-hunting"
+      ]
+    },
+    {
+      "name": "sandbox",
+      "description": "Sandbox samples and monitor them with kunai",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/kunai-project/sandbox",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/kunai-project/sandbox.git"
+      },
+      "links": {
+        "releases": "https://github.com/kunai-project/sandbox/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/kunai-project/sandbox/issues",
+        "good_first_issues": "https://github.com/kunai-project/sandbox/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/kunai-project/sandbox/releases",
+        "security_policy": "https://github.com/kunai-project/sandbox/security/policy"
+      }
+    },
+    {
+      "name": "sandbox-ui",
+      "description": "Kunai Sandbox UI",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/kunai-project/sandbox-ui",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/kunai-project/sandbox-ui.git"
+      },
+      "links": {
+        "releases": "https://github.com/kunai-project/sandbox-ui/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/kunai-project/sandbox-ui/issues",
+        "good_first_issues": "https://github.com/kunai-project/sandbox-ui/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/kunai-project/sandbox-ui/releases",
+        "security_policy": "https://github.com/kunai-project/sandbox-ui/security/policy"
+      }
+    },
+    {
+      "name": "pykunai",
+      "description": "Repository of helper tools for Kunai",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/kunai-project/pykunai",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/kunai-project/pykunai.git"
+      },
+      "links": {
+        "releases": "https://github.com/kunai-project/pykunai/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/kunai-project/pykunai/issues",
+        "good_first_issues": "https://github.com/kunai-project/pykunai/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/kunai-project/pykunai/releases",
+        "security_policy": "https://github.com/kunai-project/pykunai/security/policy"
+      }
+    },
+    {
+      "name": "kunai-build-docker",
+      "description": "Dockerfile to build kunai without effort",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/kunai-project/kunai-build-docker",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/kunai-project/kunai-build-docker.git"
+      },
+      "links": {
+        "releases": "https://github.com/kunai-project/kunai-build-docker/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/kunai-project/kunai-build-docker/issues",
+        "good_first_issues": "https://github.com/kunai-project/kunai-build-docker/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/kunai-project/kunai-build-docker/releases",
+        "security_policy": "https://github.com/kunai-project/kunai-build-docker/security/policy"
+      }
+    },
+    {
+      "name": "community-rules",
+      "description": "Community-driven detection rules for Kunai",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/kunai-project/community-rules",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/kunai-project/community-rules.git"
+      },
+      "links": {
+        "releases": "https://github.com/kunai-project/community-rules/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/kunai-project/community-rules/issues",
+        "good_first_issues": "https://github.com/kunai-project/community-rules/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/kunai-project/community-rules/releases",
+        "security_policy": "https://github.com/kunai-project/community-rules/security/policy"
+      }
+    },
+    {
+      "name": "workshops",
+      "description": "No description provided.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/kunai-project/workshops",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/kunai-project/workshops.git"
+      },
+      "links": {
+        "releases": "https://github.com/kunai-project/workshops/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/kunai-project/workshops/issues",
+        "good_first_issues": "https://github.com/kunai-project/workshops/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/kunai-project/workshops/releases",
+        "security_policy": "https://github.com/kunai-project/workshops/security/policy"
+      }
+    },
+    {
+      "name": "gene-rs",
+      "description": "Gene implementation in Rust",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/kunai-project/gene-rs",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/kunai-project/gene-rs.git"
+      },
+      "links": {
+        "releases": "https://github.com/kunai-project/gene-rs/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/kunai-project/gene-rs/issues",
+        "good_first_issues": "https://github.com/kunai-project/gene-rs/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/kunai-project/gene-rs/releases",
+        "security_policy": "https://github.com/kunai-project/gene-rs/security/policy"
+      }
+    },
+    {
+      "name": ".github",
+      "description": "No description provided.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/kunai-project/.github",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/kunai-project/.github.git"
+      },
+      "links": {
+        "releases": "https://github.com/kunai-project/.github/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/kunai-project/.github/issues",
+        "good_first_issues": "https://github.com/kunai-project/.github/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/kunai-project/.github/releases",
+        "security_policy": "https://github.com/kunai-project/.github/security/policy"
+      }
+    },
+    {
+      "name": "community-hub",
+      "description": "Kunai Community Hub",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/kunai-project/community-hub",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/kunai-project/community-hub.git"
+      },
+      "links": {
+        "releases": "https://github.com/kunai-project/community-hub/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/kunai-project/community-hub/issues",
+        "good_first_issues": "https://github.com/kunai-project/community-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/kunai-project/community-hub/releases",
+        "security_policy": "https://github.com/kunai-project/community-hub/security/policy"
+      }
+    },
+    {
+      "name": "kunai-doc",
+      "description": "No description provided.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/kunai-project/kunai-doc",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/kunai-project/kunai-doc.git"
+      },
+      "links": {
+        "releases": "https://github.com/kunai-project/kunai-doc/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/kunai-project/kunai-doc/issues",
+        "good_first_issues": "https://github.com/kunai-project/kunai-doc/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/kunai-project/kunai-doc/releases",
+        "security_policy": "https://github.com/kunai-project/kunai-doc/security/policy"
+      }
+    },
+    {
+      "name": "linux-protos",
+      "description": "Linux kernel prototypes",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/kunai-project/linux-protos",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/kunai-project/linux-protos.git"
+      },
+      "links": {
+        "releases": "https://github.com/kunai-project/linux-protos/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/kunai-project/linux-protos/issues",
+        "good_first_issues": "https://github.com/kunai-project/linux-protos/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/kunai-project/linux-protos/releases",
+        "security_policy": "https://github.com/kunai-project/linux-protos/security/policy"
+      }
+    }
+  ],
+  "extensions": {}
+}

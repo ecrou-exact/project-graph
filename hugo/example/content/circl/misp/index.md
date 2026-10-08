@@ -7,6 +7,7 @@ graph:
   id: "misp"
   type: "organisation"
   url: "https://www.misp-project.org"
+  graph: "/circl/misp"
   github: "MISP/MISP"
   githubInfo:
     fullName: "MISP/MISP"
@@ -38,3 +39,7 @@ graph:
     archived_repositories: 1
   image: "logo.png"
 ---
+
+The graph of MISP: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-misp" >}}

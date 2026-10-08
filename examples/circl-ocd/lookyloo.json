@@ -1,0 +1,584 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2026-09-24T06:21:19Z",
+  "organization": {
+    "name": "Lookyloo",
+    "domain": "lookyloo.eu",
+    "description": "Lookyloo is a web interface allowing to scrape a website and then displays a tree of domains calling each other. ",
+    "links": {
+      "homepage": "https://www.lookyloo.eu/",
+      "github_org": "https://github.com/Lookyloo"
+    }
+  },
+  "projects": [
+    {
+      "name": "lookyloo",
+      "description": "Lookyloo is a web interface that allows users to capture a website page and then display a tree of domains that call each other.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/lookyloo",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/lookyloo.git"
+      },
+      "links": {
+        "project_page": "https://www.lookyloo.eu",
+        "releases": "https://github.com/lookyloo/lookyloo/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/lookyloo/issues",
+        "good_first_issues": "https://github.com/lookyloo/lookyloo/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/lookyloo/releases",
+        "security_policy": "https://github.com/lookyloo/lookyloo/security/policy"
+      },
+      "tags": [
+        "capture",
+        "dfir",
+        "information-security",
+        "lookyloo",
+        "privacy",
+        "scraping",
+        "web-security"
+      ]
+    },
+    {
+      "name": "PlaywrightCapture",
+      "description": "Capture a URL with Playwright",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/PlaywrightCapture",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/PlaywrightCapture.git"
+      },
+      "links": {
+        "releases": "https://github.com/lookyloo/PlaywrightCapture/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/PlaywrightCapture/issues",
+        "good_first_issues": "https://github.com/lookyloo/PlaywrightCapture/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/PlaywrightCapture/releases",
+        "security_policy": "https://github.com/lookyloo/PlaywrightCapture/security/policy"
+      }
+    },
+    {
+      "name": "har2tree",
+      "description": "Make a tree from a HAR file ",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/har2tree",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/har2tree.git"
+      },
+      "links": {
+        "project_page": "https://har2tree.readthedocs.io/en/latest/?badge=latest",
+        "documentation": "https://har2tree.readthedocs.io/en/latest/?badge=latest",
+        "releases": "https://github.com/lookyloo/har2tree/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/har2tree/issues",
+        "good_first_issues": "https://github.com/lookyloo/har2tree/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22",
+        "docs": "https://har2tree.readthedocs.io/en/latest/?badge=latest"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/har2tree/releases",
+        "security_policy": "https://github.com/lookyloo/har2tree/security/policy"
+      },
+      "tags": [
+        "etetoolkit",
+        "har",
+        "lookyloo"
+      ]
+    },
+    {
+      "name": "sanejs",
+      "description": "Use CDNJS as a source to build hashes of known JS/CSS/IMG/... content used all over the internet",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/sanejs",
+        "license": "BSD-2-Clause",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/sanejs.git"
+      },
+      "links": {
+        "releases": "https://github.com/lookyloo/sanejs/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/sanejs/issues",
+        "good_first_issues": "https://github.com/lookyloo/sanejs/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/sanejs/releases",
+        "security_policy": "https://github.com/lookyloo/sanejs/security/policy"
+      },
+      "tags": [
+        "cdnjs",
+        "hashes",
+        "security-audit"
+      ]
+    },
+    {
+      "name": "phishtank-lookup",
+      "description": "Simple web API using the hourly dump from Phishtank",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/phishtank-lookup",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/phishtank-lookup.git"
+      },
+      "links": {
+        "project_page": "https://phishtankapi.circl.lu/",
+        "releases": "https://github.com/lookyloo/phishtank-lookup/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/phishtank-lookup/issues",
+        "good_first_issues": "https://github.com/lookyloo/phishtank-lookup/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/phishtank-lookup/releases",
+        "security_policy": "https://github.com/lookyloo/phishtank-lookup/security/policy"
+      },
+      "tags": [
+        "information-security",
+        "osint",
+        "phishing",
+        "phishing-detection",
+        "phishtank",
+        "phishtank-api"
+      ]
+    },
+    {
+      "name": "pysecuritytxt",
+      "description": "Tries to get and parse .well-known/security.txt from a domain",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/pysecuritytxt",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/pysecuritytxt.git"
+      },
+      "links": {
+        "releases": "https://github.com/lookyloo/pysecuritytxt/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/pysecuritytxt/issues",
+        "good_first_issues": "https://github.com/lookyloo/pysecuritytxt/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/pysecuritytxt/releases",
+        "security_policy": "https://github.com/lookyloo/pysecuritytxt/security/policy"
+      }
+    },
+    {
+      "name": "PyLookyloo",
+      "description": "Python CLI and module for Lookyloo",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/PyLookyloo",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/PyLookyloo.git"
+      },
+      "links": {
+        "project_page": "https://pylookyloo.readthedocs.io/en/latest/?badge=latest",
+        "documentation": "https://pylookyloo.readthedocs.io/en/latest/?badge=latest",
+        "releases": "https://github.com/lookyloo/PyLookyloo/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/PyLookyloo/issues",
+        "good_first_issues": "https://github.com/lookyloo/PyLookyloo/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22",
+        "docs": "https://pylookyloo.readthedocs.io/en/latest/?badge=latest"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/PyLookyloo/releases",
+        "security_policy": "https://github.com/lookyloo/PyLookyloo/security/policy"
+      },
+      "tags": [
+        "lookyloo",
+        "lookyloo-api"
+      ]
+    },
+    {
+      "name": "scraping-tutorial",
+      "description": "This tutorial explains the benefits, pitfalls, and limitations of scraping, and why Lookyloo is an important tool.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/scraping-tutorial",
+        "license": "MIT",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/scraping-tutorial.git"
+      },
+      "links": {
+        "releases": "https://github.com/lookyloo/scraping-tutorial/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/scraping-tutorial/issues",
+        "good_first_issues": "https://github.com/lookyloo/scraping-tutorial/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/scraping-tutorial/releases",
+        "security_policy": "https://github.com/lookyloo/scraping-tutorial/security/policy"
+      },
+      "tags": [
+        "lookyloo",
+        "scraping",
+        "scraping-tutorial",
+        "tutorial"
+      ]
+    },
+    {
+      "name": "monitoring",
+      "description": "Example project to monitor a list of websites and detect changes",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/monitoring",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/monitoring.git"
+      },
+      "links": {
+        "releases": "https://github.com/lookyloo/monitoring/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/monitoring/issues",
+        "good_first_issues": "https://github.com/lookyloo/monitoring/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/monitoring/releases",
+        "security_policy": "https://github.com/lookyloo/monitoring/security/policy"
+      },
+      "tags": [
+        "example",
+        "lookyloo",
+        "monitoring"
+      ]
+    },
+    {
+      "name": "PyPhishtankLookup",
+      "description": "Python API for Phishtank Lookup",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/PyPhishtankLookup",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/PyPhishtankLookup.git"
+      },
+      "links": {
+        "project_page": "https://pyphishtanklookup.readthedocs.io/en/latest/index.html",
+        "documentation": "https://pyphishtanklookup.readthedocs.io/en/latest/index.html",
+        "releases": "https://github.com/lookyloo/PyPhishtankLookup/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/PyPhishtankLookup/issues",
+        "good_first_issues": "https://github.com/lookyloo/PyPhishtankLookup/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22",
+        "docs": "https://pyphishtanklookup.readthedocs.io/en/latest/index.html"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/PyPhishtankLookup/releases",
+        "security_policy": "https://github.com/lookyloo/PyPhishtankLookup/security/policy"
+      },
+      "tags": [
+        "information-extraction",
+        "osint",
+        "phishing",
+        "phishing-sites",
+        "phishtank",
+        "phishtank-api"
+      ]
+    },
+    {
+      "name": "project_template",
+      "description": "Simple template used in most of the projects.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/project_template",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/project_template.git"
+      },
+      "links": {
+        "releases": "https://github.com/lookyloo/project_template/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/project_template/issues",
+        "good_first_issues": "https://github.com/lookyloo/project_template/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/project_template/releases",
+        "security_policy": "https://github.com/lookyloo/project_template/security/policy"
+      }
+    },
+    {
+      "name": "webext",
+      "description": "Web extension to submit a URL with its context to a Lookyloo instance",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/webext",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/webext.git"
+      },
+      "links": {
+        "releases": "https://github.com/lookyloo/webext/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/webext/issues",
+        "good_first_issues": "https://github.com/lookyloo/webext/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/webext/releases",
+        "security_policy": "https://github.com/lookyloo/webext/security/policy"
+      }
+    },
+    {
+      "name": "docs",
+      "description": "Documentation for Looklyoo",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/docs",
+        "license": "Apache-2.0",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/docs.git"
+      },
+      "links": {
+        "project_page": "https://www.lookyloo.eu/",
+        "releases": "https://github.com/lookyloo/docs/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/docs/issues",
+        "good_first_issues": "https://github.com/lookyloo/docs/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/docs/releases",
+        "security_policy": "https://github.com/lookyloo/docs/security/policy"
+      },
+      "tags": [
+        "lookyloo",
+        "lookyloo-documentation",
+        "scraping-websites",
+        "security"
+      ]
+    },
+    {
+      "name": "pyproject_template",
+      "description": "Python CLI and module for project template",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/pyproject_template",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/pyproject_template.git"
+      },
+      "links": {
+        "releases": "https://github.com/lookyloo/pyproject_template/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/pyproject_template/issues",
+        "good_first_issues": "https://github.com/lookyloo/pyproject_template/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/pyproject_template/releases",
+        "security_policy": "https://github.com/lookyloo/pyproject_template/security/policy"
+      }
+    },
+    {
+      "name": "testing",
+      "description": "Simple webserver doing weird redirects and other stuff to test Lookyloo",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/testing",
+        "license": "MIT",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/testing.git"
+      },
+      "links": {
+        "project_page": "http://rafiot.eu.pythonanywhere.com/",
+        "releases": "https://github.com/lookyloo/testing/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/testing/issues",
+        "good_first_issues": "https://github.com/lookyloo/testing/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/testing/releases",
+        "security_policy": "https://github.com/lookyloo/testing/security/policy"
+      },
+      "tags": [
+        "lookyloo",
+        "lookyloo-documentation"
+      ]
+    },
+    {
+      "name": ".github",
+      "description": "No description provided.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/.github",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/.github.git"
+      },
+      "links": {
+        "releases": "https://github.com/lookyloo/.github/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/.github/issues",
+        "good_first_issues": "https://github.com/lookyloo/.github/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/.github/releases",
+        "security_policy": "https://github.com/lookyloo/.github/security/policy"
+      }
+    },
+    {
+      "name": "capture_samples",
+      "description": "Some capture samples used for testing",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/capture_samples",
+        "license": "MIT",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/capture_samples.git"
+      },
+      "links": {
+        "releases": "https://github.com/lookyloo/capture_samples/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/capture_samples/issues",
+        "good_first_issues": "https://github.com/lookyloo/capture_samples/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/capture_samples/releases",
+        "security_policy": "https://github.com/lookyloo/capture_samples/security/policy"
+      },
+      "tags": [
+        "lookyloo",
+        "lookyloo-documentation"
+      ]
+    },
+    {
+      "name": "lookyloo-models",
+      "description": "A set of models representing data passed around across the toolchain.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/lookyloo-models",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/lookyloo-models.git"
+      },
+      "links": {
+        "releases": "https://github.com/lookyloo/lookyloo-models/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/lookyloo-models/issues",
+        "good_first_issues": "https://github.com/lookyloo/lookyloo-models/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/lookyloo-models/releases",
+        "security_policy": "https://github.com/lookyloo/lookyloo-models/security/policy"
+      }
+    },
+    {
+      "name": "PyLookylooMonitoring",
+      "description": "Python API to connect to lookyloo monitoring",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/PyLookylooMonitoring",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/PyLookylooMonitoring.git"
+      },
+      "links": {
+        "project_page": "https://pylookyloomonitoring.readthedocs.io/en/latest/",
+        "documentation": "https://pylookyloomonitoring.readthedocs.io/en/latest/",
+        "releases": "https://github.com/lookyloo/PyLookylooMonitoring/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/PyLookylooMonitoring/issues",
+        "good_first_issues": "https://github.com/lookyloo/PyLookylooMonitoring/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22",
+        "docs": "https://pylookyloomonitoring.readthedocs.io/en/latest/"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/PyLookylooMonitoring/releases",
+        "security_policy": "https://github.com/lookyloo/PyLookylooMonitoring/security/policy"
+      }
+    },
+    {
+      "name": "PyMmdbServer",
+      "description": "Python API and client to query MMDB Server",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/PyMmdbServer",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/PyMmdbServer.git"
+      },
+      "links": {
+        "releases": "https://github.com/lookyloo/PyMmdbServer/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/PyMmdbServer/issues",
+        "good_first_issues": "https://github.com/lookyloo/PyMmdbServer/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/PyMmdbServer/releases",
+        "security_policy": "https://github.com/lookyloo/PyMmdbServer/security/policy"
+      }
+    },
+    {
+      "name": "PySaneJS",
+      "description": "Python client for SaneJS",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/PySaneJS",
+        "license": "BSD-2-Clause",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/PySaneJS.git"
+      },
+      "links": {
+        "releases": "https://github.com/lookyloo/PySaneJS/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/PySaneJS/issues",
+        "good_first_issues": "https://github.com/lookyloo/PySaneJS/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/PySaneJS/releases",
+        "security_policy": "https://github.com/lookyloo/PySaneJS/security/policy"
+      },
+      "tags": [
+        "lookyloo",
+        "sanejs"
+      ]
+    },
+    {
+      "name": "training",
+      "description": "A training for using Lookyloo, Lacus and the test of the toolchain",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Lookyloo/training",
+        "license": "MIT",
+        "type": "git",
+        "clone": "https://github.com/Lookyloo/training.git"
+      },
+      "links": {
+        "releases": "https://github.com/lookyloo/training/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/lookyloo/training/issues",
+        "good_first_issues": "https://github.com/lookyloo/training/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/lookyloo/training/releases",
+        "security_policy": "https://github.com/lookyloo/training/security/policy"
+      }
+    }
+  ],
+  "extensions": {}
+}

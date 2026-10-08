@@ -7,6 +7,7 @@ graph:
   id: "neolea"
   type: "organisation"
   url: "https://neolea.github.io/neolea-training-materials/"
+  graph: "/circl/neolea"
   github: "neolea/neolea-training-materials"
   githubInfo:
     fullName: "neolea/neolea-training-materials"
@@ -35,3 +36,7 @@ graph:
     most_starred_repositories: ["neolea-training-materials (64 stars)", "misp-lea-website (0 stars)", "neolea-training-materials-files (0 stars)"]
   image: "logo.png"
 ---
+
+The graph of Neolea: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-neolea" >}}

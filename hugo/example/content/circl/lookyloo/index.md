@@ -7,6 +7,7 @@ graph:
   id: "lookyloo"
   type: "organisation"
   url: "https://www.lookyloo.eu/"
+  graph: "/circl/lookyloo"
   github: "Lookyloo/lookyloo"
   githubInfo:
     fullName: "Lookyloo/lookyloo"
@@ -35,3 +36,7 @@ graph:
     archived_repositories: 1
   image: "logo.png"
 ---
+
+The graph of Lookyloo: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-lookyloo" >}}

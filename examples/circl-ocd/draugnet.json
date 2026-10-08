@@ -1,0 +1,83 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2026-09-24T06:23:52Z",
+  "organization": {
+    "name": "draugnet",
+    "domain": "circl.lu",
+    "links": {
+      "github_org": "https://github.com/draugnet"
+    }
+  },
+  "projects": [
+    {
+      "name": "draugnet",
+      "description": "Draugnet is a lightweight, open-source tool for anonymous cyber threat reporting. Built for the MISP ecosystem, it lets users submit and track reports — no accounts, no logins, just a simple token. Supports plain text, MISP JSON, and object templates — ideal for CSIRTs, ISACs, and trusted communities. 🔐 Built for anonymity 🧩 Easy MISP integration",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/draugnet/draugnet",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/draugnet/draugnet.git"
+      },
+      "links": {
+        "project_page": "https://github.com/draugnet/draugnet/",
+        "releases": "https://github.com/draugnet/draugnet/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/draugnet/draugnet/issues",
+        "good_first_issues": "https://github.com/draugnet/draugnet/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/draugnet/draugnet/releases",
+        "security_policy": "https://github.com/draugnet/draugnet/security/policy"
+      }
+    },
+    {
+      "name": "draugnetUI",
+      "description": "The portable frontend UI for anonymous threat reporting via Draugnet. Drop intel, retrieve updates, and stay in the loop — without logging in.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/draugnet/draugnetUI",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/draugnet/draugnetUI.git"
+      },
+      "links": {
+        "project_page": "https://github.com/draugnet/draugnetUI",
+        "releases": "https://github.com/draugnet/draugnetUI/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/draugnet/draugnetUI/issues",
+        "good_first_issues": "https://github.com/draugnet/draugnetUI/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/draugnet/draugnetUI/releases",
+        "security_policy": "https://github.com/draugnet/draugnetUI/security/policy"
+      }
+    },
+    {
+      "name": "draugnet-docker",
+      "description": "Dockerized deployment for the full Draugnet stack. Secure, token-based threat reporting — in one docker compose up.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/draugnet/draugnet-docker",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/draugnet/draugnet-docker.git"
+      },
+      "links": {
+        "project_page": "https://github.com/draugnet/draugnet-docker/",
+        "releases": "https://github.com/draugnet/draugnet-docker/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/draugnet/draugnet-docker/issues",
+        "good_first_issues": "https://github.com/draugnet/draugnet-docker/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/draugnet/draugnet-docker/releases",
+        "security_policy": "https://github.com/draugnet/draugnet-docker/security/policy"
+      }
+    }
+  ],
+  "extensions": {}
+}

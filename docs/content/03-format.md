@@ -9,6 +9,8 @@ A Pivograph document is a JSON object. All top-level keys are optional; unknown 
   "nodeTypes": { "project": { … } },
   "edgeTypes": { "uses": { … } },
   "tags": { "open-source": { … } },
+  "sections": [ { "title": "…", "x": 0, "y": 0, … } ],
+  "arrows": [ { "from": { "node": "…" }, "to": { "section": "…" }, … } ],
   "nodes": [ { "id": "…", … } ],
   "edges": [ { "from": "…", "to": "…", … } ]
 }
@@ -23,6 +25,7 @@ A Pivograph document is a JSON object. All top-level keys are optional; unknown 
 | `title` | string | Shown in the app's header and the browser tab. |
 | `description` | string | What the map shows, the arrow convention, when facts were checked. |
 | `linkDistance` | number | Edge length in the layout. Default `150`; raise it (200–350) for big nodes or long edge labels. |
+| `fixedLayout` | boolean | Nodes stay exactly at their `x` / `y`: no force layout, as in a drawn diagram. *Add → Fixed layout* toggles it. |
 | `readOnly` | boolean | Opens the map locked: it can be explored and exported, not edited. Set automatically on imported descriptors and on the bundled example. To change a locked map, edit its JSON file. |
 | `source` | object | Where the map came from, e.g. `{ "format": "ocd", "domain": "misp-project.org" }`. Set by imports. |
 
@@ -37,6 +40,7 @@ Each node is an object. Only `id` is required.
 | `type` | string | A key of `nodeTypes`. Undeclared types load with a warning. |
 | `description` | string | One or two sentences, shown in the details panel, the tooltip and the node list. |
 | `url` | string | The node's website. |
+| `graph` | string | Another graph that details this node, e.g. `examples/circl/misp.json` for an organisation and its projects: a Pivograph graph or an OCD file, as a URL or a path relative to the app. The details panel and the right-click menu offer *Open its graph*; a *←* button in the header leads back. |
 | `github` | string | GitHub repository: `owner/repo`, or any github.com URL of the repository (normalized to `owner/repo`). |
 | `githubInfo` | object | Repository summary saved by the app when a repository is fetched in the node form: `fullName`, `url`, `description`, `homepage`, `stars`, `forks`, `issues`, `language`, `license`, `topics`, `archived`, `pushedAt`, `fetchedAt`. Kept only together with `github`. You can fill it yourself from the GitHub API. |
 | `links` | array | Other links: `[{ "label": "Documentation", "url": "https://…" }]`. `label` is optional. |
@@ -49,7 +53,7 @@ Each node is an object. Only `id` is required.
 | Field | Type | Default | Description |
 |---|---|---|---|
 | `color` | CSS colour | `#4f7cff` | Fill colour. `transparent` works, e.g. for logos. |
-| `shape` | string | `circle` | `circle`, `square`, `triangle` or `hexagon`. |
+| `shape` | string | `circle` | `circle`, `square`, `triangle`, `hexagon`, or `card`: a rounded box with the image and the label **inside** (see below). |
 | `size` | number | `14` | Radius in pixels. |
 | `image` | string | | URL, path relative to the app (`icons/tool.svg`, `logos/misp.png`), or `data:` URL. |
 | `imageFit` | string | `cover` | `cover` (fills the shape), `contain` (whole image inside), `icon` (a glyph on the node's colour), `frame` (square shape framing the image). |
@@ -61,6 +65,18 @@ Each node is an object. Only `id` is required.
 | `labelSize` | number | auto | Label font size in pixels. |
 | `labelFont` | string | | `sans`, `serif`, `mono`, `rounded`, `condensed`, or any CSS `font-family`. |
 | `hideBadges` | boolean | `false` | Hide the tag pills under the node. |
+
+**Card nodes** (`shape: "card"`) draw the box of a diagram: the image (if any), then the label and an optional `subtitle`, inside the box; edges and arrows end on its border. `color` is the background (default white), `borderColor` / `borderWidth` the border, `labelColor` / `labelSize` / `labelFont` the text (`\n` starts a new line). `size` and `imageFit` don't apply.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `subtitle` | string | | Second line, under the image and label. |
+| `width`, `height` | number | its content | Box size in pixels. |
+| `padding` | number | `16` | Space between the border and the content: raise it to give logos more room. |
+| `imageSize` | number | `56` | Image height in pixels. |
+| `imagePosition` | string | `top` | `top` (image above the label) or `left` (beside it). |
+
+`labelFont` also accepts `hand`: Excalidraw's hand-drawn font (Virgil, bundled).
 
 Bundled images: `icons/project.svg`, `platform`, `tool`, `data`, `organization`, `format`, `rule`, `code` (white glyphs for `imageFit: "icon"`).
 
@@ -125,6 +141,53 @@ Tags are declared on nodes. The top-level `tags` object only sets how a tag is d
 
 Available icons: `shield-halved`, `bug`, `virus`, `skull`, `lock`, `key`, `fingerprint`, `triangle-exclamation`, `circle-info`, `circle-question`, `check`, `xmark`, `star`, `flag`, `tag`, `heart`, `fire`, `bolt`, `bell`, `lightbulb`, `eye`, `magnifying-glass`, `database`, `server`, `cloud`, `network-wired`, `globe`, `link`, `code`, `terminal`, `gear`, `wrench`, `cube`, `robot`, `rocket`, `chart-line`, `clock`, `book`, `file-lines`, `graduation-cap`, `user`, `users`, `building`, `handshake`, `scale-balanced`, `money-bill`, and the brands `github`, `gitlab`, `python`, `js`, `rust`, `docker`, `linux`, `windows`, `apple`, `android`, `aws`, `google`, `slack`, `discord`, `mastodon`.
 
+### sections
+
+Titled frames drawn behind the graph ("Incident response", "Sensors"…), for the picture only: they hold no nodes and edges don't point to them. Add one with *Add → Section*; drag its title to move it, its bottom-right corner to resize it, double-click its title to edit it (or use the Sections tab). Pair them with `meta.fixedLayout` so the nodes stay inside. They are part of the PNG export.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `x`, `y` | number | | **Required.** Top-left corner, in graph coordinates (the same as the nodes' `x` / `y`). |
+| `width`, `height` | number | `400`, `240` | Size. |
+| `title` | string | | Shown in the top-left corner. |
+| `color` | CSS colour | grey | Title colour, and the line under it. |
+| `underline` | boolean | when `color` is set | Line under the title. |
+| `titleSize` | number | `22` | Title font size in pixels. |
+| `titleFont` | string | | As `labelFont`. |
+| `fill` | CSS colour or `"none"` | light grey | Background; `"none"` for a bare title (e.g. the diagram's heading). |
+| `borderColor` | CSS colour or `"none"` | grey | Border. |
+| `id` | string | from the title | Unique. |
+
+```json
+"meta": { "title": "SOC stack", "fixedLayout": true },
+"sections": [
+  { "title": "Incident response", "x": 20, "y": 115, "width": 750, "height": 420, "color": "#1971c2" },
+  { "title": "Sensors", "x": 20, "y": 880, "width": 1660, "height": 250 }
+]
+```
+
+### arrows
+
+Arrows drawn by Pivograph, like sections, for diagrams: unlike an edge, an arrow can start or end on a **section** or on **a free point**, and each end can sit **anywhere** on its target. Add one with *Add → Arrow*; click it on the graph to select it, then drag its ends (onto a node, a section or empty space) and its label; Delete removes it, a double-click edits it. Arrows are part of the PNG export, not of the report.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `from`, `to` | object | | **Required.** `{ "node": "id" }`, `{ "section": "id" }` or `{ "x": 0, "y": 0 }`. Add `"at": [u, v]` to place the end on the target's box: `[0, 0]` top-left, `[1, 1]` bottom-right, `[0.5, 1]` the middle of the bottom side. Without `at`, the end sits on the side facing the other end (straight up or down from a section). |
+| `label` | string | | `\n` starts a new line. |
+| `description` | string | | Shown when the pointer is over the arrow. |
+| `direction` | string | `forward` | As for edges: `forward`, `backward`, `both`, `none`. |
+| `route` | string | `straight` | `straight` or `elbow` (right angles). |
+| `color`, `width`, `dashed` | | `#343a40`, `2`, `false` | Line. |
+| `labelColor`, `labelSize`, `labelFont`, `labelBackground` | | line colour, `14` | Label; the background defaults to the page colour, `"none"` for none. |
+| `labelOffset` | [dx, dy] | `[0, 0]` | Shift of the label from the middle of the arrow (set by dragging it). |
+
+```json
+"arrows": [
+  { "from": { "node": "misp", "at": [0.5, 1] }, "to": { "section": "pipeline" },
+    "direction": "both", "label": "4) Feed detections\n(IoCs) & sightings", "color": "#1c5cff" }
+]
+```
+
 ### Validation
 
 Loading a document reports:
@@ -136,6 +199,7 @@ Loading a document reports:
 
 - [`examples/rulezet.json`](examples/rulezet.json): how Rulezet connects to ten other projects, with logos, detailed relationship descriptions, GitHub details and tags. It is the example the app opens with.
 - [`examples/circl.json`](examples/circl.json): the GitHub organisations managed or co-managed by CIRCL, from [new.circl.lu](https://new.circl.lu/projects/github-organisations/). CIRCL in the centre and 21 organisations around it, each with its logo, description, website, most starred repository (`githubInfo`) and most used topics as tags. Generated by `node scripts/circl-example.mjs` from the GitHub API.
+- [`examples/ngsoti-soc-stack.json`](examples/ngsoti-soc-stack.json): a drawn diagram — the NGSOTI SOC stack (sensors, Tenzir pipeline, MISP, flowintel, AIL) with Rulezet: card nodes, sections, arrows, a fixed layout and the hand-drawn font. It opens read-only (*Graph → NGSOTI SOC stack example*).
 - [`examples/minimal.json`](examples/minimal.json): the smallest useful map — two types, three nodes, two edges.
 
 A compact example with the main features:

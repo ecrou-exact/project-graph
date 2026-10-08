@@ -5,6 +5,7 @@ weight: 18
 graph:
   id: "fanything-project"
   type: "organisation"
+  graph: "/circl/fanything-project"
   github: "fanything-project/fanything"
   githubInfo:
     fullName: "fanything-project/fanything"
@@ -31,3 +32,7 @@ graph:
     most_starred_repositories: ["fanything (15 stars)"]
   image: "logo.png"
 ---
+
+The graph of FAnything Project: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-fanything-project" >}}

@@ -4,6 +4,7 @@ weight: 15
 graph:
   id: "ngsoti"
   type: "organisation"
+  graph: "/circl/ngsoti"
   github: "ngsoti/rust-training"
   githubInfo:
     fullName: "ngsoti/rust-training"
@@ -30,3 +31,7 @@ graph:
     most_starred_repositories: ["rust-training (16 stars)", "misp-wazuh-workshop (9 stars)", "ngsoti (9 stars)", ".github (0 stars)"]
   image: "logo.png"
 ---
+
+The graph of NGSOTI: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-ngsoti" >}}

@@ -7,6 +7,7 @@ graph:
   id: "cerebrate-project"
   type: "organisation"
   url: "https://www.cerebrate-project.org"
+  graph: "/circl/cerebrate-project"
   github: "cerebrate-project/cerebrate"
   githubInfo:
     fullName: "cerebrate-project/cerebrate"
@@ -39,3 +40,7 @@ graph:
     archived_repositories: 1
   image: "logo.png"
 ---
+
+The graph of Cerebrate Project: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-cerebrate-project" >}}

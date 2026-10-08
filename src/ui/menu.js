@@ -4,6 +4,7 @@ import { h } from './dom.js'
 
 /**
  * items: [{ label, hint?, onclick, disabled?: () => boolean } | 'separator' | { heading }]
+ * (`label` and `hint` can be functions, read each time the menu opens)
  * Returns the wrapper element; its `button` property is the menu button.
  */
 export function menuButton({ label, items, primary = false, id, align = 'start' }) {
@@ -32,7 +33,7 @@ export function menuButton({ label, items, primary = false, id, align = 'start' 
           close()
           item.onclick()
         },
-      }, h('span', { class: 'pg-menu-label' }, item.label), item.hint ? h('span', { class: 'pg-menu-hint' }, item.hint) : null)
+      }, h('span', { class: 'pg-menu-label' }, read(item.label)), item.hint ? h('span', { class: 'pg-menu-hint' }, read(item.hint)) : null)
     }))
   }
 
@@ -82,4 +83,8 @@ export function menuButton({ label, items, primary = false, id, align = 'start' 
     }
   })
   return wrap
+}
+
+function read(value) {
+  return typeof value === 'function' ? value() : value
 }

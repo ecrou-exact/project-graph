@@ -1,0 +1,112 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2026-09-24T06:23:44Z",
+  "organization": {
+    "name": "NGSOTI",
+    "domain": "circl.lu",
+    "links": {
+      "github_org": "https://github.com/ngsoti"
+    }
+  },
+  "projects": [
+    {
+      "name": "rust-training",
+      "description": "Rust Training by Examples",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/ngsoti/rust-training",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/ngsoti/rust-training.git"
+      },
+      "links": {
+        "releases": "https://github.com/ngsoti/rust-training/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/ngsoti/rust-training/issues",
+        "good_first_issues": "https://github.com/ngsoti/rust-training/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/ngsoti/rust-training/releases",
+        "security_policy": "https://github.com/ngsoti/rust-training/security/policy"
+      },
+      "tags": [
+        "rust",
+        "training",
+        "training-materials"
+      ]
+    },
+    {
+      "name": "misp-wazuh-workshop",
+      "description": "MISP Workshop integrating open-source tools such as Wazuh, Suricata and Zeek.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/ngsoti/misp-wazuh-workshop",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/ngsoti/misp-wazuh-workshop.git"
+      },
+      "links": {
+        "releases": "https://github.com/ngsoti/misp-wazuh-workshop/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/ngsoti/misp-wazuh-workshop/issues",
+        "good_first_issues": "https://github.com/ngsoti/misp-wazuh-workshop/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/ngsoti/misp-wazuh-workshop/releases",
+        "security_policy": "https://github.com/ngsoti/misp-wazuh-workshop/security/policy"
+      }
+    },
+    {
+      "name": "ngsoti",
+      "description": "NGSOTI",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/ngsoti/ngsoti",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/ngsoti/ngsoti.git"
+      },
+      "links": {
+        "releases": "https://github.com/ngsoti/ngsoti/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/ngsoti/ngsoti/issues",
+        "good_first_issues": "https://github.com/ngsoti/ngsoti/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/ngsoti/ngsoti/releases",
+        "security_policy": "https://github.com/ngsoti/ngsoti/security/policy"
+      },
+      "tags": [
+        "opensource",
+        "soc",
+        "threatintelligence"
+      ]
+    },
+    {
+      "name": ".github",
+      "description": "No description provided.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/ngsoti/.github",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/ngsoti/.github.git"
+      },
+      "links": {
+        "releases": "https://github.com/ngsoti/.github/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/ngsoti/.github/issues",
+        "good_first_issues": "https://github.com/ngsoti/.github/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/ngsoti/.github/releases",
+        "security_policy": "https://github.com/ngsoti/.github/security/policy"
+      }
+    }
+  ],
+  "extensions": {}
+}

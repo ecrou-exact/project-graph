@@ -6,6 +6,7 @@ graph:
   id: "pandora-analysis"
   type: "organisation"
   url: "https://pandora.circl.lu/"
+  graph: "/circl/pandora-analysis"
   github: "pandora-analysis/pandora"
   githubInfo:
     fullName: "pandora-analysis/pandora"
@@ -35,3 +36,7 @@ graph:
     most_starred_repositories: ["pandora (284 stars)", "pypandora (7 stars)"]
   image: "logo.png"
 ---
+
+The graph of Pandora Analysis: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-pandora-analysis" >}}

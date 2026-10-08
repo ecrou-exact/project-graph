@@ -1,0 +1,37 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2026-09-24T06:23:54Z",
+  "organization": {
+    "name": "fanything project",
+    "domain": "circl.lu",
+    "description": "Fingerprint everything",
+    "links": {
+      "github_org": "https://github.com/fanything-project"
+    }
+  },
+  "projects": [
+    {
+      "name": "fanything",
+      "description": "Fingerprint anything on a network perspective",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/fanything-project/fanything",
+        "license": "BSD-2-Clause",
+        "type": "git",
+        "clone": "https://github.com/fanything-project/fanything.git"
+      },
+      "links": {
+        "releases": "https://github.com/fanything-project/fanything/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/fanything-project/fanything/issues",
+        "good_first_issues": "https://github.com/fanything-project/fanything/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/fanything-project/fanything/releases",
+        "security_policy": "https://github.com/fanything-project/fanything/security/policy"
+      }
+    }
+  ],
+  "extensions": {}
+}

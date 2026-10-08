@@ -7,6 +7,7 @@ graph:
   id: "hashlookup"
   type: "organisation"
   url: "https://hashlookup.io"
+  graph: "/circl/hashlookup"
   github: "hashlookup/hashlookup-forensic-analyser"
   githubInfo:
     fullName: "hashlookup/hashlookup-forensic-analyser"
@@ -36,3 +37,7 @@ graph:
     most_starred_repositories: ["hashlookup-forensic-analyser (130 stars)", "fleur (116 stars)", "poppy (29 stars)", "private-search-set (16 stars)", "a-ray-grass (14 stars)"]
   image: "logo.png"
 ---
+
+The graph of Hashlookup: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-hashlookup" >}}

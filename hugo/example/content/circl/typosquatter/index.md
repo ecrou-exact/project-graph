@@ -7,6 +7,7 @@ graph:
   id: "typosquatter"
   type: "organisation"
   url: "https://typosquatting-finder.circl.lu/"
+  graph: "/circl/typosquatter"
   github: "typosquatter/ail-typo-squatting"
   githubInfo:
     fullName: "typosquatter/ail-typo-squatting"
@@ -36,3 +37,7 @@ graph:
     most_starred_repositories: ["ail-typo-squatting (109 stars)", "ail-typo-website (76 stars)", "pypi-squatting (6 stars)"]
   image: "logo.png"
 ---
+
+The graph of Typosquatter: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-typosquatter" >}}

@@ -1,0 +1,71 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2026-09-24T06:20:57Z",
+  "organization": {
+    "name": "Pandora analysis",
+    "domain": "pandora.circl.lu",
+    "links": {
+      "github_org": "https://github.com/pandora-analysis"
+    }
+  },
+  "projects": [
+    {
+      "name": "pandora",
+      "description": "Pandora is an analysis framework to discover if a file is suspicious and conveniently show the results ",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/pandora-analysis/pandora",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/pandora-analysis/pandora.git"
+      },
+      "links": {
+        "project_page": "https://pandora.circl.lu/",
+        "releases": "https://github.com/pandora-analysis/pandora/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/pandora-analysis/pandora/issues",
+        "good_first_issues": "https://github.com/pandora-analysis/pandora/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/pandora-analysis/pandora/releases",
+        "security_policy": "https://github.com/pandora-analysis/pandora/security/policy"
+      },
+      "tags": [
+        "document-analysis",
+        "document-analyzing",
+        "infosec",
+        "malware-detection"
+      ]
+    },
+    {
+      "name": "pypandora",
+      "description": "Python API for pandora",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/pandora-analysis/pypandora",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/pandora-analysis/pypandora.git"
+      },
+      "links": {
+        "project_page": "https://pypandora.readthedocs.io/en/latest/index.html",
+        "documentation": "https://pypandora.readthedocs.io/en/latest/index.html",
+        "releases": "https://github.com/pandora-analysis/pypandora/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/pandora-analysis/pypandora/issues",
+        "good_first_issues": "https://github.com/pandora-analysis/pypandora/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22",
+        "docs": "https://pypandora.readthedocs.io/en/latest/index.html"
+      },
+      "release": {
+        "changelog": "https://github.com/pandora-analysis/pypandora/releases",
+        "security_policy": "https://github.com/pandora-analysis/pypandora/security/policy"
+      },
+      "tags": [
+        "pandora"
+      ]
+    }
+  ],
+  "extensions": {}
+}

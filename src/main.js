@@ -2,15 +2,17 @@ import './style.css'
 import pivotickPackage from 'pivotick/package.json'
 import rulezetExample from '../examples/rulezet.json'
 import circlExample from '../examples/circl.json'
+import ngsotiExample from '../examples/ngsoti-soc-stack.json'
 import { GraphView } from './graph.js'
-import { DIRECTIONS, TAG_FIELDS, compact, emptyDocument, parseDocument, resolveEdge, resolveNode, starterDocument } from './model.js'
+import { DIRECTIONS, TAG_FIELDS, compact, parseArrow, parseSection, uniqueId, emptyDocument, parseDocument, resolveEdge, resolveNode, starterDocument } from './model.js'
 import { h } from './ui/dom.js'
-import { edgeFields, nodeFields, tagFields, typeFields } from './ui/forms.js'
+import { arrowEndKey, arrowFields, edgeFields, nodeFields, sectionFields, tagFields, typeFields } from './ui/forms.js'
 import { tagPill } from './ui/pills.js'
 import { isOcd, ocdToDocument, wellKnownUrl } from './ocd.js'
 import { confirmModal, openFormModal, toast } from './ui/modal.js'
 import { menuButton } from './ui/menu.js'
 import '../docs/search.js'
+import { registerFonts } from './fonts.js'
 
 const STORAGE_KEY = 'pivograph:document'
 
@@ -19,22 +21,25 @@ const STORAGE_KEY = 'pivograph:document'
  *   ?embed=1     hide the app's top bar (logo, menus)
  *   ?src=<url>   load this JSON at start: a Pivograph graph or an OCD file
  *   ?sidebar=0   hide the side panel
- *   ?tags=0      start with the tag pills hidden
+ *   ?tags=1      start with the tag pills shown (hidden by default)
  * The host page can also send the data, e.g. a file its visitor opened:
  *   iframe.contentWindow.postMessage({ type: 'pivograph:load', data, name }, '*')
  * The app announces itself with { type: 'pivograph:ready' } and answers each
  * load with { type: 'pivograph:loaded', nodes, edges } or { type: 'pivograph:error', message }.
+ * "Open its graph" on a node with a `graph` field sends { type: 'pivograph:open', url, label }:
+ * the host page decides where to go.
  */
 const PARAMS = new URLSearchParams(location.search)
 const EMBED = {
   enabled: PARAMS.has('embed') && PARAMS.get('embed') !== '0',
   src: PARAMS.get('src'),
   sidebar: PARAMS.get('sidebar') !== '0',
-  tags: PARAMS.get('tags') !== '0',
+  // Tag pills on the graph: hidden unless asked for (?tags=1, or the button).
+  tags: PARAMS.get('tags') === '1',
 }
 
 // Document-level state. Nodes and edges live in Pivotick (see GraphView).
-const state = { meta: {}, nodeTypes: {}, edgeTypes: {}, tags: {} }
+const state = { meta: {}, nodeTypes: {}, edgeTypes: {}, tags: {}, sections: [], arrows: [] }
 const ui = { tab: 'nodes', filter: '', jsonDirty: false, withPositions: true }
 
 const view = new GraphView(document.getElementById('graph'), {
@@ -44,10 +49,19 @@ const view = new GraphView(document.getElementById('graph'), {
   edgeFields: (container, init) => edgeFields(container, init, edgeContext()),
   confirm: (message) => confirmModal(message),
   onChange: () => {
+    pruneArrows()
     renderSidebar()
     persist()
   },
   onFilterChange: () => scheduleSidebar(),
+  openGraph: (node) => openNodeGraph(node),
+  onDrawingChange: () => {
+    renderSidebar()
+    persist()
+  },
+  editSection: (id) => editSection(id),
+  editArrow: (id) => editArrow(id),
+  deleteArrow: (id) => removeArrow(id),
 })
 
 let sidebarFrame = null
@@ -62,10 +76,14 @@ function scheduleSidebar() {
 // --- document lifecycle ------------------------------------------------------
 
 function loadDocument(doc) {
+  // Opening any other graph forgets the way back from a node's graph.
+  if (!openingNodeGraph) graphHistory.length = 0
   state.meta = { ...doc.meta }
   state.nodeTypes = structuredClone(doc.nodeTypes)
   state.edgeTypes = structuredClone(doc.edgeTypes)
   state.tags = structuredClone(doc.tags ?? {})
+  state.sections = structuredClone(doc.sections ?? [])
+  state.arrows = structuredClone(doc.arrows ?? [])
   ui.jsonDirty = false
   view.load(doc)
   renderHeader()
@@ -351,6 +369,120 @@ async function removeType(kind, name) {
   typesChanged()
 }
 
+// --- sections (titled frames behind the graph) -----------------------------------
+
+async function editSection(id) {
+  if (!editable()) return
+  const current = state.sections.find((s) => s.id === id)
+  const values = await openFormModal({
+    title: current ? 'Edit section' : 'New section',
+    submitLabel: current ? 'Save' : 'Add',
+    build: (body) => sectionFields(body, current ?? {}),
+  })
+  if (!values) return
+  if (current) {
+    const next = parseSection({ ...values, id, x: current.x, y: current.y })
+    state.sections[state.sections.indexOf(current)] = next
+  } else {
+    // A new section lands in the middle of the view.
+    const center = view.drawing.viewCenter()
+    const width = values.width ?? 400
+    const height = values.height ?? 240
+    const next = parseSection({ ...values, x: center.x - width / 2, y: center.y - height / 2 })
+    next.id = uniqueId(values.title || 'section', new Set(state.sections.map((s) => s.id)))
+    state.sections.push(next)
+  }
+  sectionsChanged()
+}
+
+async function removeSection(id) {
+  if (!editable()) return
+  const section = state.sections.find((s) => s.id === id)
+  if (!section || !(await confirmModal(`Delete the section "${section.title || id}"? Nodes are not affected.`))) return
+  state.sections = state.sections.filter((s) => s !== section)
+  pruneArrows()
+  sectionsChanged()
+}
+
+// --- arrows (drawn over the graph, between nodes, sections or free points) ----------
+
+function drawingTargets() {
+  return {
+    nodes: view.nodes()
+      .map((n) => ({ id: String(n.id), label: n.getData().label ?? String(n.id) }))
+      .sort((a, b) => a.label.localeCompare(b.label)),
+    sections: state.sections,
+  }
+}
+
+/** The end chosen in the form; unchanged ends keep their exact place. */
+function arrowEnd(key, previous, fallback) {
+  if (previous && arrowEndKey(previous) === key) return previous
+  if (key.startsWith('node:')) return { node: key.slice(5) }
+  if (key.startsWith('section:')) return { section: key.slice(8) }
+  return fallback
+}
+
+async function editArrow(id) {
+  if (!editable()) return
+  const current = state.arrows.find((a) => a.id === id)
+  const values = await openFormModal({
+    title: current ? 'Edit arrow' : 'New arrow',
+    submitLabel: current ? 'Save' : 'Add',
+    build: (body) => arrowFields(body, current ?? {}, drawingTargets()),
+  })
+  if (!values) return
+  const c = view.drawing.viewCenter()
+  const from = arrowEnd(values.from, current?.from, { x: Math.round(c.x - 120), y: Math.round(c.y) })
+  const to = arrowEnd(values.to, current?.to, { x: Math.round(c.x + 120), y: Math.round(c.y) })
+  const ids = { nodes: new Set(view.nodes().map((n) => String(n.id))), sections: new Set(state.sections.map((s) => s.id)) }
+  const next = parseArrow({ ...values, from, to, labelOffset: current?.labelOffset }, ids.nodes, ids.sections)
+  if (typeof next === 'string') return toast(`This arrow can't be drawn: ${next}.`, 'error')
+  if (current) {
+    next.id = id
+    state.arrows[state.arrows.indexOf(current)] = next
+  } else {
+    next.id = uniqueId(values.label?.split('\n')[0] || 'arrow', new Set(state.arrows.map((a) => a.id)))
+    state.arrows.push(next)
+  }
+  sectionsChanged()
+  view.drawing.select(next.id)
+}
+
+async function removeArrow(id) {
+  if (!editable()) return
+  const arrow = state.arrows.find((a) => a.id === id)
+  if (!arrow || !(await confirmModal(`Delete the arrow${arrow.label ? ` "${arrow.label.replace(/\n/g, ' ')}"` : ''}?`))) return
+  state.arrows = state.arrows.filter((a) => a !== arrow)
+  sectionsChanged()
+}
+
+/** Arrows whose node or section was deleted go with it. */
+function pruneArrows() {
+  const nodes = new Set(view.nodes().map((n) => String(n.id)))
+  const sections = new Set(state.sections.map((s) => s.id))
+  const alive = (end) => (end.node !== undefined ? nodes.has(end.node) : end.section !== undefined ? sections.has(end.section) : true)
+  const kept = state.arrows.filter((a) => alive(a.from) && alive(a.to))
+  if (kept.length === state.arrows.length) return
+  state.arrows = kept
+  view.drawing.render()
+}
+
+function sectionsChanged() {
+  view.drawing.render()
+  renderSidebar()
+  persist()
+}
+
+/** Fixed layout: nodes stay where they are put (diagrams); otherwise the force layout moves them. */
+function toggleFixedLayout() {
+  if (!editable()) return
+  const doc = view.toDocument(state, true)
+  doc.meta = { ...doc.meta, fixedLayout: !state.meta.fixedLayout || undefined }
+  loadDocument(doc)
+  toast(doc.meta.fixedLayout ? 'Layout fixed: nodes stay where you drop them.' : 'Automatic layout: nodes move with the physics again.')
+}
+
 function typesChanged() {
   view.restyleAll()
   renderSidebar()
@@ -439,6 +571,45 @@ async function importFile(file) {
   }
 }
 
+/** Opens a graph pasted as text: a Pivograph graph or an OCD file. */
+async function pasteJson() {
+  const values = await openFormModal({
+    title: 'Paste JSON',
+    submitLabel: 'Open',
+    wide: true,
+    build: (body) => {
+      const textarea = h('textarea', {
+        class: 'pg-json pg-paste', spellcheck: false, rows: 16,
+        placeholder: '{ "nodes": [ … ], "edges": [ … ] }  — a Pivograph graph or an open-contributions.json',
+      })
+      const error = h('div', { class: 'pg-form-error', role: 'alert', hidden: true })
+      body.append(error, textarea)
+      let parsed
+      return {
+        values: () => ({ raw: parsed }),
+        validate() {
+          const text = textarea.value.trim()
+          if (!text) return 'Paste some JSON first.'
+          try {
+            parsed = JSON.parse(text)
+          } catch (e) {
+            return `Invalid JSON: ${e.message}`
+          }
+          if (!isOcd(parsed) && !Array.isArray(parsed?.nodes)) return 'This is neither a Pivograph graph (no "nodes") nor an Open Contributions Descriptor.'
+          return parseDocument(isOcd(parsed) ? ocdToDocument(parsed) : parsed).errors[0] ?? null
+        },
+        showError(message) {
+          error.textContent = message ?? ''
+          error.hidden = !message
+        },
+      }
+    },
+  })
+  if (!values) return
+  if (view.nodes().length && !(await confirmModal('Replace the current graph with the pasted one?', { confirmLabel: 'Replace', danger: false }))) return
+  loadRaw(values.raw, 'pasted JSON')
+}
+
 function pickFile() {
   const input = h('input', { type: 'file', accept: '.json,application/json' })
   input.addEventListener('change', () => input.files?.[0] && importFile(input.files[0]))
@@ -457,6 +628,7 @@ const locked = (doc) => ({ ...doc, meta: { ...doc.meta, readOnly: true, source: 
 const EXAMPLES = {
   rulezet: { name: 'the Rulezet example', doc: locked(rulezetExample) },
   circl: { name: 'the CIRCL example', doc: locked(circlExample) },
+  ngsoti: { name: 'the NGSOTI SOC stack example', doc: locked(ngsotiExample) },
 }
 const EXAMPLE = EXAMPLES.rulezet.doc
 
@@ -464,6 +636,100 @@ const EXAMPLE = EXAMPLES.rulezet.doc
 function isExample(doc) {
   return doc?.meta?.source?.format === 'example'
     || Object.values(EXAMPLES).some((e) => doc?.meta?.title === e.doc.meta.title)
+}
+
+// One graph per organisation of the CIRCL example, from its Open Contributions
+// Descriptor (examples/circl/<id>.json, written by scripts/circl-orgs.mjs).
+// Loaded when opened, so they don't weigh on the app.
+const CIRCL_ORGS = import.meta.glob('../examples/circl/*.json', { import: 'default' })
+
+/** Lets the visitor pick an organisation of the CIRCL example and opens its graph. */
+async function pickCirclOrganisation() {
+  const orgs = circlExample.nodes.filter((n) => CIRCL_ORGS[`../examples/circl/${n.id}.json`])
+  const values = await openFormModal({
+    title: 'CIRCL organisations',
+    submitLabel: 'Open',
+    build: (body) => {
+      let chosen = null
+      const error = h('div', { class: 'pg-form-error', hidden: true })
+      const tiles = orgs.map((org) => {
+        const repos = org.details?.own_repositories
+        return h('button', {
+          type: 'button',
+          class: 'pg-org-tile',
+          onclick: () => {
+            chosen = org
+            body.closest('form').requestSubmit()
+          },
+        },
+        h('img', { src: org.image, alt: '', loading: 'lazy' }),
+        h('span', { class: 'pg-org-name' }, org.label),
+        h('small', { class: 'pg-muted' }, repos === undefined ? '' : `${repos} repositor${repos === 1 ? 'y' : 'ies'}`))
+      })
+      body.append(error,
+        h('p', { class: 'pg-muted pg-field-wide' }, 'The GitHub organisations managed or co-managed by CIRCL. Each one opens as its own graph: the organisation and its public repositories.'),
+        h('div', { class: 'pg-org-grid pg-field-wide' }, tiles))
+      return {
+        values: () => chosen,
+        validate: () => (chosen ? null : 'Choose an organisation.'),
+        showError: (message) => {
+          error.textContent = message ?? ''
+          error.hidden = !message
+        },
+      }
+    },
+  })
+  if (!values) return
+  if (view.nodes().length && !(await confirmModal(`Replace the current graph with the graph of ${values.label}?`, { confirmLabel: 'Load', danger: false }))) return
+  const doc = await CIRCL_ORGS[`../examples/circl/${values.id}.json`]()
+  loadRaw(locked(doc), 'example')
+}
+
+// A node's `graph` field points to another graph (the graph of an organisation
+// from the CIRCL example, …): opening it keeps the way back.
+const graphHistory = []
+let openingNodeGraph = false
+
+/** Loads a graph: a bundled one (examples/…) or a URL relative to the app. */
+async function fetchGraph(path) {
+  const bundled = CIRCL_ORGS[`../${path.replace(/^\.?\//, '')}`]
+  if (bundled) return bundled()
+  const response = await fetch(new URL(path, location.href), { headers: { Accept: 'application/json' } })
+  if (!response.ok) throw new Error(`the server answered ${response.status}`)
+  return response.json()
+}
+
+async function openNodeGraph(node) {
+  // Embedded (the Hugo component…): the host page shows that graph, on its own page.
+  if (EMBED.enabled && inFrame) return tellHost({ type: 'pivograph:open', url: node.graph, label: node.label }, EMBED.host)
+  let raw
+  try {
+    raw = await fetchGraph(node.graph)
+  } catch (error) {
+    return toast(`Could not open the graph of ${node.label}: ${error.message}.`, 'error')
+  }
+  const back = { raw: currentDocument(), source: state.meta.source?.format === 'example' ? 'example' : 'graph' }
+  const wasExample = isExample(state)
+  openingNodeGraph = true
+  try {
+    const { errors } = loadRaw(wasExample && !isOcd(raw) ? locked(raw) : raw, node.graph)
+    if (!errors.length) graphHistory.push(back)
+  } finally {
+    openingNodeGraph = false
+  }
+  renderHeader()
+}
+
+function goBack() {
+  const previous = graphHistory.pop()
+  if (!previous) return
+  openingNodeGraph = true
+  try {
+    loadRaw(previous.raw, previous.source)
+  } finally {
+    openingNodeGraph = false
+  }
+  renderHeader()
 }
 
 async function loadExample(key = 'rulezet') {
@@ -492,9 +758,13 @@ function renderHeader() {
   const what = format === 'example' ? 'Example'
     : format === 'ocd' ? `Well-known of ${state.meta.source.domain ?? 'an organization'}`
     : 'This graph'
-  badge.replaceChildren(
+  const previous = graphHistory.at(-1)
+  // replaceChildren() would write a null as the text "null": leave it out instead.
+  badge.replaceChildren(...[
+    previous && h('button', { class: 'pg-btn pg-btn-ghost', title: 'Back to the previous graph', onclick: goBack }, `← ${previous.raw.meta?.title || 'Back'}`),
     h('span', { title: 'This graph can be explored and exported, not edited' }, `🔒 ${what} · read-only`),
-    h('button', { class: 'pg-btn pg-btn-ghost', title: 'Start your own graph, saved in this browser only', onclick: newDocument }, 'New graph'))
+    h('button', { class: 'pg-btn pg-btn-ghost', title: 'Start your own graph, saved in this browser only', onclick: newDocument }, 'New graph'),
+  ].filter(Boolean))
 }
 
 function swatch(attrs) {
@@ -608,6 +878,37 @@ function renderTags() {
         })))
 }
 
+function renderSections() {
+  const endName = (end) => (end.node !== undefined
+    ? view.nodes().find((n) => String(n.id) === end.node)?.getData().label ?? end.node
+    : end.section !== undefined ? state.sections.find((s) => s.id === end.section)?.title || end.section : 'a point')
+  return h('div', {},
+    h('h3', { class: 'pg-drawing-heading' }, 'Sections'),
+    h('div', { class: 'pg-toolbar' },
+      editable() ? h('button', { class: 'pg-btn pg-btn-primary', onclick: () => editSection() }, '+ Section') : null),
+    state.sections.length === 0
+      ? h('p', { class: 'pg-empty' }, 'No sections. A section is a titled frame drawn behind the graph (“Incident response”, “Sensors”…), for the picture only: drag its title to move it, its corner to resize it. Pair it with Add → Fixed layout so the nodes stay inside.')
+      : h('ul', { class: 'pg-list' }, state.sections.map((section) => h('li', { class: 'pg-item', ondblclick: () => editSection(section.id) },
+          h('span', { class: 'pg-swatch pg-shape-square', style: `--swatch:${section.color ?? 'var(--muted)'}` }),
+          h('span', { class: 'pg-item-main' },
+            h('span', { class: 'pg-item-title' }, section.title || h('em', { class: 'pg-muted' }, 'untitled')),
+            h('span', { class: 'pg-item-sub' }, `${section.width ?? 400} × ${section.height ?? 240} at ${section.x}, ${section.y}`)),
+          actionButtons(() => editSection(section.id), () => removeSection(section.id))))),
+    h('h3', { class: 'pg-drawing-heading' }, 'Arrows'),
+    h('div', { class: 'pg-toolbar' },
+      editable() ? h('button', { class: 'pg-btn pg-btn-primary', onclick: () => editArrow() }, '+ Arrow') : null),
+    state.arrows.length === 0
+      ? h('p', { class: 'pg-empty' }, 'No arrows. Unlike an edge, an arrow can start or end on a section or anywhere on the canvas, at the exact spot you choose: click it on the graph, then drag its ends and its label.')
+      : h('ul', { class: 'pg-list' }, state.arrows.map((arrow) => h('li', {
+          class: 'pg-item', onclick: () => view.drawing.select(arrow.id), ondblclick: () => editArrow(arrow.id),
+        },
+          h('span', { class: `pg-edge-swatch${arrow.dashed ? ' pg-dashed' : ''}`, style: `--swatch:${arrow.color ?? '#343a40'}` }),
+          h('span', { class: 'pg-item-main' },
+            h('span', { class: 'pg-item-title' }, endName(arrow.from), h('span', { class: 'pg-dir' }, ` ${DIRECTIONS[arrow.direction ?? 'forward']?.symbol ?? '→'} `), endName(arrow.to)),
+            arrow.label ? h('span', { class: 'pg-item-sub' }, arrow.label.replace(/\n/g, ' ')) : null),
+          actionButtons(() => editArrow(arrow.id), () => removeArrow(arrow.id))))))
+}
+
 function renderTypes() {
   const section = (kind, title, types) => h('section', { class: 'pg-types' },
     h('div', { class: 'pg-toolbar' },
@@ -686,6 +987,7 @@ const TABS = {
   nodes: { label: 'Nodes', render: renderNodes, count: () => view.nodes().length },
   edges: { label: 'Edges', render: renderEdges, count: () => view.edges().length },
   tags: { label: 'Tags', render: renderTags, count: () => knownTags().length },
+  sections: { label: 'Drawing', render: renderSections, count: () => state.sections.length + state.arrows.length },
   types: { label: 'Types', render: renderTypes, count: () => Object.keys(state.nodeTypes).length + Object.keys(state.edgeTypes).length },
   json: { label: 'JSON', render: renderJson },
 }
@@ -715,9 +1017,9 @@ function bindPillsToggle() {
   const button = document.getElementById('btn-pills')
   let show = EMBED.tags
   try {
-    if (EMBED.tags && !EMBED.enabled) show = localStorage.getItem(PILLS_KEY) !== 'off'
+    if (!EMBED.enabled) show = EMBED.tags || localStorage.getItem(PILLS_KEY) === 'on'
   } catch {
-    // storage unavailable: pills are shown
+    // storage unavailable: pills stay hidden
   }
   const apply = () => {
     button.setAttribute('aria-pressed', String(show))
@@ -798,6 +1100,14 @@ function bindHeader() {
       items: [
         { label: 'Node', hint: 'A project, team, platform, dataset…', onclick: addNode },
         { label: 'Edge', hint: 'An arrow between two nodes', onclick: () => addEdge(), disabled: () => view.nodes().length === 0 },
+        { label: 'Section', hint: 'A titled frame behind the graph, for the picture', onclick: () => editSection() },
+        { label: 'Arrow', hint: 'Between nodes, sections or free points; ends placed anywhere', onclick: () => editArrow() },
+        'separator',
+        {
+          label: () => (state.meta.fixedLayout ? 'Automatic layout' : 'Fixed layout'),
+          hint: () => (state.meta.fixedLayout ? 'Let the physics place the nodes again' : 'Nodes stay where you drop them, as in a diagram'),
+          onclick: toggleFixedLayout,
+        },
       ],
     }),
     menuButton({
@@ -806,10 +1116,13 @@ function bindHeader() {
       items: [
         { label: 'New graph', hint: 'Start empty; saved in this browser only', onclick: newDocument },
         { label: 'Open a file…', hint: 'Pivograph JSON or open-contributions.json', onclick: pickFile },
+        { label: 'Paste JSON…', hint: 'Paste a graph (or an OCD file) as text', onclick: pasteJson },
         { label: 'Import an organization…', hint: 'From its .well-known/open-contributions.json', onclick: importWellKnown },
         'separator',
         { label: 'Rulezet example', hint: 'Projects linked to Rulezet', onclick: () => loadExample('rulezet') },
         { label: 'CIRCL example', hint: 'The GitHub organisations of CIRCL', onclick: () => loadExample('circl') },
+        { label: 'NGSOTI SOC stack example', hint: 'A drawn diagram: cards, sections, arrows', onclick: () => loadExample('ngsoti') },
+        { label: 'CIRCL organisations…', hint: 'One graph per organisation: its projects', onclick: pickCirclOrganisation },
       ],
     }),
     menuButton({
@@ -853,6 +1166,7 @@ function tellHost(message, origin = '*') {
 
 /** Loads data given by the host page or the ?src URL, and reports back to the host. */
 function loadForHost(raw, name, origin) {
+  EMBED.host = origin
   const { errors } = loadRaw(raw, name)
   if (errors.length) tellHost({ type: 'pivograph:error', message: errors[0] }, origin)
   else tellHost({ type: 'pivograph:loaded', nodes: view.nodes().length, edges: view.edges().length }, origin)
@@ -877,6 +1191,13 @@ if (inFrame) {
     loadForHost(event.data.data, event.data.name ?? 'data', event.origin)
   })
 }
+
+// Text measured before a font arrived (cards, arrow labels) is measured again.
+registerFonts()
+document.fonts?.addEventListener('loadingdone', () => {
+  view.drawing.render()
+  view.scheduleRestyle()
+})
 
 document.body.classList.toggle('pg-embed', EMBED.enabled)
 document.body.classList.toggle('pg-no-sidebar', !EMBED.sidebar)

@@ -7,6 +7,7 @@ graph:
   id: "flowintel"
   type: "organisation"
   url: "https://flowintel.github.io/flowintel-doc "
+  graph: "/circl/flowintel"
   github: "flowintel/flowintel"
   githubInfo:
     fullName: "flowintel/flowintel"
@@ -35,3 +36,7 @@ graph:
     most_starred_repositories: ["flowintel (158 stars)", "cocktailparty (23 stars)", "benthos (4 stars)", "flowintel-templates (2 stars)", "flowintel-doc (1 stars)"]
   image: "logo.png"
 ---
+
+The graph of FlowIntel: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-flowintel" >}}

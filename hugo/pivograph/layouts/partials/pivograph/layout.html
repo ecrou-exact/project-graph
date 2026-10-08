@@ -38,12 +38,18 @@
   {{- $maxR := 14.0 -}}
   {{- range $ring -}}{{- $maxR = math.Max $maxR (float (index $radius .)) -}}{{- end -}}
   {{- $step := add (mul $maxR 2) 130 -}}
+  {{- /* Past 30 nodes (like the app), more room between them: long project names stay apart. */ -}}
+  {{- if gt (len $nodes) 30 -}}{{- $step = add $step 30 -}}{{- end -}}
   {{- $r0 := math.Max 280 (add (mul (float (index $radius $hub | default 0)) 2) (mul $maxR 2) 240) -}}
   {{- $i := 0 -}}{{- $k := 0 -}}
   {{- $left := len $ring -}}
   {{- range seq 50 -}}
     {{- if gt $left 0 -}}
-      {{- $R := add $r0 (mul $k (add $step 40)) -}}
+      {{- /* Along a ring, room for the labels (step); from one ring to the next,
+             only for a node and its label: rings close together keep big graphs
+             small enough to read once the picture fits the page. The rings are
+             turned against each other, so labels don't line up. */ -}}
+      {{- $R := add $r0 (mul $k (add (mul $maxR 2) 90)) -}}
       {{- $capacity := int (math.Max 1 (math.Floor (div (mul 2 math.Pi $R) $step))) -}}
       {{- if eq $k 0 -}}{{- if not $hub -}}{{- $R = math.Max $R (div (mul (float $left) $step) (mul 2 math.Pi)) -}}{{- $capacity = $left -}}{{- end -}}{{- end -}}
       {{- $n := cond (lt $left $capacity) $left $capacity -}}

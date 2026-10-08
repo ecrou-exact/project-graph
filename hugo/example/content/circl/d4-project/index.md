@@ -7,6 +7,7 @@ graph:
   id: "d4-project"
   type: "organisation"
   url: "https://d4-project.org/"
+  graph: "/circl/d4-project"
   github: "D4-project/passive-ssh"
   githubInfo:
     fullName: "D4-project/passive-ssh"
@@ -39,3 +40,7 @@ graph:
     archived_repositories: 1
   image: "logo.png"
 ---
+
+The graph of D4 Project: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-d4-project" >}}

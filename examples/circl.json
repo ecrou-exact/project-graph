@@ -12,8 +12,7 @@
       "shape": "circle",
       "size": 70,
       "imageFit": "contain",
-      "borderColor": "#1c2b4a",
-      "borderWidth": 3,
+      "borderWidth": 0,
       "labelSize": 22,
       "labelFont": "sans",
       "labelBackground": "none"
@@ -24,8 +23,7 @@
       "shape": "circle",
       "size": 36,
       "imageFit": "contain",
-      "borderColor": "#c9d1e0",
-      "borderWidth": 2,
+      "borderWidth": 0,
       "labelSize": 15,
       "labelFont": "sans",
       "labelBackground": "none"
@@ -48,6 +46,7 @@
       "description": "CIRCL is the CERT (Computer Emergency Response Team/Computer Security Incident Response Team) for the private sector, communes and non-governmental entities.",
       "url": "https://www.circl.lu",
       "image": "logos/circl/circl.png",
+      "graph": "examples/circl/circl.json",
       "github": "CIRCL/Circlean",
       "githubInfo": {
         "fullName": "CIRCL/Circlean",
@@ -108,6 +107,7 @@
       "description": "MISP Project - Open Source Threat Intelligence Platform & Open Standards For Threat Information Sharing",
       "url": "https://www.misp-project.org",
       "image": "logos/circl/misp.png",
+      "graph": "examples/circl/misp.json",
       "github": "MISP/MISP",
       "githubInfo": {
         "fullName": "MISP/MISP",
@@ -184,6 +184,7 @@
       "description": "Vulnerability-Lookup facilitates quick correlation of vulnerabilities from various sources, independent of vulnerability IDs.",
       "url": "https://www.vulnerability-lookup.org",
       "image": "logos/circl/vulnerability-lookup.png",
+      "graph": "examples/circl/vulnerability-lookup.json",
       "github": "vulnerability-lookup/vulnerability-lookup",
       "githubInfo": {
         "fullName": "vulnerability-lookup/vulnerability-lookup",
@@ -242,6 +243,7 @@
       "type": "organisation",
       "url": "https://pandora.circl.lu/",
       "image": "logos/circl/pandora-analysis.png",
+      "graph": "examples/circl/pandora-analysis.json",
       "github": "pandora-analysis/pandora",
       "githubInfo": {
         "fullName": "pandora-analysis/pandora",
@@ -297,6 +299,7 @@
       "description": "Lookyloo is a web interface allowing to scrape a website and then displays a tree of domains calling each other. ",
       "url": "https://www.lookyloo.eu/",
       "image": "logos/circl/lookyloo.png",
+      "graph": "examples/circl/lookyloo.json",
       "github": "Lookyloo/lookyloo",
       "githubInfo": {
         "fullName": "Lookyloo/lookyloo",
@@ -357,6 +360,7 @@
       "description": "AIL Project is an open source project to collect and analyse data to produce security intelligence.",
       "url": "https://www.ail-project.org/",
       "image": "logos/circl/ail-project.png",
+      "graph": "examples/circl/ail-project.json",
       "github": "ail-project/ail-framework",
       "githubInfo": {
         "fullName": "ail-project/ail-framework",
@@ -421,6 +425,7 @@
       "description": "Open source tools and standards to lookup known files",
       "url": "https://hashlookup.io",
       "image": "logos/circl/hashlookup.png",
+      "graph": "examples/circl/hashlookup.json",
       "github": "hashlookup/hashlookup-forensic-analyser",
       "githubInfo": {
         "fullName": "hashlookup/hashlookup-forensic-analyser",
@@ -485,6 +490,7 @@
       "description": "Community-Driven Detection Rules Platform",
       "url": "https://rulezet.org/",
       "image": "logos/circl/rulezet.png",
+      "graph": "examples/circl/rulezet.json",
       "github": "rulezet/rulezet-core",
       "githubInfo": {
         "fullName": "rulezet/rulezet-core",
@@ -539,6 +545,7 @@
       "type": "organisation",
       "url": "https://pivotick.github.io/Pivotick/",
       "image": "logos/circl/pivotick.png",
+      "graph": "examples/circl/pivotick.json",
       "github": "Pivotick/Pivotick",
       "githubInfo": {
         "fullName": "Pivotick/Pivotick",
@@ -588,6 +595,7 @@
       "description": "Global CVE Allocation System",
       "url": "https://gcve.eu",
       "image": "logos/circl/gcve-eu.png",
+      "graph": "examples/circl/gcve-eu.json",
       "github": "gcve-eu/gcve.eu",
       "githubInfo": {
         "fullName": "gcve-eu/gcve.eu",
@@ -637,6 +645,7 @@
       "description": "Tools to perform local searches for known vulnerabilities",
       "url": "https://www.cve-search.org/",
       "image": "logos/circl/cve-search.png",
+      "graph": "examples/circl/cve-search.json",
       "github": "cve-search/cve-search",
       "githubInfo": {
         "fullName": "cve-search/cve-search",
@@ -701,6 +710,7 @@
       "description": "open source projects to find typosquatting in different sources, domain, pypi...",
       "url": "https://typosquatting-finder.circl.lu/",
       "image": "logos/circl/typosquatter.png",
+      "graph": "examples/circl/typosquatter.json",
       "github": "typosquatter/ail-typo-squatting",
       "githubInfo": {
         "fullName": "typosquatter/ail-typo-squatting",
@@ -756,6 +766,7 @@
       "type": "organisation",
       "url": "https://why.kunai.rocks",
       "image": "logos/circl/kunai-project.png",
+      "graph": "examples/circl/kunai-project.json",
       "github": "kunai-project/kunai",
       "githubInfo": {
         "fullName": "kunai-project/kunai",
@@ -812,6 +823,7 @@
       "description": "Large-scale distributed sensor network project to monitor DDoS and other malicious activities.",
       "url": "https://d4-project.org/",
       "image": "logos/circl/d4-project.png",
+      "graph": "examples/circl/d4-project.json",
       "github": "D4-project/passive-ssh",
       "githubInfo": {
         "fullName": "D4-project/passive-ssh",
@@ -875,6 +887,7 @@
       "label": "NGSOTI",
       "type": "organisation",
       "image": "logos/circl/ngsoti.png",
+      "graph": "examples/circl/ngsoti.json",
       "github": "ngsoti/rust-training",
       "githubInfo": {
         "fullName": "ngsoti/rust-training",
@@ -921,6 +934,7 @@
       "description": "Training materials for (LEA) law enforcement agency and partners",
       "url": "https://neolea.github.io/neolea-training-materials/",
       "image": "logos/circl/neolea.png",
+      "graph": "examples/circl/neolea.json",
       "github": "neolea/neolea-training-materials",
       "githubInfo": {
         "fullName": "neolea/neolea-training-materials",
@@ -973,6 +987,7 @@
       "label": "Draugnet",
       "type": "organisation",
       "image": "logos/circl/draugnet.png",
+      "graph": "examples/circl/draugnet.json",
       "github": "draugnet/draugnet",
       "githubInfo": {
         "fullName": "draugnet/draugnet",
@@ -1014,6 +1029,7 @@
       "type": "organisation",
       "description": "Fingerprint everything",
       "image": "logos/circl/fanything-project.png",
+      "graph": "examples/circl/fanything-project.json",
       "github": "fanything-project/fanything",
       "githubInfo": {
         "fullName": "fanything-project/fanything",
@@ -1053,6 +1069,7 @@
       "description": "Organize your intelligence flow",
       "url": "https://flowintel.github.io/flowintel-doc ",
       "image": "logos/circl/flowintel.png",
+      "graph": "examples/circl/flowintel.json",
       "github": "flowintel/flowintel",
       "githubInfo": {
         "fullName": "flowintel/flowintel",
@@ -1106,6 +1123,7 @@
       "description": "Cerebrate is an open-source platform meant to act as a trusted contact information provider and interconnection orchestrator for other security tools. ",
       "url": "https://www.cerebrate-project.org",
       "image": "logos/circl/cerebrate-project.png",
+      "graph": "examples/circl/cerebrate-project.json",
       "github": "cerebrate-project/cerebrate",
       "githubInfo": {
         "fullName": "cerebrate-project/cerebrate",
@@ -1165,6 +1183,7 @@
       "label": "SkillAegis",
       "type": "organisation",
       "image": "logos/circl/skillaegis.png",
+      "graph": "examples/circl/skillaegis.json",
       "github": "SkillAegis/SkillAegis",
       "githubInfo": {
         "fullName": "SkillAegis/SkillAegis",
@@ -1208,6 +1227,7 @@
       "label": "BinTriage",
       "type": "organisation",
       "image": "logos/circl/bintriage.png",
+      "graph": "examples/circl/bintriage.json",
       "links": [
         {
           "label": "GitHub organisation",

@@ -1,0 +1,84 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2026-09-24T06:24:15Z",
+  "organization": {
+    "name": "SkillAegis",
+    "domain": "circl.lu",
+    "links": {
+      "github_org": "https://github.com/SkillAegis"
+    }
+  },
+  "projects": [
+    {
+      "name": "SkillAegis",
+      "description": "SkillAegis is a platform to design, run, and monitor exercise scenarios, enhancing skills in applications like MISP and training users in best practices for information management and protective tools. Its gamification system makes learning engaging, ensuring users acquire essential technical skills and adhere to industry standards.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/SkillAegis/SkillAegis",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/SkillAegis/SkillAegis.git"
+      },
+      "links": {
+        "releases": "https://github.com/SkillAegis/SkillAegis/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/SkillAegis/SkillAegis/issues",
+        "good_first_issues": "https://github.com/SkillAegis/SkillAegis/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/SkillAegis/SkillAegis/releases",
+        "security_policy": "https://github.com/SkillAegis/SkillAegis/security/policy"
+      }
+    },
+    {
+      "name": "SkillAegis-Dashboard",
+      "description": "SkillAegis-Dashboard is a platform to run a training session and visualize the progress of participants in real-time. Part of SkillAegis.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/SkillAegis/SkillAegis-Dashboard",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/SkillAegis/SkillAegis-Dashboard.git"
+      },
+      "links": {
+        "releases": "https://github.com/SkillAegis/SkillAegis-Dashboard/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/SkillAegis/SkillAegis-Dashboard/issues",
+        "good_first_issues": "https://github.com/SkillAegis/SkillAegis-Dashboard/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/SkillAegis/SkillAegis-Dashboard/releases",
+        "security_policy": "https://github.com/SkillAegis/SkillAegis-Dashboard/security/policy"
+      }
+    },
+    {
+      "name": "SkillAegis-Editor",
+      "description": "SkillAegis-Editor is a platform to design exercise scenarios, enhancing skills in applications like MISP and training users in best practices for information management and protective tools.  The Editor allows you to create scenarios under the Common Exercise Format (CEXF) that can be used by other application such as SkillAegis Dashboard.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/SkillAegis/SkillAegis-Editor",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/SkillAegis/SkillAegis-Editor.git"
+      },
+      "links": {
+        "releases": "https://github.com/SkillAegis/SkillAegis-Editor/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/SkillAegis/SkillAegis-Editor/issues",
+        "good_first_issues": "https://github.com/SkillAegis/SkillAegis-Editor/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/SkillAegis/SkillAegis-Editor/releases",
+        "security_policy": "https://github.com/SkillAegis/SkillAegis-Editor/security/policy"
+      },
+      "tags": [
+        "scenario-creator",
+        "training"
+      ]
+    }
+  ],
+  "extensions": {}
+}

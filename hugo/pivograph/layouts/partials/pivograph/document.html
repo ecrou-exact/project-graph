@@ -19,6 +19,9 @@
       url: https://rulezet.org
       github: rulezet/rulezet-core
       image: logo.png                      a page resource, a /static path or a URL
+      graph: /circl/misp                   the page showing this node's own graph (its
+                                           projects…): without JavaScript the node links
+                                           to it, with JavaScript "Open its graph" goes there
       links: [{ label: Docs, url: … }]
       details: { … }
       …any other node field (color, shape, size, imageFit, …)
@@ -77,7 +80,7 @@
       {{- $id := $g.id | default $p.File.ContentBaseName | default ($p.Title | urlize) -}}
       {{- $node := dict "id" (string $id) "label" ($g.label | default $p.Title) -}}
       {{- range $key, $value := $g -}}
-        {{- if not (in (slice "id" "label" "relations" "image" "links") $key) -}}
+        {{- if not (in (slice "id" "label" "relations" "image" "links" "graph") $key) -}}
           {{- $node = merge $node (dict $key $value) -}}
         {{- end -}}
       {{- end -}}
@@ -91,6 +94,13 @@
         {{- with $p.Resources.Get . -}}{{- $src = .Permalink -}}
         {{- else -}}{{- if hasPrefix . "/" -}}{{- $src = absURL (strings.TrimPrefix "/" .) -}}{{- end -}}{{- end -}}
         {{- $node = merge $node (dict "image" $src) -}}
+      {{- end -}}
+      {{- /* graph: a page of the site becomes its address; anything else stays as it is. */ -}}
+      {{- with $g.graph -}}
+        {{- $target := . -}}
+        {{- with $p.GetPage . -}}{{- $target = .Permalink -}}
+        {{- else -}}{{- warnf "pivograph: %s: graph %q is not a page of this site" $p.File.Path . -}}{{- end -}}
+        {{- $node = merge $node (dict "graph" $target) -}}
       {{- end -}}
       {{- $links := slice (dict "label" "Site page" "url" $p.Permalink) -}}
       {{- range $g.links -}}{{- $links = $links | append (partial "pivograph/fields.html" .) -}}{{- end -}}

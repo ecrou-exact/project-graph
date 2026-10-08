@@ -20,6 +20,10 @@
           "type": "number",
           "minimum": 1,
           "description": "Length of the edges in the layout (default 150). Raise it for big nodes or long edge labels."
+        },
+        "fixedLayout": {
+          "type": "boolean",
+          "description": "Nodes stay exactly at their x / y (no force layout), as in a drawn diagram."
         }
       }
     },
@@ -35,6 +39,195 @@
       "description": "Reusable edge styles, keyed by type name.",
       "additionalProperties": {
         "$ref": "#/$defs/edgeAppearance"
+      }
+    },
+    "sections": {
+      "type": "array",
+      "description": "Titled frames drawn behind the graph, for the picture only (they hold no nodes).",
+      "items": {
+        "type": "object",
+        "required": [
+          "x",
+          "y"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "x": {
+            "type": "number",
+            "description": "Top-left corner, in graph coordinates."
+          },
+          "y": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Default 400."
+          },
+          "height": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Default 240."
+          },
+          "color": {
+            "$ref": "#/$defs/color",
+            "description": "Title and underline colour."
+          },
+          "underline": {
+            "type": "boolean",
+            "description": "Line under the title. Default: when the section has a colour."
+          },
+          "titleSize": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Default 22."
+          },
+          "titleFont": {
+            "type": "string"
+          },
+          "fill": {
+            "type": "string",
+            "description": "Background colour, or \"none\"."
+          },
+          "borderColor": {
+            "type": "string",
+            "description": "Border colour, or \"none\"."
+          }
+        }
+      }
+    },
+    "arrows": {
+      "type": "array",
+      "description": "Arrows drawn over the graph, from / to a node, a section or a free point.",
+      "items": {
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "from": {
+            "type": "object",
+            "description": "{ node, at? }, { section, at? } or { x, y }. `at` = [0..1, 0..1] place on the target's box; without it, the side facing the other end.",
+            "properties": {
+              "node": {
+                "type": [
+                  "string",
+                  "number"
+                ]
+              },
+              "section": {
+                "type": "string"
+              },
+              "at": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              }
+            }
+          },
+          "to": {
+            "type": "object",
+            "description": "{ node, at? }, { section, at? } or { x, y }. `at` = [0..1, 0..1] place on the target's box; without it, the side facing the other end.",
+            "properties": {
+              "node": {
+                "type": [
+                  "string",
+                  "number"
+                ]
+              },
+              "section": {
+                "type": "string"
+              },
+              "at": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              }
+            }
+          },
+          "label": {
+            "type": "string",
+            "description": "A \"\\n\" starts a new line."
+          },
+          "description": {
+            "type": "string"
+          },
+          "direction": {
+            "enum": [
+              "forward",
+              "backward",
+              "both",
+              "none"
+            ]
+          },
+          "route": {
+            "enum": [
+              "straight",
+              "elbow"
+            ]
+          },
+          "color": {
+            "$ref": "#/$defs/color"
+          },
+          "width": {
+            "type": "number"
+          },
+          "dashed": {
+            "type": "boolean"
+          },
+          "labelColor": {
+            "$ref": "#/$defs/color"
+          },
+          "labelSize": {
+            "type": "number"
+          },
+          "labelFont": {
+            "type": "string"
+          },
+          "labelBackground": {
+            "type": "string"
+          },
+          "labelOffset": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "Shift of the label from the middle of the arrow."
+          }
+        }
       }
     },
     "nodes": {
@@ -133,6 +326,10 @@
                     }
                   ]
                 }
+              },
+              "subtitle": {
+                "type": "string",
+                "description": "Card shape: a second line inside the card."
               }
             }
           }
@@ -246,7 +443,8 @@
             "circle",
             "square",
             "triangle",
-            "hexagon"
+            "hexagon",
+            "card"
           ]
         },
         "size": {
@@ -291,11 +489,34 @@
         },
         "labelFont": {
           "type": "string",
-          "description": "sans, serif, mono, rounded, condensed \u2014 or any CSS font-family."
+          "description": "sans, serif, mono, rounded, condensed — or any CSS font-family."
         },
         "hideBadges": {
           "type": "boolean",
           "description": "Hide the tag pills."
+        },
+        "width": {
+          "type": "number",
+          "description": "Card shape: width in pixels (default: its content)."
+        },
+        "height": {
+          "type": "number",
+          "description": "Card shape: height in pixels."
+        },
+        "padding": {
+          "type": "number",
+          "description": "Card shape: space between the border and the content (default 16)."
+        },
+        "imageSize": {
+          "type": "number",
+          "description": "Card shape: image height (default 56)."
+        },
+        "imagePosition": {
+          "enum": [
+            "top",
+            "left"
+          ],
+          "description": "Card shape: image above (default) or beside the text."
         }
       }
     },
@@ -322,7 +543,7 @@
             "both",
             "none"
           ],
-          "description": "forward: from \u2192 to, backward: to \u2192 from, both: \u2194, none: no arrow."
+          "description": "forward: from → to, backward: to → from, both: ↔, none: no arrow."
         }
       }
     }

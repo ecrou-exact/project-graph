@@ -1,7 +1,7 @@
 // Declarative forms for nodes, edges and types.
 import { h } from './dom.js'
 import {
-  CURVES, DEFAULT_EDGE, DEFAULT_NODE, DIRECTIONS, IMAGE_FITS, LABEL_FONTS, SHAPES,
+  CURVES, DEFAULT_CARD, DEFAULT_EDGE, DEFAULT_NODE, DIRECTIONS, IMAGE_FITS, LABEL_FONTS, SHAPES,
   edgeLabelLook, parseDetails, parseGithub, parseLinks, parseTags, resolveEdge, resolveNode, slugify, tagLook, uniqueId,
 } from '../model.js'
 import { fetchRepo } from '../github.js'
@@ -12,7 +12,7 @@ import { BADGE_ICONS, badgeIconSvg } from '../badgeIcons.js'
 export const BUNDLED_ICONS = ['project', 'platform', 'tool', 'data', 'organization', 'format', 'rule', 'code']
   .map((name) => `icons/${name}.svg`)
 
-const SHAPE_LABELS = { circle: 'Circle', square: 'Square', triangle: 'Triangle', hexagon: 'Hexagon' }
+const SHAPE_LABELS = { circle: 'Circle', square: 'Square', triangle: 'Triangle', hexagon: 'Hexagon', card: 'Card (image and text inside)' }
 const FIT_LABELS = { cover: 'Cover', contain: 'Contain', icon: 'Icon', frame: 'Frame' }
 
 // --- field widgets -----------------------------------------------------------
@@ -554,6 +554,22 @@ function nodeLookSpecs(inherited, word = 'inherited', currentFont, tagsSpec) {
   ]
 }
 
+/** The card shape's own fields (box size, inner space, image size and place). */
+function cardSpecs(inherited, word) {
+  const hint = (key, fallback) => `${word} (${inherited[key] ?? fallback})`
+  return [
+    { section: 'Card' },
+    { key: 'width', label: 'Width', type: 'number', min: 20, max: 1000, step: 10, placeholder: hint('width', 'auto'), hint: 'Card shape only. Empty: as wide as its content.' },
+    { key: 'height', label: 'Height', type: 'number', min: 20, max: 1000, step: 10, placeholder: hint('height', 'auto') },
+    { key: 'padding', label: 'Inner space', type: 'number', min: 0, max: 100, placeholder: hint('padding', DEFAULT_CARD.padding), hint: 'Space between the border and the image / text.' },
+    { key: 'imageSize', label: 'Image height', type: 'number', min: 8, max: 400, placeholder: hint('imageSize', DEFAULT_CARD.imageSize) },
+    {
+      key: 'imagePosition', label: 'Image', type: 'select',
+      options: [['', hint('imagePosition', 'top')], ['top', 'Above the text'], ['left', 'Beside the text']],
+    },
+  ]
+}
+
 /** Updates the border/label fields' inherited hints after the type changed. */
 function refreshLookHints(widgets, inherited) {
   widgets.borderWidth.input.placeholder = `inherited (${inherited.borderWidth ?? DEFAULT_BORDER.width})`
@@ -616,6 +632,7 @@ export function nodeFields(container, init, ctx) {
       hint: Object.keys(ctx.nodeTypes).length ? 'The type provides default colour, shape, size and image.' : 'No node types yet: add some in the Types tab.',
     },
     { key: 'description', label: 'Description', type: 'text', multiline: true, wide: true },
+    { key: 'subtitle', label: 'Subtitle', type: 'text', wide: true, placeholder: 'e.g. Linux endpoint', hint: 'Card shape only: a second line inside the card.' },
     { section: 'Links' },
     { key: 'url', label: 'Website', type: 'text', inputType: 'url', placeholder: 'https://…', wide: true },
     {
@@ -638,6 +655,7 @@ export function nodeFields(container, init, ctx) {
     { key: 'size', label: 'Size', type: 'number', min: 4, max: 120, placeholder: `inherited (${inherited.size ?? DEFAULT_NODE.size})` },
     { key: 'image', label: 'Image', type: 'image', wide: true, placeholder: inherited.image ? `inherited: ${inherited.image}` : undefined },
     { key: 'imageFit', label: 'Image fit', type: 'select', options: [['', 'inherited'], ...IMAGE_FITS.map((f) => [f, FIT_LABELS[f]])] },
+    ...cardSpecs(inherited, 'inherited'),
     ...nodeLookSpecs(inherited, 'inherited', values.labelFont, {
       key: 'tags', label: 'Tags', type: 'tags', wide: true, tagDefs, knownTags: ctx.knownTags ?? [],
       hint: 'Each #tag becomes a badge on the node. A tag’s colour and icon are shared by every node with that tag.',
@@ -925,6 +943,7 @@ export function typeFields(container, init, ctx) {
       { key: 'size', label: 'Size', type: 'number', min: 4, max: 120, placeholder: String(DEFAULT_NODE.size) },
       { key: 'image', label: 'Image', type: 'image', wide: true },
       { key: 'imageFit', label: 'Image fit', type: 'select', options: [['', 'default'], ...IMAGE_FITS.map((f) => [f, FIT_LABELS[f]])] },
+      ...cardSpecs({}, 'default'),
       ...nodeLookSpecs({}, 'default', def.labelFont),
     )
   } else {
@@ -995,5 +1014,89 @@ export function tagFields(container, init, ctx) {
       if (!name && ctx.takenNames.has(tag)) return `The tag #${tag} already exists.`
       return null
     },
+  }
+}
+
+// --- section form ------------------------------------------------------------------
+
+/** A titled frame behind the graph: title, colours, size. Position is set by dragging it. */
+export function sectionFields(container, values = {}) {
+  const form = renderFields(container, [
+    { key: 'title', label: 'Title', type: 'text', placeholder: 'Incident response', wide: true },
+    { key: 'color', label: 'Title colour', type: 'color', inherited: '#677084', hint: 'Also the colour of the line under the title.' },
+    {
+      key: 'underline', label: 'Line under the title', type: 'select',
+      options: [['', 'When the title has a colour'], ['true', 'Yes'], ['false', 'No']],
+    },
+    { key: 'titleSize', label: 'Title size', type: 'number', min: 8, max: 120, placeholder: '22' },
+    { key: 'titleFont', label: 'Title font', type: 'select', options: fontOptions(undefined, 'Default', values.titleFont) },
+    { section: 'Frame' },
+    { key: 'fill', label: 'Background', type: 'colorChoice', inheritedLabel: 'Default (light grey)', fallback: '#f6f7f9' },
+    { key: 'borderColor', label: 'Border', type: 'colorChoice', inheritedLabel: 'Default (grey)', fallback: '#dde1e7' },
+    { key: 'width', label: 'Width', type: 'number', min: 80, step: 10, placeholder: '400', hint: 'Or drag the bottom-right corner on the graph.' },
+    { key: 'height', label: 'Height', type: 'number', min: 60, step: 10, placeholder: '240' },
+  ], { ...values, underline: values.underline === undefined ? '' : String(values.underline) })
+  return {
+    ...form,
+    values() {
+      const v = form.values()
+      if (v.underline !== undefined) v.underline = v.underline === 'true'
+      return v
+    },
+    validate: () => null,
+  }
+}
+
+// --- arrow form ----------------------------------------------------------------------
+
+/** An end of an arrow as a select value: "node:<id>", "section:<id>" or "point". */
+export function arrowEndKey(end) {
+  if (end?.node !== undefined) return `node:${end.node}`
+  if (end?.section !== undefined) return `section:${end.section}`
+  return 'point'
+}
+
+/**
+ * Arrow drawn over the graph: its ends (a node, a section or a free point), label and line.
+ * ctx: { nodes: [{ id, label }], sections: [{ id, title }] }
+ */
+export function arrowFields(container, values = {}, ctx) {
+  const ends = [
+    ['point', 'A free point (drag it where you want)'],
+    ...ctx.nodes.map((n) => [`node:${n.id}`, `Node · ${n.label}`]),
+    ...ctx.sections.map((s) => [`section:${s.id}`, `Section · ${s.title || s.id}`]),
+  ]
+  const directions = Object.entries(DIRECTIONS).map(([key, d]) => [key, `${d.symbol} ${d.label}`])
+  const form = renderFields(container, [
+    { key: 'from', label: 'From', type: 'select', options: ends, hint: 'Then drag its ends on the graph to place them exactly.' },
+    { key: 'to', label: 'To', type: 'select', options: ends },
+    { key: 'label', label: 'Label', type: 'text', multiline: true, wide: true, placeholder: '4) Feed detections (IoCs) & sightings', hint: 'A new line starts a new line of the label.' },
+    { key: 'description', label: 'Description', type: 'text', multiline: true, wide: true, hint: 'Shown when the pointer is over the arrow.' },
+    { section: 'Line' },
+    { key: 'direction', label: 'Arrow', type: 'select', options: directions },
+    { key: 'route', label: 'Route', type: 'select', options: [['straight', 'Straight'], ['elbow', 'Right angles']] },
+    { key: 'color', label: 'Colour', type: 'color', inherited: '#343a40' },
+    { key: 'width', label: 'Width', type: 'number', min: 1, max: 12, placeholder: '2' },
+    { key: 'dashed', label: 'Line', type: 'select', options: [['false', 'Solid'], ['true', 'Dashed']] },
+    { section: 'Label' },
+    { key: 'labelSize', label: 'Text size', type: 'number', min: 6, max: 60, placeholder: '14' },
+    { key: 'labelColor', label: 'Text colour', type: 'color', inherited: 'the line colour' },
+    { key: 'labelFont', label: 'Font', type: 'select', options: fontOptions(undefined, 'Default', values.labelFont) },
+    { key: 'labelBackground', label: 'Background', type: 'colorChoice', inheritedLabel: 'Default (the page)', fallback: '#ffffff' },
+  ], {
+    ...values,
+    from: arrowEndKey(values.from),
+    to: arrowEndKey(values.to),
+    direction: values.direction ?? 'forward',
+    route: values.route ?? 'straight',
+    dashed: String(Boolean(values.dashed)),
+  })
+  return {
+    ...form,
+    values() {
+      const v = form.values()
+      return { ...v, dashed: v.dashed === 'true' || undefined }
+    },
+    validate: () => null,
   }
 }

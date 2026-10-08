@@ -1,6 +1,6 @@
 # Plan: one graph per CIRCL organisation
 
-*Written 23 September 2026. Status: step 1 to do (generate the OCD files), then steps 2 to 6 (Claude).*
+*Written 23 September 2026. Status (24 September): steps 1 to 5 done (to check in a browser); step 6 later.*
 
 ## Goal
 
@@ -178,9 +178,13 @@ Notes:
 
 ## Checklist
 
-- [ ] Domains of the organisations without a website decided
-- [ ] Step 1: 22 files in `examples/circl-ocd/`, all valid
-- [ ] Step 2: 22 organisation graphs load in the app without errors
-- [ ] Step 3: each organisation page of the Hugo example shows its graph, with and without JavaScript
-- [ ] Step 4: clicking an organisation opens its graph, with and without JavaScript
-- [ ] Docs and tests updated; 0 broken links; everything pushed when you say so
+- [x] Domains of the organisations without a website decided: `circl.lu`; Pivotick, Kunai, Neolea as in the table
+- [x] Step 1: 22 files in `examples/circl-ocd/`, all valid, 377 projects, all public repositories (checked without a token)
+- [x] Step 2: 22 organisation graphs (`examples/circl/<id>.json`, `node scripts/circl-orgs.mjs`) parse without errors or warnings (`tests/circl-orgs.test.js`)
+- [ ] Step 2: readability of the big graphs (MISP, CIRCL) checked in the app
+- [x] Step 3: each organisation page of the Hugo example shows its graph (`data/pivograph/circl-<id>.json`), with and without JavaScript
+- [x] Step 4 in the app: node field `graph`, "Open its graph" (details panel, right-click), a ← button back; Graph → CIRCL organisations… picker; no borders around logos
+- [x] Step 4 in Hugo: `graph.graph` = the organisation's page; SVG link without JavaScript, `pivograph:open` message with it
+- [x] Graphs over 30 nodes spread out (app and Hugo picture); tag pills hidden by default everywhere
+- [x] Docs and tests updated (88 tests); 0 broken links in the Hugo example (93 addresses)
+- [ ] Checked in a browser, committed when you say so (pushed by you)

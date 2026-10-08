@@ -4,6 +4,10 @@
 // its relations, and its logo) and the section's `graph` map (title, types).
 // Hugo then builds each graph back from its pages
 // (hugo/pivograph/layouts/partials/pivograph/document.html).
+// Each CIRCL organisation's page also shows its own graph, the organisation and
+// its projects (examples/circl/<id>.json, copied to data/pivograph/circl-<id>.json):
+// its node's `graph` is that page, so clicking it in the CIRCL graph, with or
+// without JavaScript, leads there.
 //   node scripts/hugo-example.mjs
 import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -28,8 +32,11 @@ function page(frontMatter, body = '') {
   return `---${yaml(frontMatter)}\n---\n${body ? `\n${body}\n` : ''}`
 }
 
-/** One section of the example site from one example map: a page bundle per node. */
-function section(name, linkTitle, doc, intro, weight) {
+/**
+ * One section of the example site from one example map: a page bundle per node.
+ * `nodeGraph(node)`: the data file of the node's own graph, shown on its page, or undefined.
+ */
+function section(name, linkTitle, doc, intro, weight, nodeGraph = () => undefined) {
   const dir = join(site, 'content', name)
   rmSync(dir, { recursive: true, force: true })
   mkdirSync(dir, { recursive: true })
@@ -45,16 +52,30 @@ function section(name, linkTitle, doc, intro, weight) {
     const relations = doc.edges.filter((e) => e.from === id).map(({ id: _id, from: _from, ...edge }) => edge)
     const graph = { id, ...rest }
     if (image) graph.image = 'logo.png'
+    // The node's own graph is shown on its page: the node links there.
+    const data = nodeGraph(node)
+    if (data) graph.graph = `/${name}/${id}`
+    else delete graph.graph
     if (relations.length) graph.relations = relations
     const bundle = join(dir, id)
     mkdirSync(bundle, { recursive: true })
     // weight keeps the map's order (Hugo would sort the pages by title otherwise)
-    writeFileSync(join(bundle, 'index.md'), page({ title: label, description, tags, weight: i + 1, graph }))
+    const body = data ? `The graph of ${label}: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.\n\n{{< pivograph data="${data}" >}}` : ''
+    writeFileSync(join(bundle, 'index.md'), page({ title: label, description, tags, weight: i + 1, graph }, body))
     if (image) copyFileSync(join(root, 'public', image), join(bundle, 'logo.png'))
   })
   console.log(`Wrote ${doc.nodes.length} pages to content/${name}/`)
 }
 
 section('projects', 'Projects', doc, 'Each project below is a page of this site. Its front matter describes it (`graph`) and says how it relates to the others (`graph.relations`); Hugo builds the graph from these pages.', 1)
+// The organisation graphs, as data files of the site.
+const data = join(site, 'data/pivograph')
+rmSync(data, { recursive: true, force: true })
+mkdirSync(data, { recursive: true })
 section('circl', 'CIRCL', JSON.parse(readFileSync(join(root, 'examples/circl.json'), 'utf8')),
-  'Each organisation below is a page of this site, with its logo and its GitHub facts in its front matter (`graph`); CIRCL\'s page lists the organisations it manages (`graph.relations`). Hugo builds the graph from these pages.', 2)
+  'Each organisation below is a page of this site, with its logo and its GitHub facts in its front matter (`graph`); CIRCL\'s page lists the organisations it manages (`graph.relations`). Hugo builds the graph from these pages. Click an organisation to open its page and its own graph, with all its projects.', 2,
+  (node) => {
+    if (!node.graph) return undefined
+    copyFileSync(join(root, node.graph), join(data, `circl-${node.id}.json`))
+    return `circl-${node.id}`
+  })

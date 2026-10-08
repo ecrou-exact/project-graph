@@ -6,6 +6,7 @@ graph:
   id: "pivotick"
   type: "organisation"
   url: "https://pivotick.github.io/Pivotick/"
+  graph: "/circl/pivotick"
   github: "Pivotick/Pivotick"
   githubInfo:
     fullName: "Pivotick/Pivotick"
@@ -33,3 +34,7 @@ graph:
     most_starred_repositories: ["Pivotick (30 stars)"]
   image: "logo.png"
 ---
+
+The graph of Pivotick: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-pivotick" >}}

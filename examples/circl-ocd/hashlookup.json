@@ -1,0 +1,381 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2026-09-24T06:22:11Z",
+  "organization": {
+    "name": "hashlookup",
+    "domain": "hashlookup.io",
+    "description": "Open source tools and standards to lookup known files",
+    "links": {
+      "homepage": "hashlookup.io",
+      "github_org": "https://github.com/hashlookup"
+    }
+  },
+  "projects": [
+    {
+      "name": "hashlookup-forensic-analyser",
+      "description": "Analyse a forensic target (such as a directory) to find and report files found and not found from CIRCL hashlookup public service - https://circl.lu/services/hashlookup/",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/hashlookup/hashlookup-forensic-analyser",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/hashlookup/hashlookup-forensic-analyser.git"
+      },
+      "links": {
+        "project_page": "https://hashlookup.github.io/hashlookup-forensic-analyser/",
+        "releases": "https://github.com/hashlookup/hashlookup-forensic-analyser/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/hashlookup/hashlookup-forensic-analyser/issues",
+        "good_first_issues": "https://github.com/hashlookup/hashlookup-forensic-analyser/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/hashlookup/hashlookup-forensic-analyser/releases",
+        "security_policy": "https://github.com/hashlookup/hashlookup-forensic-analyser/security/policy"
+      },
+      "tags": [
+        "bloom-filter",
+        "dfir",
+        "dfir-automation",
+        "forensic-analysis",
+        "forensics-investigations",
+        "hashlookup",
+        "nsrl",
+        "nsrllookup"
+      ]
+    },
+    {
+      "name": "fleur",
+      "description": "Fleur implements a Bloom Filter library in C that is fully compatible with DCSO's Go and python implementations.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/hashlookup/fleur",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/hashlookup/fleur.git"
+      },
+      "links": {
+        "releases": "https://github.com/hashlookup/fleur/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/hashlookup/fleur/issues",
+        "good_first_issues": "https://github.com/hashlookup/fleur/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/hashlookup/fleur/releases",
+        "security_policy": "https://github.com/hashlookup/fleur/security/policy"
+      },
+      "tags": [
+        "bloom-filter",
+        "hashlookup",
+        "yara"
+      ]
+    },
+    {
+      "name": "poppy",
+      "description": "Rust implementation of the DCSO Bloom filter",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/hashlookup/poppy",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/hashlookup/poppy.git"
+      },
+      "links": {
+        "releases": "https://github.com/hashlookup/poppy/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/hashlookup/poppy/issues",
+        "good_first_issues": "https://github.com/hashlookup/poppy/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/hashlookup/poppy/releases",
+        "security_policy": "https://github.com/hashlookup/poppy/security/policy"
+      },
+      "tags": [
+        "bloom",
+        "bloomfilter",
+        "hashset"
+      ]
+    },
+    {
+      "name": "private-search-set",
+      "description": "Private Search Set (PSS) is an extension to standard Bloom filter or a standalone hash file to describe and share private set.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/hashlookup/private-search-set",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/hashlookup/private-search-set.git"
+      },
+      "links": {
+        "project_page": "https://hashlookup.github.io/private-search-set/",
+        "releases": "https://github.com/hashlookup/private-search-set/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/hashlookup/private-search-set/issues",
+        "good_first_issues": "https://github.com/hashlookup/private-search-set/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/hashlookup/private-search-set/releases",
+        "security_policy": "https://github.com/hashlookup/private-search-set/security/policy"
+      },
+      "tags": [
+        "information-sharing",
+        "privacy",
+        "pss",
+        "threat-intelligence"
+      ]
+    },
+    {
+      "name": "a-ray-grass",
+      "description": "a-ray-grass is a yara module that provides support for DCSO-format bloom filters in yara. In the context of hashlookup, it allows quickly discard known files \"pour séparer le grain de l'ivraie\"",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/hashlookup/a-ray-grass",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/hashlookup/a-ray-grass.git"
+      },
+      "links": {
+        "releases": "https://github.com/hashlookup/a-ray-grass/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/hashlookup/a-ray-grass/issues",
+        "good_first_issues": "https://github.com/hashlookup/a-ray-grass/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/hashlookup/a-ray-grass/releases",
+        "security_policy": "https://github.com/hashlookup/a-ray-grass/security/policy"
+      },
+      "tags": [
+        "bloom-filter",
+        "filter",
+        "yara",
+        "yara-module"
+      ]
+    },
+    {
+      "name": "PyHashlookup",
+      "description": "Python CLI and module for CIRCL hash lookup",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/hashlookup/PyHashlookup",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/hashlookup/PyHashlookup.git"
+      },
+      "links": {
+        "releases": "https://github.com/hashlookup/PyHashlookup/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/hashlookup/PyHashlookup/issues",
+        "good_first_issues": "https://github.com/hashlookup/PyHashlookup/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/hashlookup/PyHashlookup/releases",
+        "security_policy": "https://github.com/hashlookup/PyHashlookup/security/policy"
+      }
+    },
+    {
+      "name": "hashlookup-gui",
+      "description": "Provides a multi-platform Graphical User Interface for hashlookup",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/hashlookup/hashlookup-gui",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/hashlookup/hashlookup-gui.git"
+      },
+      "links": {
+        "releases": "https://github.com/hashlookup/hashlookup-gui/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/hashlookup/hashlookup-gui/issues",
+        "good_first_issues": "https://github.com/hashlookup/hashlookup-gui/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/hashlookup/hashlookup-gui/releases",
+        "security_policy": "https://github.com/hashlookup/hashlookup-gui/security/policy"
+      },
+      "tags": [
+        "dfir",
+        "fyne",
+        "hashing",
+        "hashlookup",
+        "threat-hunting",
+        "triage"
+      ]
+    },
+    {
+      "name": "hashlookup-lib",
+      "description": "hashlookup insert pipeline Python library",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/hashlookup/hashlookup-lib",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/hashlookup/hashlookup-lib.git"
+      },
+      "links": {
+        "project_page": "https://hashlookup.github.io/hashlookup-lib/hashlookup/hashlookup.html",
+        "releases": "https://github.com/hashlookup/hashlookup-lib/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/hashlookup/hashlookup-lib/issues",
+        "good_first_issues": "https://github.com/hashlookup/hashlookup-lib/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/hashlookup/hashlookup-lib/releases",
+        "security_policy": "https://github.com/hashlookup/hashlookup-lib/security/policy"
+      }
+    },
+    {
+      "name": "hashlookup-nsrl",
+      "description": "hashlookup-nsrl is a NSRL RDSv3 importer for hashlookup server",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/hashlookup/hashlookup-nsrl",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/hashlookup/hashlookup-nsrl.git"
+      },
+      "links": {
+        "project_page": "https://hashlookup.github.io/hashlookup-nsrl/",
+        "releases": "https://github.com/hashlookup/hashlookup-nsrl/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/hashlookup/hashlookup-nsrl/issues",
+        "good_first_issues": "https://github.com/hashlookup/hashlookup-nsrl/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/hashlookup/hashlookup-nsrl/releases",
+        "security_policy": "https://github.com/hashlookup/hashlookup-nsrl/security/policy"
+      },
+      "tags": [
+        "dfir",
+        "hashlookup",
+        "nsrl"
+      ]
+    },
+    {
+      "name": "hashlookup-format",
+      "description": "Common output format for hashlookup",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/hashlookup/hashlookup-format",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/hashlookup/hashlookup-format.git"
+      },
+      "links": {
+        "releases": "https://github.com/hashlookup/hashlookup-format/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/hashlookup/hashlookup-format/issues",
+        "good_first_issues": "https://github.com/hashlookup/hashlookup-format/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/hashlookup/hashlookup-format/releases",
+        "security_policy": "https://github.com/hashlookup/hashlookup-format/security/policy"
+      },
+      "tags": [
+        "dfir",
+        "digitalforensics",
+        "hashlookup",
+        "incident-response",
+        "nsrl"
+      ]
+    },
+    {
+      "name": "hashlookup-importer",
+      "description": "Directory importer for hashlookup server",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/hashlookup/hashlookup-importer",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/hashlookup/hashlookup-importer.git"
+      },
+      "links": {
+        "releases": "https://github.com/hashlookup/hashlookup-importer/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/hashlookup/hashlookup-importer/issues",
+        "good_first_issues": "https://github.com/hashlookup/hashlookup-importer/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/hashlookup/hashlookup-importer/releases",
+        "security_policy": "https://github.com/hashlookup/hashlookup-importer/security/policy"
+      }
+    },
+    {
+      "name": "hashlookup-json-importer",
+      "description": "Generic NDJSON importer for hashlookup server",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/hashlookup/hashlookup-json-importer",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/hashlookup/hashlookup-json-importer.git"
+      },
+      "links": {
+        "releases": "https://github.com/hashlookup/hashlookup-json-importer/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/hashlookup/hashlookup-json-importer/issues",
+        "good_first_issues": "https://github.com/hashlookup/hashlookup-json-importer/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/hashlookup/hashlookup-json-importer/releases",
+        "security_policy": "https://github.com/hashlookup/hashlookup-json-importer/security/policy"
+      }
+    },
+    {
+      "name": "hashlookup.io",
+      "description": "public web page of hashlookup.io",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/hashlookup/hashlookup.io",
+        "license": "BSD-2-Clause",
+        "type": "git",
+        "clone": "https://github.com/hashlookup/hashlookup.io.git"
+      },
+      "links": {
+        "project_page": "https://hashlookup.io/",
+        "releases": "https://github.com/hashlookup/hashlookup.io/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/hashlookup/hashlookup.io/issues",
+        "good_first_issues": "https://github.com/hashlookup/hashlookup.io/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/hashlookup/hashlookup.io/releases",
+        "security_policy": "https://github.com/hashlookup/hashlookup.io/security/policy"
+      }
+    },
+    {
+      "name": "ex_poppy",
+      "description": "poppy elixir binding",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/hashlookup/ex_poppy",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/hashlookup/ex_poppy.git"
+      },
+      "links": {
+        "releases": "https://github.com/hashlookup/ex_poppy/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/hashlookup/ex_poppy/issues",
+        "good_first_issues": "https://github.com/hashlookup/ex_poppy/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/hashlookup/ex_poppy/releases",
+        "security_policy": "https://github.com/hashlookup/ex_poppy/security/policy"
+      }
+    }
+  ],
+  "extensions": {}
+}

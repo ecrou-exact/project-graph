@@ -1,0 +1,88 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2026-09-24T06:23:49Z",
+  "organization": {
+    "name": "neolea",
+    "domain": "neolea.github.io",
+    "description": "Training materials for (LEA) law enforcement agency and partners",
+    "links": {
+      "github_org": "https://github.com/neolea"
+    }
+  },
+  "projects": [
+    {
+      "name": "neolea-training-materials",
+      "description": "Open source training materials for law-enforcement and organisations interested in DFIR.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/neolea/neolea-training-materials",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/neolea/neolea-training-materials.git"
+      },
+      "links": {
+        "project_page": "https://neolea.github.io/neolea-training-materials/",
+        "releases": "https://github.com/neolea/neolea-training-materials/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/neolea/neolea-training-materials/issues",
+        "good_first_issues": "https://github.com/neolea/neolea-training-materials/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/neolea/neolea-training-materials/releases",
+        "security_policy": "https://github.com/neolea/neolea-training-materials/security/policy"
+      },
+      "tags": [
+        "dfir",
+        "law-enforcement",
+        "misp",
+        "neola"
+      ]
+    },
+    {
+      "name": "misp-lea-website",
+      "description": "misp-lea.org website",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/neolea/misp-lea-website",
+        "license": "MIT",
+        "type": "git",
+        "clone": "https://github.com/neolea/misp-lea-website.git"
+      },
+      "links": {
+        "releases": "https://github.com/neolea/misp-lea-website/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/neolea/misp-lea-website/issues",
+        "good_first_issues": "https://github.com/neolea/misp-lea-website/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/neolea/misp-lea-website/releases",
+        "security_policy": "https://github.com/neolea/misp-lea-website/security/policy"
+      }
+    },
+    {
+      "name": "neolea-training-materials-files",
+      "description": "No description provided.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/neolea/neolea-training-materials-files",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/neolea/neolea-training-materials-files.git"
+      },
+      "links": {
+        "releases": "https://github.com/neolea/neolea-training-materials-files/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/neolea/neolea-training-materials-files/issues",
+        "good_first_issues": "https://github.com/neolea/neolea-training-materials-files/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/neolea/neolea-training-materials-files/releases",
+        "security_policy": "https://github.com/neolea/neolea-training-materials-files/security/policy"
+      }
+    }
+  ],
+  "extensions": {}
+}

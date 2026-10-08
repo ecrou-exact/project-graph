@@ -69,6 +69,7 @@ The build turns the Markdown into `docs/index.html` (static HTML, readable witho
 | [`pivograph.schema.json`](pivograph.schema.json) | JSON schema of the document format. |
 | [`examples/rulezet.json`](examples/rulezet.json) | A complete, checked map. |
 | [`examples/circl.json`](examples/circl.json) | An organisation and the 21 GitHub organisations it manages, with logos and GitHub facts. |
+| [`examples/ngsoti-soc-stack.json`](examples/ngsoti-soc-stack.json) | A drawn diagram: the NGSOTI SOC stack with Rulezet, in card nodes, sections and arrows, with a fixed layout. |
 | [`examples/minimal.json`](examples/minimal.json) | The smallest useful map. |
 | [Hugo](#hugo) | To add a graph to a Hugo site: procedure, front-matter reference, checklist and prompt. |
 

@@ -1,0 +1,42 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2026-09-24T06:22:20Z",
+  "organization": {
+    "name": "Pivtotick",
+    "domain": "pivotick.github.io",
+    "links": {
+      "github_org": "https://github.com/Pivotick"
+    }
+  },
+  "projects": [
+    {
+      "name": "Pivotick",
+      "description": "Pivotick is network graph library to facilitate pivoting.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/Pivotick/Pivotick",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/Pivotick/Pivotick.git"
+      },
+      "links": {
+        "project_page": "https://pivotick.github.io/Pivotick/",
+        "releases": "https://github.com/pivotick/Pivotick/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/pivotick/Pivotick/issues",
+        "good_first_issues": "https://github.com/pivotick/Pivotick/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/pivotick/Pivotick/releases",
+        "security_policy": "https://github.com/pivotick/Pivotick/security/policy"
+      },
+      "tags": [
+        "infovis",
+        "network-vis",
+        "network-visualization"
+      ]
+    }
+  ],
+  "extensions": {}
+}

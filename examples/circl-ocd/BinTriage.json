@@ -1,0 +1,13 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2026-09-24T06:24:16Z",
+  "organization": {
+    "name": "BinTriage",
+    "domain": "circl.lu",
+    "links": {
+      "github_org": "https://github.com/BinTriage"
+    }
+  },
+  "projects": [],
+  "extensions": {}
+}

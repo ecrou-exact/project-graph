@@ -25,24 +25,39 @@ function staticMode() {
   }
 }
 
+/**
+ * The switch between the two versions of the page, shown above each graph:
+ * the interactive graph, or the version without JavaScript (the picture drawn
+ * by Hugo, then the text). The current one is marked; the other is a link.
+ */
+function modeSwitch(current) {
+  const nav = document.createElement('nav')
+  nav.className = 'pivograph-mode'
+  nav.setAttribute('aria-label', 'Version of the graph')
+  for (const [mode, label] of [['interactive', 'Interactive'], ['static', 'Without JavaScript']]) {
+    const url = new URL(location.href)
+    url.searchParams.set('pivograph', mode)
+    const a = document.createElement('a')
+    a.href = url.href
+    a.textContent = label
+    if (mode === current) a.setAttribute('aria-current', 'true')
+    nav.append(a)
+  }
+  return nav
+}
+
 /** The version without JavaScript, said as such, with the way back to the interactive graph. */
 function showStatic(figure) {
   figure.classList.add('pivograph-static')
   const note = document.createElement('p')
   note.className = 'pivograph-static-note'
-  const back = new URL(location.href)
-  back.searchParams.set('pivograph', 'interactive')
-  note.append('You are seeing the version without JavaScript: the picture drawn by Hugo, then the text. ')
-  const link = document.createElement('a')
-  link.href = back.href
-  link.textContent = 'Show the interactive graph'
-  note.append(link)
-  figure.prepend(note)
+  note.append('You are seeing the version without JavaScript: the picture drawn by Hugo, then the text.')
+  figure.prepend(modeSwitch('static'), note)
   // The site's links keep the mode, so it survives a page without a graph too.
   const base = new URL(figure.dataset.base || '/', location.href)
   const root = new URL(base.pathname, location.origin)
   for (const a of document.querySelectorAll('a[href]')) {
-    if (a === link) continue
+    if (a.closest('.pivograph-mode')) continue // the switch says its own mode
     const url = new URL(a.getAttribute('href'), location.href)
     const local = url.origin === location.origin || url.href.startsWith(base.href)
     if (!local || !(url.pathname.startsWith(root.pathname) || url.href.startsWith(base.href)) || url.hash && url.pathname === location.pathname) continue
@@ -56,7 +71,7 @@ function enhance(figure) {
   const appUrl = new URL(app, location.href)
   const params = new URLSearchParams({ embed: '1' })
   if (sidebar !== '1') params.set('sidebar', '0')
-  if (tags === '0') params.set('tags', '0')
+  if (tags === '1') params.set('tags', '1')
 
   const frame = document.createElement('iframe')
   frame.className = 'pivograph-frame'
@@ -77,7 +92,7 @@ function enhance(figure) {
   full.className = 'pivograph-button'
   full.textContent = 'Full screen'
   full.addEventListener('click', () => (document.fullscreenElement ? document.exitFullscreen() : figure.requestFullscreen?.()))
-  bar.append(status, full)
+  bar.append(modeSwitch('interactive'), status, full)
 
   // The text moves into a disclosure under the graph: still there for screen
   // readers, search engines and anyone who prefers reading.
@@ -116,6 +131,12 @@ function enhance(figure) {
       status.textContent = `${message.nodes} nodes, ${message.edges} relationships`
     } else if (message.type === 'pivograph:error') {
       fail(`The graph could not be shown: ${message.message}`)
+    } else if (message.type === 'pivograph:open') {
+      // "Open its graph" on a node: go to the page of its graph, on this site only.
+      const url = new URL(String(message.url ?? ''), location.href)
+      const root = new URL(new URL(base || '/', location.href).pathname, location.origin)
+      if (url.origin === location.origin && url.pathname.startsWith(root.pathname)) location.assign(url.href)
+      else if (base && url.href.startsWith(base)) location.assign(new URL(url.href.slice(base.length), root).href)
     }
   })
 

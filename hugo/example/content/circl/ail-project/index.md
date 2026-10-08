@@ -7,6 +7,7 @@ graph:
   id: "ail-project"
   type: "organisation"
   url: "https://www.ail-project.org/"
+  graph: "/circl/ail-project"
   github: "ail-project/ail-framework"
   githubInfo:
     fullName: "ail-project/ail-framework"
@@ -37,3 +38,7 @@ graph:
     archived_repositories: 1
   image: "logo.png"
 ---
+
+The graph of AIL Project: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-ail-project" >}}

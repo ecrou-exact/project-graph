@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { existsSync, readFileSync } from 'node:fs'
 import {
   MARKER_END, MARKER_START, NO_MARKER,
-  edgeLabel, edgeLabelLook, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, parseDetails, parseDocument, parseGithub, parseLinks, parseTags, readableOn, tagLook, resolveNode, slugify, starterDocument, toRawEdge, toRawNode, uniqueId,
+  cardLook, edgeLabel, edgeLabelLook, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, parseDetails, parseDocument, parseGithub, parseLinks, parseTags, readableOn, tagLook, resolveNode, slugify, starterDocument, toRawEdge, toRawNode, uniqueId,
 } from '../src/model.js'
 import { flattenDetails, unflattenDetails } from '../src/ui/forms.js'
 
@@ -261,5 +261,59 @@ describe('edge look', () => {
   it('keeps the new fields when reading a document', () => {
     const { doc } = parseDocument({ nodes: [{ id: 'a' }, { id: 'b' }], edges: [{ from: 'a', to: 'b', curve: 'curved', animated: true, labelColor: '#f00' }] })
     expect(doc.edges[0]).toMatchObject({ curve: 'curved', animated: true, labelColor: '#f00' })
+  })
+})
+
+describe('sections', () => {
+  it('keeps valid sections, ignores those without a position, and round-trips them', () => {
+    const { doc, warnings } = parseDocument({
+      meta: { fixedLayout: true },
+      sections: [
+        { title: 'Incident response', x: 20.4, y: 115, width: 750, height: 420, color: '#1971c2', underline: 'true' },
+        { title: 'No position' },
+        { title: 'Incident response', x: 0, y: 0, fill: 'none', width: -3 },
+      ],
+    })
+    expect(warnings).toHaveLength(1)
+    expect(doc.meta.fixedLayout).toBe(true)
+    expect(doc.sections).toEqual([
+      { id: 'incident-response', title: 'Incident response', x: 20, y: 115, width: 750, height: 420, color: '#1971c2', underline: true },
+      { id: 'incident-response-2', title: 'Incident response', x: 0, y: 0, fill: 'none' },
+    ])
+    const back = fromGraph({ getNodes: () => [], getEdges: () => [] }, doc)
+    expect(back.sections).toEqual(doc.sections)
+  })
+})
+
+describe('arrows', () => {
+  const raw = {
+    sections: [{ id: 'pipeline', x: 0, y: 0 }],
+    nodes: [{ id: 'misp' }, { id: 'case' }],
+    arrows: [
+      { id: 'feed', from: { node: 'misp', at: [0.5, 1.4] }, to: { section: 'pipeline' }, direction: 'both', label: '4) Feed', labelOffset: [10.4, -3] },
+      { from: { x: 10.6, y: 20 }, to: { node: 'case' }, route: 'zigzag', dashed: 'true' },
+      { from: { node: 'gone' }, to: { node: 'case' } },
+      { from: 'misp', to: { node: 'case' } },
+    ],
+  }
+
+  it('keeps arrows between nodes, sections and points; drops broken ones with a warning', () => {
+    const { doc, warnings } = parseDocument(raw)
+    expect(warnings).toHaveLength(2)
+    expect(doc.arrows).toEqual([
+      { id: 'feed', from: { node: 'misp', at: [0.5, 1] }, to: { section: 'pipeline' }, direction: 'both', label: '4) Feed', labelOffset: [10, -3] },
+      { id: 'arrow', from: { x: 11, y: 20 }, to: { node: 'case' }, dashed: true },
+    ])
+    const back = fromGraph({ getNodes: () => [], getEdges: () => [] }, doc)
+    expect(back.arrows).toEqual(doc.arrows)
+  })
+})
+
+describe('card nodes', () => {
+  it('are drawn without a Pivotick shape, with the card defaults', () => {
+    const nodeTypes = { box: { shape: 'card', width: 172, labelSize: 20 } }
+    expect(nodeStyle({ label: 'Acquire', type: 'box' }, nodeTypes)).toEqual({ shape: 'none', color: '#ffffff', size: 4 })
+    const look = cardLook({ label: 'Kunai', subtitle: 'Linux endpoint', type: 'box', imagePosition: 'left' }, nodeTypes)
+    expect(look).toMatchObject({ width: 172, labelSize: 20, padding: 16, imagePosition: 'left', borderColor: '#9aa3b5', textColor: '#1c2230' })
   })
 })

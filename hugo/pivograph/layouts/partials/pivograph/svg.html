@@ -1,12 +1,14 @@
 {{- /*
   The graph drawn as SVG at build time, for pages read without JavaScript:
   nodes with their shape, colour, logo, label and tag pills; edges with their
-  colour, width, dashes, arrows and labels. Each node is a link to its entry in
-  the text below, and shows its name on hover. With JavaScript, the
-  interactive graph replaces the picture.
+  colour, width, dashes, arrows and labels. Each node is a link to the page of
+  its own graph (its `graph` field), else to its entry in the text below, and
+  shows its name on hover. With JavaScript, the interactive graph replaces the
+  picture.
 
   Arguments: dict "doc" "app" (the app's URL, for its bundled icons)
             "key" (unique on the page: prefixes the ids of markers and clips)
+            "tags" (true to draw the tag pills; hidden by default)
   Returns HTML.
 */ -}}
 {{- $doc := .doc -}}
@@ -34,7 +36,7 @@
     {{- else if and $app (not (findRE `^(https?:|data:|/)` $image)) -}}{{- $image = printf "%s%s" $app $image -}}{{- end -}}
   {{- end -}}
   {{- $pills := slice -}}
-  {{- if not ($n.hideBadges | default $t.hideBadges) -}}
+  {{- if and $.tags (not ($n.hideBadges | default $t.hideBadges)) -}}
     {{- $all := slice -}}{{- with $n.tags -}}{{- $all = . -}}{{- end -}}
     {{- range first 3 $all -}}
       {{- $c := partial "pivograph/tagcolor.html" (dict "tag" (lower .) "tags" $tags) -}}
@@ -131,7 +133,7 @@
     {{- end -}}
     {{- $lx = add (mul 0.25 $sx) (mul 0.5 $cx) (mul 0.25 $ex) -}}{{- $ly = add (mul 0.25 $sy) (mul 0.5 $cy) (mul 0.25 $ey) -}}
   {{- end -}}
-  {{- $edgeSvg = printf `%s<path d="%s" fill="none" stroke="%s" stroke-width="%.1f"%s%s/>` $edgeSvg $path (htmlEscape $color) $w (cond $dashed ` stroke-dasharray="7 5"` "") $markers -}}
+  {{- $edgeSvg = printf `%s<path d="%s" fill="none" stroke="%s" stroke-width="%.1f" stroke-linecap="round" stroke-opacity="0.7"%s%s/>` $edgeSvg $path (htmlEscape $color) $w (cond $dashed ` stroke-dasharray="7 5"` "") $markers -}}
 
   {{- /* The label, on its own background, at the middle of the edge. */ -}}
   {{- $label := trim (string ($e.label | default $t.label | default "")) " " -}}
@@ -153,6 +155,8 @@
   {{- $p := index $pos $n.id -}}{{- $l := index $looks $n.id -}}{{- $r := index $radius $n.id -}}
   {{- $fill := cond (in (slice "transparent" "none" "") $l.color) "none" $l.color -}}
   {{- $stroke := cond (gt $l.borderWidth 0.0) (printf ` stroke="%s" stroke-width="%.1f"` (htmlEscape $l.borderColor) $l.borderWidth) "" -}}
+  {{- $shadow := printf ` filter="url(#%s-shadow)"` $uid -}}
+  {{- $stroke = printf "%s%s" $stroke $shadow -}}
   {{- $shape := "" -}}
   {{- if eq $l.shape "square" -}}
     {{- $shape = printf `<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="3" fill="%s"%s/>` (mul $r -1) (mul $r -1) (mul $r 2) (mul $r 2) (htmlEscape $fill) $stroke -}}
@@ -184,7 +188,7 @@
       {{- $bw := add (mul (float (len $l.label)) $l.labelSize 0.58) 10 -}}
       {{- $text = printf `<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="3" fill="%s"/>` (div $bw -2) (sub $ty (mul $l.labelSize 0.8)) $bw (mul $l.labelSize 1.6) (htmlEscape $l.labelBackground) -}}
     {{- end -}}
-    {{- $text = printf `%s<text y="%.1f" font-size="%.1f" fill="%s" text-anchor="middle" dominant-baseline="central">%s</text>` $text $ty $l.labelSize (htmlEscape $l.labelColor) (htmlEscape $l.label) -}}
+    {{- $text = printf `%s<text class="pivograph-svg-label" y="%.1f" font-size="%.1f" font-weight="600" fill="%s" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" dominant-baseline="central">%s</text>` $text $ty $l.labelSize (htmlEscape $l.labelColor) (htmlEscape $l.label) -}}
     {{- $below = add $ty (mul $l.labelSize 0.8) 4 -}}
   {{- end -}}
   {{- /* Tag pills, in rows centred under the label. */ -}}
@@ -206,10 +210,12 @@
       {{- end -}}
     {{- end -}}
   {{- end -}}
-  {{- $nodeSvg = printf `%s<a href="#pivograph-%s"><g transform="translate(%.1f,%.1f)"><title>%s</title>%s%s%s%s</g></a>` $nodeSvg (anchorize $n.id) $p.x $p.y (htmlEscape $l.label) $shape $img $text $pillSvg -}}
+  {{- $href := printf "#pivograph-%s" (anchorize $n.id) -}}
+  {{- with $n.graph -}}{{- if hasPrefix . $base -}}{{- $href = relURL (strings.TrimPrefix $base .) -}}{{- end -}}{{- end -}}
+  {{- $nodeSvg = printf `%s<a href="%s"><g transform="translate(%.1f,%.1f)"><title>%s</title>%s%s%s%s</g></a>` $nodeSvg (htmlEscape $href) $p.x $p.y (htmlEscape $l.label) $shape $img $text $pillSvg -}}
 {{- end -}}
 
-{{- $defs := "" -}}
+{{- $defs := printf `<filter id="%s-shadow" x="-50%%" y="-50%%" width="200%%" height="200%%"><feDropShadow dx="0" dy="1.5" stdDeviation="2.5" flood-color="#1c2b4a" flood-opacity="0.18"/></filter>` $uid -}}
 {{- range $ci, $c := $colors -}}
   {{- $defs = printf `%s<marker id="%s-arrow-%d" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,-5L10,0L0,5" fill="%s"/></marker>` $defs $uid $ci (htmlEscape $c) -}}
 {{- end -}}

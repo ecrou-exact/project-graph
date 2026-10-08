@@ -2,6 +2,7 @@
 // cloned with the computed styles written inline (stylesheets don't follow the
 // SVG into an image) and its images turned into data URLs (an SVG drawn as an
 // image loads nothing), then drawn on a canvas.
+import { BUNDLED_FONTS } from './fonts.js'
 
 // The properties that make the drawing: SVG paint, text, and the HTML labels
 // inside <foreignObject>.
@@ -12,8 +13,12 @@ const PROPS = [
   'color', 'background-color', 'border', 'border-radius', 'padding', 'box-shadow', 'box-sizing', 'transform', 'transform-origin', 'overflow', 'x', 'y',
 ]
 
+// Layout of the HTML inside <foreignObject> (card nodes): read only on HTML elements.
+const HTML_PROPS = ['flex-direction', 'align-items', 'justify-content', 'gap', 'width', 'height', 'max-width', 'object-fit', 'opacity']
+const XHTML = 'http://www.w3.org/1999/xhtml'
+
 // Pivotick's layers that are not part of the picture.
-const SKIP = '.selection-box, .shadow-edges, .pvt-shadow-edge'
+const SKIP = '.selection-box, .shadow-edges, .pvt-shadow-edge, .pg-arrow-hit, .pg-arrow-handle, .pg-section-grip, .pg-section-handle'
 
 /**
  * The graph drawn in `container` as a PNG data URL (null when there is nothing
@@ -44,6 +49,7 @@ export async function graphSnapshot(container, { scale = 2, maxSide = 4000, padd
   clone.removeAttribute('style')
   clone.style.background = background(container)
   await inlineImages(clone)
+  await embedFonts(clone)
 
   // A data URL, not a blob URL: Chrome taints the canvas for a blob SVG holding <foreignObject>.
   const url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(clone))}`
@@ -82,7 +88,7 @@ function inlineStyles(source, target) {
     const out = targets[i]
     if (!out?.style) return
     const cs = getComputedStyle(el)
-    for (const prop of PROPS) {
+    for (const prop of el.namespaceURI === XHTML ? [...PROPS, ...HTML_PROPS] : PROPS) {
       const value = cs.getPropertyValue(prop)
       if (value !== '') out.style.setProperty(prop, value)
     }
@@ -90,6 +96,16 @@ function inlineStyles(source, target) {
 }
 
 async function inlineImages(root) {
+  // <img> inside the HTML of card nodes: an SVG drawn as an image loads nothing either.
+  await Promise.all([...root.querySelectorAll('img')].map(async (img) => {
+    const src = img.getAttribute('src')
+    if (!src || src.startsWith('data:')) return
+    try {
+      img.setAttribute('src', await toDataUrl(new URL(src, document.baseURI).href))
+    } catch {
+      img.remove()
+    }
+  }))
   const images = [...root.querySelectorAll('image')]
   await Promise.all(images.map(async (img) => {
     const href = img.getAttribute('href') ?? img.getAttributeNS('http://www.w3.org/1999/xlink', 'href')
@@ -103,6 +119,24 @@ async function inlineImages(root) {
       img.remove() // unreachable or cross-origin without CORS: leave the node without its picture
     }
   }))
+}
+
+/** Bundled fonts the drawing uses, embedded: an SVG drawn as an image can't load them. */
+async function embedFonts(root) {
+  const markup = new XMLSerializer().serializeToString(root)
+  const rules = []
+  for (const [family, path] of Object.entries(BUNDLED_FONTS)) {
+    if (!markup.includes(family)) continue
+    try {
+      rules.push(`@font-face { font-family: ${family}; src: url(${await toDataUrl(new URL(path, document.baseURI).href)}); }`)
+    } catch {
+      // unavailable: the text falls back to the next font of its list
+    }
+  }
+  if (!rules.length) return
+  const style = document.createElementNS('http://www.w3.org/2000/svg', 'style')
+  style.textContent = rules.join('\n')
+  root.prepend(style)
 }
 
 const dataUrls = new Map()

@@ -1,0 +1,191 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2026-09-24T06:22:18Z",
+  "organization": {
+    "name": "rulezet",
+    "domain": "rulezet.org",
+    "description": "Community-Driven Detection Rules Platform",
+    "links": {
+      "homepage": "https://rulezet.org/",
+      "github_org": "https://github.com/rulezet"
+    }
+  },
+  "projects": [
+    {
+      "name": "rulezet-core",
+      "description": "Rulezet is an open-source web platform for sharing, evaluating, improving, and managing cybersecurity detection rules (YARA, Sigma, Suricata, etc). It aims to foster collaboration among professionals and enthusiasts to improve the quality and reliability of detection rules. ",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/rulezet/rulezet-core",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/rulezet/rulezet-core.git"
+      },
+      "links": {
+        "project_page": "https://rulezet.org/docs/",
+        "documentation": "https://rulezet.org/docs/",
+        "releases": "https://github.com/rulezet/rulezet-core/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/rulezet/rulezet-core/issues",
+        "good_first_issues": "https://github.com/rulezet/rulezet-core/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22",
+        "docs": "https://rulezet.org/docs/"
+      },
+      "release": {
+        "changelog": "https://github.com/rulezet/rulezet-core/releases",
+        "security_policy": "https://github.com/rulezet/rulezet-core/security/policy"
+      },
+      "tags": [
+        "cti",
+        "network-detection",
+        "network-security",
+        "threat-intelligence",
+        "yara"
+      ]
+    },
+    {
+      "name": "rulezet-cast",
+      "description": "A versatile security rule parser and normalizer designed to convert multi-format detection signatures (such as YARA, Suricata, and Emerging Threats) into structured JSON. Whether via file upload or direct copy-paste, it streamlines the translation of complex security logic into a machine-readable format for seamless integration and automation.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/rulezet/rulezet-cast",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/rulezet/rulezet-cast.git"
+      },
+      "links": {
+        "releases": "https://github.com/rulezet/rulezet-cast/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/rulezet/rulezet-cast/issues",
+        "good_first_issues": "https://github.com/rulezet/rulezet-cast/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/rulezet/rulezet-cast/releases",
+        "security_policy": "https://github.com/rulezet/rulezet-cast/security/policy"
+      },
+      "tags": [
+        "cti",
+        "cybersecurity",
+        "rules",
+        "threat-intelligence"
+      ]
+    },
+    {
+      "name": "rulezet-workshop",
+      "description": "rulezet workshop materials",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/rulezet/rulezet-workshop",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/rulezet/rulezet-workshop.git"
+      },
+      "links": {
+        "releases": "https://github.com/rulezet/rulezet-workshop/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/rulezet/rulezet-workshop/issues",
+        "good_first_issues": "https://github.com/rulezet/rulezet-workshop/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/rulezet/rulezet-workshop/releases",
+        "security_policy": "https://github.com/rulezet/rulezet-workshop/security/policy"
+      }
+    },
+    {
+      "name": "rulezet-rulesets",
+      "description": "Collection of all rules from Rulezet official ( READ ONLY  !)",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/rulezet/rulezet-rulesets",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/rulezet/rulezet-rulesets.git"
+      },
+      "links": {
+        "project_page": "https://rulezet.org/",
+        "releases": "https://github.com/rulezet/rulezet-rulesets/releases"
+      },
+      "release": {
+        "changelog": "https://github.com/rulezet/rulezet-rulesets/releases",
+        "security_policy": "https://github.com/rulezet/rulezet-rulesets/security/policy"
+      },
+      "tags": [
+        "detection-rules",
+        "read-only",
+        "ruleset",
+        "rulezet",
+        "sample"
+      ]
+    },
+    {
+      "name": "rulezet-scripts",
+      "description": "Scripts using rulezet",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/rulezet/rulezet-scripts",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/rulezet/rulezet-scripts.git"
+      },
+      "links": {
+        "releases": "https://github.com/rulezet/rulezet-scripts/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/rulezet/rulezet-scripts/issues",
+        "good_first_issues": "https://github.com/rulezet/rulezet-scripts/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/rulezet/rulezet-scripts/releases",
+        "security_policy": "https://github.com/rulezet/rulezet-scripts/security/policy"
+      }
+    },
+    {
+      "name": "rulezet-validation",
+      "description": "No description provided.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/rulezet/rulezet-validation",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/rulezet/rulezet-validation.git"
+      },
+      "links": {
+        "releases": "https://github.com/rulezet/rulezet-validation/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/rulezet/rulezet-validation/issues",
+        "good_first_issues": "https://github.com/rulezet/rulezet-validation/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/rulezet/rulezet-validation/releases",
+        "security_policy": "https://github.com/rulezet/rulezet-validation/security/policy"
+      }
+    },
+    {
+      "name": "rulezet-sample-rules",
+      "description": "A centralized collection of security and logic rules for various platforms. This repository is designed as a resource library for workshops, CTFs, and technical training sessions, providing ready-to-import rules in multiple formats.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/rulezet/rulezet-sample-rules",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/rulezet/rulezet-sample-rules.git"
+      },
+      "links": {
+        "project_page": "https://rulezet.org/",
+        "releases": "https://github.com/rulezet/rulezet-sample-rules/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/rulezet/rulezet-sample-rules/issues",
+        "good_first_issues": "https://github.com/rulezet/rulezet-sample-rules/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/rulezet/rulezet-sample-rules/releases",
+        "security_policy": "https://github.com/rulezet/rulezet-sample-rules/security/policy"
+      }
+    }
+  ],
+  "extensions": {}
+}

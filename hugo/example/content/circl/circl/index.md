@@ -7,6 +7,7 @@ graph:
   id: "circl"
   type: "cert"
   url: "https://www.circl.lu"
+  graph: "/circl/circl"
   github: "CIRCL/Circlean"
   githubInfo:
     fullName: "CIRCL/Circlean"
@@ -81,3 +82,7 @@ graph:
     - to: "bintriage"
       type: "manages"
 ---
+
+The graph of CIRCL: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-circl" >}}

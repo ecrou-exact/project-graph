@@ -1,0 +1,139 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2026-09-24T06:24:12Z",
+  "organization": {
+    "name": "Cerebrate project",
+    "domain": "cerebrate-project.org",
+    "description": "Cerebrate is an open-source platform meant to act as a trusted contact information provider and interconnection orchestrator for other security tools. ",
+    "links": {
+      "homepage": "https://www.cerebrate-project.org",
+      "github_org": "https://github.com/cerebrate-project"
+    }
+  },
+  "projects": [
+    {
+      "name": "cerebrate",
+      "description": "Cerebrate is an open-source platform meant to act as a trusted contact information provider and interconnection orchestrator for other security tools.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/cerebrate-project/cerebrate",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/cerebrate-project/cerebrate.git"
+      },
+      "links": {
+        "project_page": "https://www.cerebrate-project.org/",
+        "releases": "https://github.com/cerebrate-project/cerebrate/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/cerebrate-project/cerebrate/issues",
+        "good_first_issues": "https://github.com/cerebrate-project/cerebrate/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/cerebrate-project/cerebrate/releases",
+        "security_policy": "https://github.com/cerebrate-project/cerebrate/security/policy"
+      },
+      "tags": [
+        "cerebrate",
+        "cerebrate-project",
+        "information-sharing",
+        "misp",
+        "security-automation"
+      ]
+    },
+    {
+      "name": "cerebrate-training",
+      "description": "Cerebrate training materials",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/cerebrate-project/cerebrate-training",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/cerebrate-project/cerebrate-training.git"
+      },
+      "links": {
+        "releases": "https://github.com/cerebrate-project/cerebrate-training/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/cerebrate-project/cerebrate-training/issues",
+        "good_first_issues": "https://github.com/cerebrate-project/cerebrate-training/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/cerebrate-project/cerebrate-training/releases",
+        "security_policy": "https://github.com/cerebrate-project/cerebrate-training/security/policy"
+      },
+      "tags": [
+        "cerebrate-project",
+        "misp"
+      ]
+    },
+    {
+      "name": "module-collection",
+      "description": "No description provided.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/cerebrate-project/module-collection",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/cerebrate-project/module-collection.git"
+      },
+      "links": {
+        "releases": "https://github.com/cerebrate-project/module-collection/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/cerebrate-project/module-collection/issues",
+        "good_first_issues": "https://github.com/cerebrate-project/module-collection/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/cerebrate-project/module-collection/releases",
+        "security_policy": "https://github.com/cerebrate-project/module-collection/security/policy"
+      }
+    },
+    {
+      "name": "cerebrate-website",
+      "description": "Website - www.cerebrate-project.org",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/cerebrate-project/cerebrate-website",
+        "license": "MIT",
+        "type": "git",
+        "clone": "https://github.com/cerebrate-project/cerebrate-website.git"
+      },
+      "links": {
+        "releases": "https://github.com/cerebrate-project/cerebrate-website/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/cerebrate-project/cerebrate-website/issues",
+        "good_first_issues": "https://github.com/cerebrate-project/cerebrate-website/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/cerebrate-project/cerebrate-website/releases",
+        "security_policy": "https://github.com/cerebrate-project/cerebrate-website/security/policy"
+      }
+    },
+    {
+      "name": "doc.cerebrate-project.org",
+      "description": "Cerebrate documentation website",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/cerebrate-project/doc.cerebrate-project.org",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/cerebrate-project/doc.cerebrate-project.org.git"
+      },
+      "links": {
+        "project_page": "https://doc.cerebrate-project.org",
+        "releases": "https://github.com/cerebrate-project/doc.cerebrate-project.org/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/cerebrate-project/doc.cerebrate-project.org/issues",
+        "good_first_issues": "https://github.com/cerebrate-project/doc.cerebrate-project.org/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/cerebrate-project/doc.cerebrate-project.org/releases",
+        "security_policy": "https://github.com/cerebrate-project/doc.cerebrate-project.org/security/policy"
+      }
+    }
+  ],
+  "extensions": {}
+}

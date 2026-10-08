@@ -52,8 +52,22 @@ describe.skipIf(!available)('Hugo component', () => {
     expect(doc.edges.map(key).sort()).toEqual(original.edges.map(key).sort())
   })
 
+  it('leaves the relationships out of the text unless asked for', () => {
+    for (const page of ['projects/index.html', 'circl/index.html', 'circl/misp/index.html']) {
+      expect(readFileSync(join(out, page), 'utf8')).not.toContain('pivograph-relations')
+    }
+  })
+
   it('writes the same sentences as the report protocol', () => {
-    const html = readFileSync(join(out, 'projects/index.html'), 'utf8')
+    // relations="true" on a copy of the example: the Rulezet graph with its sentences.
+    const site = mkdtempSync(join(tmpdir(), 'pivograph-hugo-relations-'))
+    cpSync(join(root, 'hugo/example'), site, { recursive: true, filter: (f) => !/[\\/](public|resources)$/.test(f) })
+    const index = join(site, 'content/projects/_index.md')
+    writeFileSync(index, readFileSync(index, 'utf8').replace('{{< pivograph >}}', '{{< pivograph relations="true" >}}'))
+    const config = join(site, 'hugo.toml')
+    writeFileSync(config, readFileSync(config, 'utf8').replace(/themesDir = ".*"/, `themesDir = ${JSON.stringify(join(root, 'hugo'))}`))
+    execFileSync(hugo, ['-s', site, '-d', join(site, 'out'), '--quiet'], { encoding: 'utf8' })
+    const html = readFileSync(join(site, 'out/projects/index.html'), 'utf8')
     const items = [...html.matchAll(/<li>([\s\S]*?)(?:<p>|<dl|<\/li>)/g)].map((m) => plain(m[1]))
     const text = (segments) => segments.map((s) => (typeof s === 'string' ? s : s.name ?? `#${s.tag}`)).join('')
     const model = reportModel(parseDocument(built).doc)
@@ -107,9 +121,25 @@ describe.skipIf(!available)('Hugo component', () => {
     expect(doc.edges).toHaveLength(circl.edges.length)
     const html = readFileSync(join(out, 'circl/index.html'), 'utf8')
     expect((html.match(/class="pivograph-node"/g) ?? []).length).toBe(circl.nodes.length)
-    expect(html).toContain('<a href="#pivograph-bintriage">')
+    // Each organisation links to its page, which shows its own graph (with or without JavaScript).
+    expect(html).toContain('<a href="/circl/bintriage/"><g')
+    expect(html).toContain('<a href="/circl/misp/">The graph of MISP</a>')
     expect(html).not.toContain('undefined')
-    expect(html).toMatch(/<strong>CIRCL<\/strong> manages or co-manages <strong>MISP<\/strong>, /)
+  })
+
+  it('shows each CIRCL organisation\'s own graph on its page', () => {
+    const circl = JSON.parse(readFileSync(join(root, 'examples/circl.json'), 'utf8'))
+    for (const { id, graph } of circl.nodes) {
+      const own = JSON.parse(readFileSync(join(root, graph), 'utf8'))
+      const { doc, errors } = parseDocument(JSON.parse(readFileSync(join(out, `pivograph/circl-${id}.json`), 'utf8')))
+      expect(errors).toEqual([])
+      expect(doc.nodes).toHaveLength(own.nodes.length)
+      const page = readFileSync(join(out, `circl/${id}/index.html`), 'utf8')
+      expect(page).toContain('class="pivograph-picture"')
+      expect((page.match(/class="pivograph-node"/g) ?? []).length).toBe(own.nodes.length)
+    }
+    // Tag pills are not drawn unless asked for (the Rulezet nodes have tags).
+    expect(readFileSync(join(out, 'projects/index.html'), 'utf8')).not.toContain('height="16" rx="8"')
   })
 
   it('reads a data file, and keeps the positions of the app in the picture', () => {

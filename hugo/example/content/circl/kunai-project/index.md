@@ -5,6 +5,7 @@ graph:
   id: "kunai-project"
   type: "organisation"
   url: "https://why.kunai.rocks"
+  graph: "/circl/kunai-project"
   github: "kunai-project/kunai"
   githubInfo:
     fullName: "kunai-project/kunai"
@@ -36,3 +37,7 @@ graph:
     most_starred_repositories: ["kunai (1091 stars)", "sandbox (30 stars)", "sandbox-ui (18 stars)", "pykunai (8 stars)", "kunai-build-docker (6 stars)"]
   image: "logo.png"
 ---
+
+The graph of Kunai Project: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-kunai-project" >}}

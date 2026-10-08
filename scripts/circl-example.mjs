@@ -72,6 +72,8 @@ for (const [login, name] of ORGANISATIONS) {
     description: org.description || undefined,
     url: website,
     image: `logos/circl/${file}`,
+    // Its own graph, with all its projects (scripts/circl-orgs.mjs).
+    graph: `examples/circl/${login.toLowerCase()}.json`,
     github: top ? top.full_name : undefined,
     githubInfo: top ? compact({
       fullName: top.full_name,
@@ -120,11 +122,11 @@ const doc = {
   nodeTypes: {
     cert: {
       label: 'CERT', color: '#ffffff', shape: 'circle', size: 70, imageFit: 'contain',
-      borderColor: '#1c2b4a', borderWidth: 3, labelSize: 22, labelFont: 'sans', labelBackground: 'none',
+      borderWidth: 0, labelSize: 22, labelFont: 'sans', labelBackground: 'none',
     },
     organisation: {
       label: 'GitHub organisation', color: '#ffffff', shape: 'circle', size: 36, imageFit: 'contain',
-      borderColor: '#c9d1e0', borderWidth: 2, labelSize: 15, labelFont: 'sans', labelBackground: 'none',
+      borderWidth: 0, labelSize: 15, labelFont: 'sans', labelBackground: 'none',
     },
   },
   edgeTypes: {

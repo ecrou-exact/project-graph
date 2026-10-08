@@ -1,0 +1,941 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2026-09-24T06:23:40Z",
+  "organization": {
+    "name": "D4 project",
+    "domain": "d4-project.org",
+    "description": "Large-scale distributed sensor network project to monitor DDoS and other malicious activities.",
+    "links": {
+      "homepage": "https://d4-project.org/",
+      "github_org": "https://github.com/D4-project"
+    }
+  },
+  "projects": [
+    {
+      "name": "passive-ssh",
+      "description": "A Passive SSH back-end and scanner.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/passive-ssh",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/passive-ssh.git"
+      },
+      "links": {
+        "project_page": "https://d4-project.github.io/passive-ssh/",
+        "releases": "https://github.com/d4-project/passive-ssh/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/passive-ssh/issues",
+        "good_first_issues": "https://github.com/d4-project/passive-ssh/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/passive-ssh/releases",
+        "security_policy": "https://github.com/d4-project/passive-ssh/security/policy"
+      },
+      "tags": [
+        "hassh",
+        "passive-ssh",
+        "passive-ssh-server",
+        "ssh",
+        "ssh-scanner",
+        "threat-intelligence"
+      ]
+    },
+    {
+      "name": "IPASN-History",
+      "description": "IP ASN History to find ASN announcing an IP and the closest prefix announcing it at a specific date",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/IPASN-History",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/IPASN-History.git"
+      },
+      "links": {
+        "project_page": "https://www.d4-project.org/open%20source/asn/history/2019/01/09/IP-ASN-History.html",
+        "releases": "https://github.com/d4-project/IPASN-History/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/IPASN-History/issues",
+        "good_first_issues": "https://github.com/d4-project/IPASN-History/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/IPASN-History/releases",
+        "security_policy": "https://github.com/d4-project/IPASN-History/security/policy"
+      },
+      "tags": [
+        "d4-project",
+        "historical-data",
+        "ip-address",
+        "ip-asn-history",
+        "ip-whois",
+        "security-tools"
+      ]
+    },
+    {
+      "name": "BGP-Ranking",
+      "description": "BGP ranking is a free software to calculate the security ranking of Internet Service Provider (ASN)",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/BGP-Ranking",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/BGP-Ranking.git"
+      },
+      "links": {
+        "project_page": "http://bgpranking.circl.lu/",
+        "releases": "https://github.com/d4-project/BGP-Ranking/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/BGP-Ranking/issues",
+        "good_first_issues": "https://github.com/d4-project/BGP-Ranking/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/BGP-Ranking/releases",
+        "security_policy": "https://github.com/d4-project/BGP-Ranking/security/policy"
+      },
+      "tags": [
+        "bgp",
+        "bgp-ranking",
+        "csirt",
+        "csirt-activities",
+        "d4-project",
+        "network-monitoring",
+        "network-security"
+      ]
+    },
+    {
+      "name": "d4-core",
+      "description": "D4 core software (server and sample sensor client) ",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/d4-core",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/d4-core.git"
+      },
+      "links": {
+        "project_page": "https://www.d4-project.org/",
+        "releases": "https://github.com/d4-project/d4-core/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/d4-core/issues",
+        "good_first_issues": "https://github.com/d4-project/d4-core/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/d4-core/releases",
+        "security_policy": "https://github.com/d4-project/d4-core/security/policy"
+      },
+      "tags": [
+        "d4-project",
+        "network-monitoring",
+        "network-security",
+        "threat-intelligence"
+      ]
+    },
+    {
+      "name": "sensor-d4-tls-fingerprinting",
+      "description": "Extract TLS certificates from pcap files or network interfaces, fingerprint TLS client/server interactions with ja3/ja3s",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/sensor-d4-tls-fingerprinting",
+        "license": "MIT",
+        "type": "git",
+        "clone": "https://github.com/D4-project/sensor-d4-tls-fingerprinting.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/sensor-d4-tls-fingerprinting/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/sensor-d4-tls-fingerprinting/issues",
+        "good_first_issues": "https://github.com/d4-project/sensor-d4-tls-fingerprinting/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/sensor-d4-tls-fingerprinting/releases",
+        "security_policy": "https://github.com/d4-project/sensor-d4-tls-fingerprinting/security/policy"
+      },
+      "tags": [
+        "d4-project",
+        "pcap",
+        "security-monitoring",
+        "tls",
+        "tls-certificate"
+      ]
+    },
+    {
+      "name": "analyzer-d4-passivedns",
+      "description": "A Passive DNS backend and collector",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/analyzer-d4-passivedns",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/analyzer-d4-passivedns.git"
+      },
+      "links": {
+        "project_page": "https://d4-project.github.io/analyzer-d4-passivedns/",
+        "releases": "https://github.com/d4-project/analyzer-d4-passivedns/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/analyzer-d4-passivedns/issues",
+        "good_first_issues": "https://github.com/d4-project/analyzer-d4-passivedns/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/analyzer-d4-passivedns/releases",
+        "security_policy": "https://github.com/d4-project/analyzer-d4-passivedns/security/policy"
+      },
+      "tags": [
+        "d4-project",
+        "dns",
+        "network-monitoring",
+        "network-security",
+        "passive-dns",
+        "passive-dns-collection",
+        "security-monitoring"
+      ]
+    },
+    {
+      "name": "architecture",
+      "description": "Architecture - design and implementation of the D4 project architecture",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/architecture",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/architecture.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/architecture/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/architecture/issues",
+        "good_first_issues": "https://github.com/d4-project/architecture/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/architecture/releases",
+        "security_policy": "https://github.com/d4-project/architecture/security/policy"
+      },
+      "tags": [
+        "d4-project"
+      ]
+    },
+    {
+      "name": "Plum-Island",
+      "description": "Proactive Land Uncovering & Monitoring",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/Plum-Island",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/Plum-Island.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/Plum-Island/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/Plum-Island/issues",
+        "good_first_issues": "https://github.com/d4-project/Plum-Island/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/Plum-Island/releases",
+        "security_policy": "https://github.com/d4-project/Plum-Island/security/policy"
+      },
+      "tags": [
+        "network-scanning"
+      ]
+    },
+    {
+      "name": "bgp-monitor",
+      "description": "A tool for filtering BGP records, by AS numbers, prefixes, countries, etc ...",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/bgp-monitor",
+        "license": "Apache-2.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/bgp-monitor.git"
+      },
+      "links": {
+        "project_page": "https://d4-project.github.io/bgp-monitor/",
+        "releases": "https://github.com/d4-project/bgp-monitor/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/bgp-monitor/issues",
+        "good_first_issues": "https://github.com/d4-project/bgp-monitor/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/bgp-monitor/releases",
+        "security_policy": "https://github.com/d4-project/bgp-monitor/security/policy"
+      },
+      "tags": [
+        "bgp",
+        "bgp-monitor"
+      ]
+    },
+    {
+      "name": "d4-goclient",
+      "description": "D4 core software client in Go",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/d4-goclient",
+        "license": "MIT",
+        "type": "git",
+        "clone": "https://github.com/D4-project/d4-goclient.git"
+      },
+      "links": {
+        "project_page": "https://www.d4-project.org/",
+        "releases": "https://github.com/d4-project/d4-goclient/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/d4-goclient/issues",
+        "good_first_issues": "https://github.com/d4-project/d4-goclient/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/d4-goclient/releases",
+        "security_policy": "https://github.com/d4-project/d4-goclient/security/policy"
+      },
+      "tags": [
+        "d4-project",
+        "network-monitoring",
+        "network-sensor"
+      ]
+    },
+    {
+      "name": "pyipasnhistory",
+      "description": "API client for IPASN History",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/pyipasnhistory",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/D4-project/pyipasnhistory.git"
+      },
+      "links": {
+        "project_page": "https://pyipasnhistory.readthedocs.io/en/latest/",
+        "documentation": "https://pyipasnhistory.readthedocs.io/en/latest/",
+        "releases": "https://github.com/d4-project/pyipasnhistory/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/pyipasnhistory/issues",
+        "good_first_issues": "https://github.com/d4-project/pyipasnhistory/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22",
+        "docs": "https://pyipasnhistory.readthedocs.io/en/latest/"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/pyipasnhistory/releases",
+        "security_policy": "https://github.com/d4-project/pyipasnhistory/security/policy"
+      }
+    },
+    {
+      "name": "snake-oil-crypto",
+      "description": "Spotting and sharing weak cryptographic key materials",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/snake-oil-crypto",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/snake-oil-crypto.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/snake-oil-crypto/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/snake-oil-crypto/issues",
+        "good_first_issues": "https://github.com/d4-project/snake-oil-crypto/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/snake-oil-crypto/releases",
+        "security_policy": "https://github.com/d4-project/snake-oil-crypto/security/policy"
+      },
+      "tags": [
+        "cracking",
+        "crypto",
+        "d4-project",
+        "rsa"
+      ]
+    },
+    {
+      "name": "analyzer-d4-pewpew",
+      "description": "This analyzer creates a pewpew map out of d4 data",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/analyzer-d4-pewpew",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/analyzer-d4-pewpew.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/analyzer-d4-pewpew/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/analyzer-d4-pewpew/issues",
+        "good_first_issues": "https://github.com/d4-project/analyzer-d4-pewpew/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/analyzer-d4-pewpew/releases",
+        "security_policy": "https://github.com/d4-project/analyzer-d4-pewpew/security/policy"
+      }
+    },
+    {
+      "name": "analyzer-d4-ipa",
+      "description": "analyzer-d4-ipa (ICMP Passive Analysis)",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/analyzer-d4-ipa",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/analyzer-d4-ipa.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/analyzer-d4-ipa/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/analyzer-d4-ipa/issues",
+        "good_first_issues": "https://github.com/d4-project/analyzer-d4-ipa/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/analyzer-d4-ipa/releases",
+        "security_policy": "https://github.com/d4-project/analyzer-d4-ipa/security/policy"
+      },
+      "tags": [
+        "d4-project",
+        "icmp",
+        "network-analysis"
+      ]
+    },
+    {
+      "name": "analyzer-d4-log",
+      "description": "Analyze logs collected though d4 to produce diverse statistics.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/analyzer-d4-log",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/analyzer-d4-log.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/analyzer-d4-log/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/analyzer-d4-log/issues",
+        "good_first_issues": "https://github.com/d4-project/analyzer-d4-log/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/analyzer-d4-log/releases",
+        "security_policy": "https://github.com/d4-project/analyzer-d4-log/security/policy"
+      }
+    },
+    {
+      "name": "analyzer-d4-passivessl",
+      "description": "No description provided.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/analyzer-d4-passivessl",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/analyzer-d4-passivessl.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/analyzer-d4-passivessl/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/analyzer-d4-passivessl/issues",
+        "good_first_issues": "https://github.com/d4-project/analyzer-d4-passivessl/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/analyzer-d4-passivessl/releases",
+        "security_policy": "https://github.com/d4-project/analyzer-d4-passivessl/security/policy"
+      },
+      "tags": [
+        "d4-project",
+        "passivessl",
+        "tls",
+        "tls-certificate",
+        "x509certificates"
+      ]
+    },
+    {
+      "name": "d4-pretensor",
+      "description": "Easing tor proxies botnet analysis",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/d4-pretensor",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/D4-project/d4-pretensor.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/d4-pretensor/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/d4-pretensor/issues",
+        "good_first_issues": "https://github.com/d4-project/d4-pretensor/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/d4-pretensor/releases",
+        "security_policy": "https://github.com/d4-project/d4-pretensor/security/policy"
+      }
+    },
+    {
+      "name": "d4-pyclient",
+      "description": "D4 core software client in Python https://www.d4-project.org/",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/d4-pyclient",
+        "license": "BSD-2-Clause",
+        "type": "git",
+        "clone": "https://github.com/D4-project/d4-pyclient.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/d4-pyclient/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/d4-pyclient/issues",
+        "good_first_issues": "https://github.com/d4-project/d4-pyclient/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/d4-pyclient/releases",
+        "security_policy": "https://github.com/d4-project/d4-pyclient/security/policy"
+      }
+    },
+    {
+      "name": "d4-sensor-generator",
+      "description": "No description provided.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/d4-sensor-generator",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/d4-sensor-generator.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/d4-sensor-generator/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/d4-sensor-generator/issues",
+        "good_first_issues": "https://github.com/d4-project/d4-sensor-generator/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/d4-sensor-generator/releases",
+        "security_policy": "https://github.com/d4-project/d4-sensor-generator/security/policy"
+      },
+      "tags": [
+        "d4-project",
+        "network-monitoring",
+        "network-security",
+        "security-tools",
+        "threat-intelligence"
+      ]
+    },
+    {
+      "name": "nmap2json",
+      "description": "Library to Convert XML Nmap output to usable JSON",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/nmap2json",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/nmap2json.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/nmap2json/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/nmap2json/issues",
+        "good_first_issues": "https://github.com/d4-project/nmap2json/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/nmap2json/releases",
+        "security_policy": "https://github.com/d4-project/nmap2json/security/policy"
+      },
+      "tags": [
+        "network-scanning",
+        "nmap"
+      ]
+    },
+    {
+      "name": "analyzer-d4-isn",
+      "description": "D4 Analyser to get stats and graphs on TCP SYN packets where IP_DST==ISN",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/analyzer-d4-isn",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/D4-project/analyzer-d4-isn.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/analyzer-d4-isn/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/analyzer-d4-isn/issues",
+        "good_first_issues": "https://github.com/d4-project/analyzer-d4-isn/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/analyzer-d4-isn/releases",
+        "security_policy": "https://github.com/d4-project/analyzer-d4-isn/security/policy"
+      }
+    },
+    {
+      "name": "analyzer-d4-pcap-filter",
+      "description": "d4 analyzer - PCAP filter",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/analyzer-d4-pcap-filter",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/analyzer-d4-pcap-filter.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/analyzer-d4-pcap-filter/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/analyzer-d4-pcap-filter/issues",
+        "good_first_issues": "https://github.com/d4-project/analyzer-d4-pcap-filter/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/analyzer-d4-pcap-filter/releases",
+        "security_policy": "https://github.com/d4-project/analyzer-d4-pcap-filter/security/policy"
+      }
+    },
+    {
+      "name": "analyzer-d4-pibs",
+      "description": "Passive Identification of BackScatter (analyzer for D4 project)",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/analyzer-d4-pibs",
+        "license": "NOASSERTION",
+        "type": "git",
+        "clone": "https://github.com/D4-project/analyzer-d4-pibs.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/analyzer-d4-pibs/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/analyzer-d4-pibs/issues",
+        "good_first_issues": "https://github.com/d4-project/analyzer-d4-pibs/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/analyzer-d4-pibs/releases",
+        "security_policy": "https://github.com/d4-project/analyzer-d4-pibs/security/policy"
+      },
+      "tags": [
+        "backscatter",
+        "d4-project",
+        "ddos-attacks",
+        "ddos-detection",
+        "ddos-tool"
+      ]
+    },
+    {
+      "name": "ct-scrutinize",
+      "description": "ct-scrutinize is a set of tools extract information from Certificate Transparency logs",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/ct-scrutinize",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/ct-scrutinize.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/ct-scrutinize/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/ct-scrutinize/issues",
+        "good_first_issues": "https://github.com/d4-project/ct-scrutinize/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/ct-scrutinize/releases",
+        "security_policy": "https://github.com/d4-project/ct-scrutinize/security/policy"
+      }
+    },
+    {
+      "name": "demotic-js",
+      "description": "Common JS utilities used by ordinary people",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/demotic-js",
+        "license": "BSD-2-Clause",
+        "type": "git",
+        "clone": "https://github.com/D4-project/demotic-js.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/demotic-js/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/demotic-js/issues",
+        "good_first_issues": "https://github.com/d4-project/demotic-js/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/demotic-js/releases",
+        "security_policy": "https://github.com/d4-project/demotic-js/security/policy"
+      }
+    },
+    {
+      "name": "pybgpranking",
+      "description": "Python API for BGP Ranking",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/pybgpranking",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/D4-project/pybgpranking.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/pybgpranking/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/pybgpranking/issues",
+        "good_first_issues": "https://github.com/d4-project/pybgpranking/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/pybgpranking/releases",
+        "security_policy": "https://github.com/d4-project/pybgpranking/security/policy"
+      }
+    },
+    {
+      "name": "d4-rustclient",
+      "description": "Very basic rust client: listen for a message on stdin, write the message on stdout.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/d4-rustclient",
+        "license": "BSD-2-Clause",
+        "type": "git",
+        "clone": "https://github.com/D4-project/d4-rustclient.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/d4-rustclient/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/d4-rustclient/issues",
+        "good_first_issues": "https://github.com/d4-project/d4-rustclient/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/d4-rustclient/releases",
+        "security_policy": "https://github.com/d4-project/d4-rustclient/security/policy"
+      }
+    },
+    {
+      "name": "d4-website",
+      "description": "D4 Project website",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/d4-website",
+        "license": "MIT",
+        "type": "git",
+        "clone": "https://github.com/D4-project/d4-website.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/d4-website/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/d4-website/issues",
+        "good_first_issues": "https://github.com/d4-project/d4-website/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/d4-website/releases",
+        "security_policy": "https://github.com/d4-project/d4-website/security/policy"
+      }
+    },
+    {
+      "name": "Plum-Agent",
+      "description": "Scanning Agent running with Plum-Island",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/Plum-Agent",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/Plum-Agent.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/Plum-Agent/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/Plum-Agent/issues",
+        "good_first_issues": "https://github.com/d4-project/Plum-Agent/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/Plum-Agent/releases",
+        "security_policy": "https://github.com/d4-project/Plum-Agent/security/policy"
+      }
+    },
+    {
+      "name": "d4-golang-utils",
+      "description": "Golang utils for D4-Project",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/d4-golang-utils",
+        "license": "MIT",
+        "type": "git",
+        "clone": "https://github.com/D4-project/d4-golang-utils.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/d4-golang-utils/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/d4-golang-utils/issues",
+        "good_first_issues": "https://github.com/d4-project/d4-golang-utils/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/d4-golang-utils/releases",
+        "security_policy": "https://github.com/d4-project/d4-golang-utils/security/policy"
+      }
+    },
+    {
+      "name": "d4-server-packer",
+      "description": "Create D4 virtual machines",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/d4-server-packer",
+        "license": "GPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/d4-server-packer.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/d4-server-packer/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/d4-server-packer/issues",
+        "good_first_issues": "https://github.com/d4-project/d4-server-packer/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/d4-server-packer/releases",
+        "security_policy": "https://github.com/d4-project/d4-server-packer/security/policy"
+      },
+      "tags": [
+        "d4-project"
+      ]
+    },
+    {
+      "name": "ex_d4",
+      "description": "Ex_d4 allows for communicating with d4-servers in elixir.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/ex_d4",
+        "license": "MIT",
+        "type": "git",
+        "clone": "https://github.com/D4-project/ex_d4.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/ex_d4/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/ex_d4/issues",
+        "good_first_issues": "https://github.com/d4-project/ex_d4/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/ex_d4/releases",
+        "security_policy": "https://github.com/d4-project/ex_d4/security/policy"
+      }
+    },
+    {
+      "name": "lookup-d4-passivessl",
+      "description": "No description provided.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/lookup-d4-passivessl",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/lookup-d4-passivessl.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/lookup-d4-passivessl/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/lookup-d4-passivessl/issues",
+        "good_first_issues": "https://github.com/d4-project/lookup-d4-passivessl/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/lookup-d4-passivessl/releases",
+        "security_policy": "https://github.com/d4-project/lookup-d4-passivessl/security/policy"
+      }
+    },
+    {
+      "name": "Plum-Rules-NSE",
+      "description": "NSE Rules for Plum-Island ",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/Plum-Rules-NSE",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/Plum-Rules-NSE.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/Plum-Rules-NSE/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/Plum-Rules-NSE/issues",
+        "good_first_issues": "https://github.com/d4-project/Plum-Rules-NSE/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/Plum-Rules-NSE/releases",
+        "security_policy": "https://github.com/d4-project/Plum-Rules-NSE/security/policy"
+      }
+    },
+    {
+      "name": "d4-nifi-templates",
+      "description": "This repository holds nifi templates used to interact with d4.",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/d4-nifi-templates",
+        "license": "Apache-2.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/d4-nifi-templates.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/d4-nifi-templates/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/d4-nifi-templates/issues",
+        "good_first_issues": "https://github.com/d4-project/d4-nifi-templates/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/d4-nifi-templates/releases",
+        "security_policy": "https://github.com/d4-project/d4-nifi-templates/security/policy"
+      }
+    },
+    {
+      "name": "d4-sensor-packer",
+      "description": "Generate Raspberry Pi images for D4 sensors",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/d4-sensor-packer",
+        "license": "BSD-3-Clause",
+        "type": "git",
+        "clone": "https://github.com/D4-project/d4-sensor-packer.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/d4-sensor-packer/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/d4-sensor-packer/issues",
+        "good_first_issues": "https://github.com/d4-project/d4-sensor-packer/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/d4-sensor-packer/releases",
+        "security_policy": "https://github.com/d4-project/d4-sensor-packer/security/policy"
+      }
+    },
+    {
+      "name": "Plum-Antibodies",
+      "description": "Detections rules for Plum Island",
+      "status": "active",
+      "repository": {
+        "url": "https://github.com/D4-project/Plum-Antibodies",
+        "license": "AGPL-3.0",
+        "type": "git",
+        "clone": "https://github.com/D4-project/Plum-Antibodies.git"
+      },
+      "links": {
+        "releases": "https://github.com/d4-project/Plum-Antibodies/releases"
+      },
+      "participate": {
+        "issues": "https://github.com/d4-project/Plum-Antibodies/issues",
+        "good_first_issues": "https://github.com/d4-project/Plum-Antibodies/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+      },
+      "release": {
+        "changelog": "https://github.com/d4-project/Plum-Antibodies/releases",
+        "security_policy": "https://github.com/d4-project/Plum-Antibodies/security/policy"
+      }
+    }
+  ],
+  "extensions": {}
+}

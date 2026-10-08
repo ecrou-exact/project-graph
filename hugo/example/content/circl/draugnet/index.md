@@ -4,6 +4,7 @@ weight: 17
 graph:
   id: "draugnet"
   type: "organisation"
+  graph: "/circl/draugnet"
   github: "draugnet/draugnet"
   githubInfo:
     fullName: "draugnet/draugnet"
@@ -31,3 +32,7 @@ graph:
     most_starred_repositories: ["draugnet (21 stars)", "draugnetUI (6 stars)", "draugnet-docker (0 stars)"]
   image: "logo.png"
 ---
+
+The graph of Draugnet: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-draugnet" >}}

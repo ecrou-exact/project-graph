@@ -7,7 +7,7 @@ Pivograph can be shown inside another site with an `<iframe>`, without its top b
 | `embed=1` | Hides the top bar (logo and menus). Starts empty and read-only. Never reads or overwrites the visitor's saved map. |
 | `src=<url>` | Loads this JSON at start: a Pivograph document or an OCD file. The server must allow CORS. |
 | `sidebar=0` | Hides the side panel. |
-| `tags=0` | Starts with the tag pills hidden. |
+| `tags=1` | Starts with the tag pills shown on the graph. They are hidden by default; the *# Tags* button shows them. |
 
 The map below is the app embedded in this page, loading the example with `?embed=1&sidebar=0&src=…`:
 

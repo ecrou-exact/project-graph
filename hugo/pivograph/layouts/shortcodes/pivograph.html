@@ -2,12 +2,12 @@
   {{< pivograph >}}                          the graph of the current section
   {{< pivograph section="/projects" >}}      the graph of another section
   {{< pivograph data="ecosystem" >}}         data/pivograph/ecosystem.json|yaml|toml
-  Other parameters: app, height, sidebar, tags, picture, image, title, level, text
+  Other parameters: app, height, sidebar, tags, relations, picture, image, title, level, text
   (see layouts/partials/pivograph/embed.html).
 */ -}}
 {{- $args := dict "page" .Page -}}
 {{- range $key, $value := .Params -}}
-  {{- if in (slice "sidebar" "tags" "text" "picture") $key -}}{{- $value = ne (string $value) "false" -}}{{- end -}}
+  {{- if in (slice "sidebar" "tags" "relations" "text" "picture") $key -}}{{- $value = ne (string $value) "false" -}}{{- end -}}
   {{- $args = merge $args (dict $key $value) -}}
 {{- end -}}
 {{- partial "pivograph/embed.html" $args -}}

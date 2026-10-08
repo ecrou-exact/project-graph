@@ -5,6 +5,7 @@ weight: 21
 graph:
   id: "skillaegis"
   type: "organisation"
+  graph: "/circl/skillaegis"
   github: "SkillAegis/SkillAegis"
   githubInfo:
     fullName: "SkillAegis/SkillAegis"
@@ -31,3 +32,7 @@ graph:
     most_starred_repositories: ["SkillAegis (38 stars)", "SkillAegis-Dashboard (4 stars)", "SkillAegis-Editor (4 stars)"]
   image: "logo.png"
 ---
+
+The graph of SkillAegis: the organisation and its public GitHub repositories, from its Open Contributions Descriptor.
+
+{{< pivograph data="circl-skillaegis" >}}
