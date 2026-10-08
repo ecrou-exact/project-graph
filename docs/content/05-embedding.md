@@ -6,6 +6,7 @@ Pivograph can be shown inside another site with an `<iframe>`, without its top b
 |---|---|
 | `embed=1` | Hides the top bar (logo and menus). Starts empty and read-only. Never reads or overwrites the visitor's saved map. |
 | `src=<url>` | Loads this JSON at start: a Pivograph document or an OCD file. The server must allow CORS. |
+| `example=<name>` | Opens a bundled example: `rulezet`, `circl` or `ngsoti`, e.g. [`?example=ngsoti`](https://ecrou-exact.github.io/project-graph/?example=ngsoti). Works without `embed` too: the address follows the example shown, so it can be shared. |
 | `sidebar=0` | Hides the side panel. |
 | `tags=1` | Starts with the tag pills shown on the graph. They are hidden by default; the *# Tags* button shows them. |
 

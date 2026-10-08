@@ -79,6 +79,7 @@ The app can be embedded in an `<iframe>` without its top bar (logo and menus):
 |---|---|
 | `embed=1` | hide the top bar; start empty and read-only; never touch the visitor's saved graph |
 | `src=<url>` | load this JSON at start (a Pivograph graph or an OCD file; the server must allow CORS) |
+| `example=<name>` | open a bundled example: `rulezet`, `circl` or `ngsoti` — e.g. https://ecrou-exact.github.io/project-graph/?example=ngsoti (also without `embed`) |
 | `sidebar=0` | hide the side panel |
 | `tags=0` | start with the tag pills hidden |
 

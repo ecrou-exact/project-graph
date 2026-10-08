@@ -17,6 +17,10 @@ import { registerFonts } from './fonts.js'
 const STORAGE_KEY = 'pivograph:document'
 
 /**
+ * A link to a bundled example: ?example=rulezet, ?example=circl or
+ * ?example=ngsoti opens the app on that graph. The address follows the graph
+ * shown, so it can be copied and shared from the browser.
+ *
  * Embedding in another site (an <iframe>):
  *   ?embed=1     hide the app's top bar (logo, menus)
  *   ?src=<url>   load this JSON at start: a Pivograph graph or an OCD file
@@ -33,6 +37,7 @@ const PARAMS = new URLSearchParams(location.search)
 const EMBED = {
   enabled: PARAMS.has('embed') && PARAMS.get('embed') !== '0',
   src: PARAMS.get('src'),
+  example: PARAMS.get('example'),
   sidebar: PARAMS.get('sidebar') !== '0',
   // Tag pills on the graph: hidden unless asked for (?tags=1, or the button).
   tags: PARAMS.get('tags') === '1',
@@ -85,6 +90,7 @@ function loadDocument(doc) {
   state.sections = structuredClone(doc.sections ?? [])
   state.arrows = structuredClone(doc.arrows ?? [])
   ui.jsonDirty = false
+  syncAddress(doc)
   view.load(doc)
   renderHeader()
   renderSidebar()
@@ -631,6 +637,22 @@ const EXAMPLES = {
   ngsoti: { name: 'the NGSOTI SOC stack example', doc: locked(ngsotiExample) },
 }
 const EXAMPLE = EXAMPLES.rulezet.doc
+
+/** The key of the bundled example a document is (same title), or null. */
+function exampleKey(doc) {
+  if (!isExample(doc)) return null
+  return Object.entries(EXAMPLES).find(([, e]) => e.doc.meta.title === doc.meta?.title)?.[0] ?? null
+}
+
+/** ?example=<key> in the address while a bundled example is shown, so the link opens it again. */
+function syncAddress(doc) {
+  if (EMBED.enabled) return
+  const url = new URL(location.href)
+  const key = exampleKey(doc)
+  if (key) url.searchParams.set('example', key)
+  else url.searchParams.delete('example')
+  if (url.href !== location.href) history.replaceState(history.state, '', url)
+}
 
 /** A bundled example, or a copy of one (same title) saved by an older version. */
 function isExample(doc) {
@@ -1205,11 +1227,17 @@ bindHeader()
 if (EMBED.enabled) {
   // Start empty: the graph comes from ?src or from the host page.
   loadDocument({ ...emptyDocument(), meta: { title: '', readOnly: true } })
+  if (EXAMPLES[EMBED.example]) loadRaw(EXAMPLES[EMBED.example].doc, 'example')
+  if (EMBED.src) loadSrc(EMBED.src)
+} else if (EXAMPLES[EMBED.example]) {
+  // A link to an example: show it (the visitor's own graph stays saved, untouched).
+  loadRaw(EXAMPLES[EMBED.example].doc, 'example')
   if (EMBED.src) loadSrc(EMBED.src)
 } else {
   const saved = restore()
   if (saved) loadDocument(saved)
   else loadRaw(EXAMPLE, 'example')
+  if (EMBED.example) toast(`Unknown example "${EMBED.example}": try ${Object.keys(EXAMPLES).join(', ')}.`, 'warning')
   if (EMBED.src) loadSrc(EMBED.src)
 }
 tellHost({ type: 'pivograph:ready' })
