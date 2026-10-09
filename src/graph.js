@@ -229,6 +229,8 @@ export class GraphView {
     })
     this.moveObserver.observe(mount, { subtree: true, childList: true, attributes: true, attributeFilter: ['transform', 'class', 'style'] })
     this.scheduleLabels()
+    // Edges can be selected like nodes: by their label, or by a click near the line.
+    mount.addEventListener('click', (event) => this.clickNearEdge(event))
 
     // Tag pills live inside each node's SVG group; Pivotick rebuilds that group's
     // content on every redraw, so draw them again whenever it does.
@@ -554,6 +556,13 @@ export class GraphView {
     if (!layer) {
       layer = document.createElementNS('http://www.w3.org/2000/svg', 'g')
       layer.setAttribute('class', 'pg-edge-labels')
+      // A label selects its edge (the copies sit in front, the originals are hidden).
+      layer.addEventListener('click', (event) => {
+        const copy = event.target.closest?.('.label-container')
+        if (!copy?.pgEdgeGroup) return
+        event.stopPropagation()
+        this.selectEdge(this.edgeOfGroup(copy.pgEdgeGroup))
+      })
     }
     if (layer.nextSibling !== front) front.before(layer)
     const shown = new Set()
@@ -567,6 +576,7 @@ export class GraphView {
         copy = next
         this.liftedLabels.set(original, copy)
       }
+      copy.pgEdgeGroup = original.parentNode
       if (copy.parentNode !== layer) layer.append(copy)
       const transform = original.getAttribute('transform') ?? ''
       if (copy.getAttribute('transform') !== transform) copy.setAttribute('transform', transform)
@@ -579,6 +589,49 @@ export class GraphView {
     }
     // Copies of labels that are gone (edge deleted).
     for (const copy of [...layer.children]) if (!shown.has(copy)) copy.remove()
+  }
+
+  /** The Edge (live, as Pivotick holds it) drawn by a `g.pvt-edge-group`. */
+  edgeOfGroup(group) {
+    if (!group) return null
+    // d3 keeps each element's datum on it; fall back on the group's id (edge-<domID>).
+    return group.__data__ ?? this.graph?.getMutableEdges().find((e) => `edge-${e.domID}` === group.id) ?? null
+  }
+
+  /** Select an edge — Pivotick then shows its details, as for a node. */
+  selectEdge(edge) {
+    if (!edge) return
+    // after Pivotick's own handling of the click (which clears the selection on the canvas)
+    setTimeout(() => this.graph.selectElement(edge), 0)
+  }
+
+  /**
+   * A click on the empty canvas within a few pixels of an edge selects it: lines
+   * are 1–2 px wide, too thin to aim at. Measured on the path as drawn (straight
+   * or curved), in screen pixels, the closest edge wins.
+   */
+  clickNearEdge(event) {
+    const target = event.target
+    if (!(target instanceof Element) || !target.closest('svg')) return
+    if (target.closest('[id^="node-"], .pg-edge-labels, .pg-drawing-front, a, button')) return
+    const TOLERANCE = 8
+    let best = null
+    for (const group of target.closest('svg').querySelectorAll('g.pvt-edge-group')) {
+      if (getComputedStyle(group).display === 'none') continue
+      for (const path of group.querySelectorAll(':scope > path, :scope > g > path')) {
+        if (!path.getTotalLength) continue
+        const length = path.getTotalLength()
+        const matrix = path.getScreenCTM()
+        if (!length || !matrix) continue
+        const steps = Math.max(2, Math.ceil(length / 6))
+        for (let i = 0; i <= steps; i++) {
+          const p = path.getPointAtLength((length * i) / steps).matrixTransform(matrix)
+          const d = Math.hypot(p.x - event.clientX, p.y - event.clientY)
+          if (d <= TOLERANCE && (!best || d < best.d)) best = { d, group }
+        }
+      }
+    }
+    if (best) this.selectEdge(this.edgeOfGroup(best.group))
   }
 
   /** Restyles once when a pending icon arrives — one redraw per batch, not per node. */

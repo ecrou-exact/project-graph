@@ -418,6 +418,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
    box to the edge midpoint, let the label overflow and centre it ourselves. */
 .label-container foreignObject { overflow: visible; x: 0; y: 0; }
 .label-container .pg-edge-label { transform: translate(-50%, -50%); }
+/* The copies in front are clickable: a label selects its edge (graph.js). */
+.pg-edge-labels .pg-edge-label { pointer-events: auto; cursor: pointer; transition: box-shadow .12s ease, border-color .12s ease; }
+.pg-edge-labels .pg-edge-label:hover { border-color: var(--primary); box-shadow: 0 0 0 2px rgb(59 99 243 / 0.25); }
 /* Shown by a copy in front of the edges and nodes (graph.js, liftEdgeLabels). */
 .pvt-edge-group > .label-container { visibility: hidden; }
 
