@@ -25,6 +25,10 @@ const STORAGE_KEY = 'pivograph:document'
  *   ?embed=1     hide the app's top bar (logo, menus)
  *   ?src=<url>   load this JSON at start: a Pivograph graph or an OCD file
  *   ?sidebar=0   hide the side panel
+ *   ?toolbar=1   keep the top bar (menus) when embedded, to edit the map
+ *   ?mode=viewer only the graph: pan, zoom, drag, no panels
+ *   ?theme=light|dark, ?bg=<colour>  follow the host page's theme (also the
+ *                pivograph:theme { scheme, background } message, live)
  *   ?tags=1      start with the tag pills shown (hidden by default)
  * The host page can also send the data, e.g. a file its visitor opened:
  *   iframe.contentWindow.postMessage({ type: 'pivograph:load', data, name }, '*')
@@ -32,6 +36,10 @@ const STORAGE_KEY = 'pivograph:document'
  * load with { type: 'pivograph:loaded', nodes, edges } or { type: 'pivograph:error', message }.
  * "Open its graph" on a node with a `graph` field sends { type: 'pivograph:open', url, label }:
  * the host page decides where to go.
+ * Editing from the host page: a map loaded with meta.readOnly false can be
+ * edited in the frame; every change is sent as { type: 'pivograph:changed', data }
+ * (the document, positions included), and { type: 'pivograph:get' } asks for it
+ * at any time — answered with { type: 'pivograph:document', data }.
  */
 const PARAMS = new URLSearchParams(location.search)
 const EMBED = {
@@ -39,6 +47,14 @@ const EMBED = {
   src: PARAMS.get('src'),
   example: PARAMS.get('example'),
   sidebar: PARAMS.get('sidebar') !== '0',
+  // ?toolbar=1 keeps the top bar (Graph and Add menus) when embedded — for a
+  // host page that lets its users edit the map.
+  toolbar: PARAMS.get('toolbar') === '1',
+  // ?mode=viewer: only the graph (pan, zoom, drag) — no Pivotick panels.
+  viewer: PARAMS.get('mode') === 'viewer',
+  // ?theme=light|dark and ?bg=<colour>: follow the host page's theme instead of the OS.
+  theme: ['light', 'dark'].includes(PARAMS.get('theme')) ? PARAMS.get('theme') : null,
+  bg: PARAMS.get('bg'),
   // Tag pills on the graph: hidden unless asked for (?tags=1, or the button).
   tags: PARAMS.get('tags') === '1',
 }
@@ -205,8 +221,14 @@ function currentDocument() {
 }
 
 function persist() {
-  // Embedded in another site: never overwrite what the visitor keeps in the app itself.
-  if (EMBED.enabled) return
+  // Embedded in another site: never overwrite what the visitor keeps in the app
+  // itself. An editable map tells the host page instead, so it can save it.
+  if (EMBED.enabled) {
+    if (editable() && EMBED.host !== undefined) {
+      tellHost({ type: 'pivograph:changed', data: view.toDocument(state, true) }, EMBED.host)
+    }
+    return
+  }
   // The bundled example is never saved: the browser keeps only the visitor's
   // own graph, and loading the example doesn't overwrite it.
   if (isExample(state)) return
@@ -1186,6 +1208,18 @@ function tellHost(message, origin = '*') {
   if (inFrame) window.parent.postMessage(message, origin && origin !== 'null' ? origin : '*')
 }
 
+/** Light / dark and background chosen by the host page (null: keep the OS
+ *  colours). Pivotick and this app both read html[data-theme]; the background
+ *  goes to both canvases. Colours are checked so a host can't inject CSS. */
+function applyTheme(scheme, background) {
+  const root = document.documentElement
+  if (scheme === 'light' || scheme === 'dark') root.setAttribute('data-theme', scheme)
+  if (typeof background === 'string' && /^#[0-9a-f]{3,8}$|^rgba?\([\d\s.,%]+\)$/i.test(background.trim())) {
+    root.style.setProperty('--bg', background.trim())
+    root.style.setProperty('--pvt-bg', background.trim())
+  }
+}
+
 /** Loads data given by the host page or the ?src URL, and reports back to the host. */
 function loadForHost(raw, name, origin) {
   EMBED.host = origin
@@ -1208,9 +1242,13 @@ async function loadSrc(url) {
 
 if (inFrame) {
   window.addEventListener('message', (event) => {
-    // Only the page embedding the app can load data into it.
-    if (event.source !== window.parent || event.data?.type !== 'pivograph:load') return
-    loadForHost(event.data.data, event.data.name ?? 'data', event.origin)
+    // Only the page embedding the app can load data into it or read it.
+    if (event.source !== window.parent) return
+    if (event.data?.type === 'pivograph:load') loadForHost(event.data.data, event.data.name ?? 'data', event.origin)
+    else if (event.data?.type === 'pivograph:theme') applyTheme(event.data.scheme, event.data.background)
+    else if (event.data?.type === 'pivograph:get') {
+      tellHost({ type: 'pivograph:document', data: view.toDocument(state, true) }, event.origin)
+    }
   })
 }
 
@@ -1221,7 +1259,9 @@ document.fonts?.addEventListener('loadingdone', () => {
   view.scheduleRestyle()
 })
 
-document.body.classList.toggle('pg-embed', EMBED.enabled)
+document.body.classList.toggle('pg-embed', EMBED.enabled && !EMBED.toolbar)
+if (EMBED.viewer) view.uiMode = 'viewer'
+applyTheme(EMBED.theme, EMBED.bg)
 document.body.classList.toggle('pg-no-sidebar', !EMBED.sidebar)
 bindHeader()
 if (EMBED.enabled) {

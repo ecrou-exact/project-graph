@@ -18,8 +18,24 @@
   color-scheme: light dark;
 }
 
+/* Dark colours: from the OS, unless the page sets data-theme (?theme= or the
+   pivograph:theme message) — the same convention as Pivotick's own CSS. */
+:root[data-theme="dark"] {
+  --bg: #11141a;
+  --surface: #181c24;
+  --surface-2: #212632;
+  --border: #2c3240;
+  --text: #e4e7ee;
+  --muted: #8d95a8;
+  --primary: #5b7fff;
+  --danger: #f06272;
+  --warning: #e0a83a;
+  color-scheme: dark;
+}
+:root[data-theme="light"] { color-scheme: light; }
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     --bg: #11141a;
     --surface: #181c24;
     --surface-2: #212632;
