@@ -147,6 +147,8 @@ export class GraphView {
       UI: {
         // 'viewer' (?mode=viewer when embedded): just the graph — pan, zoom, drag, no panels.
         mode: this.uiMode || 'full',
+        // 'light' / 'dark' forced by the host page (?theme=); undefined follows the OS.
+        theme: this.uiTheme || undefined,
         // With every editor and notes off, Pivotick drops its Create section.
         editors: { nodeEditor: editable, nodeCreator: editable, edgeCreator: editable, edgeEditor: editable, deletion: editable },
         notes: editable,

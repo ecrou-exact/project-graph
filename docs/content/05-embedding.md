@@ -50,6 +50,9 @@ window.addEventListener('message', (event) => {
 | `{ type: 'pivograph:error', message }` | app → host | The data was refused; `message` says why. |
 | `{ type: 'pivograph:changed', data }` | app → host | An editable map (loaded with `meta.readOnly: false`) was changed; `data` is the whole document, positions included. Never sent for read-only maps. |
 | `{ type: 'pivograph:get' }` | host → app | Ask for the current document. |
+| `{ type: 'pivograph:snapshot' }` | host → app | Ask for a PNG of the graph as drawn. |
+| `{ type: 'pivograph:snapshot', image }` | app → host | The answer: a `data:image/png` URL, or `null` when the picture could not be made. |
+| `{ type: 'pivograph:export', format }` | host → app | Run one of the app's exports in the frame: `json`, `pivotick`, `png`, `md` or `pdf` (the report). |
 | `{ type: 'pivograph:theme', scheme, background }` | host → app | Switch to `light` / `dark` and/or a background colour, live (when the host page changes theme). |
 | `{ type: 'pivograph:document', data }` | app → host | The answer: the whole document, positions included. |
 

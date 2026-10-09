@@ -40,6 +40,10 @@ const STORAGE_KEY = 'pivograph:document'
  * edited in the frame; every change is sent as { type: 'pivograph:changed', data }
  * (the document, positions included), and { type: 'pivograph:get' } asks for it
  * at any time — answered with { type: 'pivograph:document', data }.
+ * { type: 'pivograph:snapshot' } asks for a PNG of the graph as drawn —
+ * answered with { type: 'pivograph:snapshot', image } (a data: URL, or null);
+ * { type: 'pivograph:export', format } runs one of the app's exports:
+ * json, pivotick, png, md or pdf (the report).
  */
 const PARAMS = new URLSearchParams(location.search)
 const EMBED = {
@@ -108,6 +112,7 @@ function loadDocument(doc) {
   ui.jsonDirty = false
   syncAddress(doc)
   view.load(doc)
+  syncCanvasTheme()                     // Pivotick rebuilt its .pivotick element
   renderHeader()
   renderSidebar()
   persist()
@@ -1209,15 +1214,31 @@ function tellHost(message, origin = '*') {
 }
 
 /** Light / dark and background chosen by the host page (null: keep the OS
- *  colours). Pivotick and this app both read html[data-theme]; the background
- *  goes to both canvases. Colours are checked so a host can't inject CSS. */
+ *  colours). This app reads html[data-theme]; Pivotick reads data-theme on its
+ *  own .pivotick element (and its OS-based dark mode only applies while <html>
+ *  has no data-theme), so both get it — the canvas again after each redraw
+ *  (syncCanvasTheme). Colours are checked so a host can't inject CSS. */
+const hostTheme = { scheme: null, background: null }
+
 function applyTheme(scheme, background) {
   const root = document.documentElement
-  if (scheme === 'light' || scheme === 'dark') root.setAttribute('data-theme', scheme)
-  if (typeof background === 'string' && /^#[0-9a-f]{3,8}$|^rgba?\([\d\s.,%]+\)$/i.test(background.trim())) {
-    root.style.setProperty('--bg', background.trim())
-    root.style.setProperty('--pvt-bg', background.trim())
+  if (scheme === 'light' || scheme === 'dark') {
+    hostTheme.scheme = scheme
+    view.uiTheme = scheme                 // Pivotick's own option, for the next redraws
+    root.setAttribute('data-theme', scheme)
   }
+  if (typeof background === 'string' && /^#[0-9a-f]{3,8}$|^rgba?\([\d\s.,%]+\)$/i.test(background.trim())) {
+    hostTheme.background = background.trim()
+    root.style.setProperty('--bg', hostTheme.background)
+  }
+  syncCanvasTheme()
+}
+
+function syncCanvasTheme() {
+  document.querySelectorAll('.pivotick').forEach((el) => {
+    if (hostTheme.scheme) el.setAttribute('data-theme', hostTheme.scheme)
+    if (hostTheme.background) el.style.setProperty('--pvt-bg', hostTheme.background)
+  })
 }
 
 /** Loads data given by the host page or the ?src URL, and reports back to the host. */
@@ -1246,6 +1267,13 @@ if (inFrame) {
     if (event.source !== window.parent) return
     if (event.data?.type === 'pivograph:load') loadForHost(event.data.data, event.data.name ?? 'data', event.origin)
     else if (event.data?.type === 'pivograph:theme') applyTheme(event.data.scheme, event.data.background)
+    else if (event.data?.type === 'pivograph:snapshot') {
+      snapshot().then((image) => tellHost({ type: 'pivograph:snapshot', image }, event.origin))
+    } else if (event.data?.type === 'pivograph:export') {
+      const exports = { json: exportJson, pivotick: exportPivotick, png: exportPicture,
+                        md: () => exportReport('md'), pdf: () => exportReport('pdf') }
+      exports[event.data.format]?.()
+    }
     else if (event.data?.type === 'pivograph:get') {
       tellHost({ type: 'pivograph:document', data: view.toDocument(state, true) }, event.origin)
     }
