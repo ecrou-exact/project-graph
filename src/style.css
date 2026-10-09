@@ -511,24 +511,16 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .pg-arrow-handle { fill: var(--surface); stroke: var(--primary); stroke-width: 2.5px; cursor: grab; }
 .pg-arrow-handle:hover { fill: var(--primary); }
 
-/* --- notes (drawing.js): free text, sticky or bare --- */
-.pg-note-fo { overflow: visible; }
-.pg-note-box {
-  box-sizing: border-box; padding: 10px 14px; border-radius: 4px; line-height: 1.4;
-  font-family: Inter, system-ui, sans-serif; white-space: pre-wrap; overflow-wrap: anywhere;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12), 0 3px 8px rgb(0 0 0 / 0.08);
-}
-.pg-note-box.is-bare { padding: 2px 4px; box-shadow: none; background: transparent; }
+/* Text inside shapes (drawing.js): "# " headings and "- " bullets. */
 .pg-note-heading { font-weight: 700; font-size: 1.3em; line-height: 1.25; }
 .pg-note-bullet { padding-left: 1em; text-indent: -0.75em; }
-.pg-note { cursor: move; }
-.pg-note.is-selected .pg-note-box { outline: 2px solid var(--primary); outline-offset: 2px; }
-.pg-note-handle { fill: var(--primary); opacity: 0; cursor: ew-resize; transition: opacity 0.15s; }
-.pg-note:hover .pg-note-handle, .pg-note.is-selected .pg-note-handle { opacity: 1; }
+.pg-note-fo { overflow: visible; }
 
 /* --- shapes and hand-drawn strokes (drawing.js, shapes.js) --- */
 .pg-shape { cursor: move; }
 .pg-shape-fo { overflow: visible; pointer-events: none; }
+.pg-shape-hit { fill: transparent; }
+.pg-shape-text.is-plain { text-align: left; justify-content: flex-start; overflow: visible; }
 .pg-shape-text {
   box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: stretch;
   text-align: center; line-height: 1.3; font-family: Inter, system-ui, sans-serif; overflow-wrap: anywhere; overflow: hidden;
@@ -545,26 +537,22 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .pg-mode-connect svg, .pg-mode-connect svg * { cursor: crosshair !important; }
 .pg-mode-pen svg, .pg-mode-pen svg * { cursor: crosshair !important; }
 
-/* --- drawing tools, floating over the canvas (main.js renderDrawToolbar) --- */
-.pg-draw-toolbar {
-  position: absolute; top: 52px; left: 50%; transform: translateX(-50%); z-index: 5;
-  display: flex; align-items: center; gap: 2px; padding: 4px; max-width: calc(100% - 24px); flex-wrap: wrap; justify-content: center;
-  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 2px 10px rgb(0 0 0 / 0.1);
+/* --- the Draw mode's panel, on Pivotick's rail (main.js drawPanel) --- */
+.pg-draw-panel { padding: 4px 10px 10px; font-size: 12.5px; }
+.pg-draw-panel-title { font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; font-size: 10.5px; margin: 10px 0 5px; }
+.pg-shape-picks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.pg-shape-pick {
+  display: flex; align-items: center; justify-content: center; height: 34px; padding: 4px;
+  border: 1px solid var(--border); border-radius: 7px; background: var(--surface); color: var(--text); cursor: pointer;
 }
-.pg-draw-toolbar[hidden] { display: none; }
-.pg-tool, .pg-draw-toolbar .pg-menu-btn {
-  display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border: 0; border-radius: 7px;
-  background: transparent; color: var(--text); font: 500 13px/1.2 inherit; cursor: pointer;
-}
-.pg-tool:hover, .pg-draw-toolbar .pg-menu-btn:hover { background: var(--surface-2); }
-.pg-tool.is-active { background: var(--primary); color: var(--primary-text); }
-.pg-tool-icon { font-size: 14px; width: 14px; text-align: center; }
-.pg-pen-style { display: inline-flex; gap: 4px; align-items: center; padding: 0 4px; }
-.pg-pen-style input[type="color"] { width: 26px; height: 24px; padding: 0; border: 1px solid var(--border); border-radius: 5px; background: none; }
-.pg-pen-style select { font-size: 12px; padding: 2px; }
-.pg-tool-hint { flex-basis: 100%; text-align: center; font-size: 12px; color: var(--muted); padding: 2px 6px 3px; }
+.pg-shape-pick:hover { border-color: var(--primary); color: var(--primary); }
+.pg-shape-pick svg { width: 30px; height: 22px; }
+.pg-shape-pick-fa svg { width: 16px; height: 16px; display: block; }
+.pg-pen-style { display: flex; gap: 6px; align-items: center; }
+.pg-pen-style input[type="color"] { width: 30px; height: 26px; padding: 0; border: 1px solid var(--border); border-radius: 5px; background: none; }
+.pg-pen-style select { font-size: 12px; padding: 3px; }
+.pg-draw-hint { margin: 8px 0 0; color: var(--muted); line-height: 1.4; }
 .pg-drawing-tip { font-size: 12px; margin: 0 0 6px; }
-@media (max-width: 700px) { .pg-tool-label { display: none; } }
 
 /* --- legend (drawing.js): the types in use --- */
 .pg-legend-box {

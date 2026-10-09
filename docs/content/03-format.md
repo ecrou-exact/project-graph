@@ -29,7 +29,7 @@ A Pivograph document is a JSON object. All top-level keys are optional; unknown 
 | `title` | string | Shown in the app's header and the browser tab. |
 | `description` | string | What the map shows, the arrow convention, when facts were checked. |
 | `linkDistance` | number | Edge length in the layout. Default `150`; raise it (200–350) for big nodes or long edge labels. |
-| `fixedLayout` | boolean | Nodes stay exactly at their `x` / `y`: no force layout, as in a drawn diagram. *Add → Fixed layout* toggles it. |
+| `fixedLayout` | boolean | Nodes stay exactly at their `x` / `y`: no force layout, as in a drawn diagram. *Arrange → Fixed layout* toggles it. |
 | `readOnly` | boolean | Opens the map locked: it can be explored and exported, not edited. Set automatically on imported descriptors and on the bundled example. To change a locked map, edit its JSON file. |
 | `source` | object | Where the map came from, e.g. `{ "format": "ocd", "domain": "misp-project.org" }`. Set by imports. |
 
@@ -149,7 +149,7 @@ Available icons: `shield-halved`, `bug`, `virus`, `skull`, `lock`, `key`, `finge
 
 ### sections
 
-Titled frames drawn behind the graph ("Incident response", "Sensors"…), for the picture only: they hold no nodes and edges don't point to them. Add one with *Add → Section*; drag its title to move it, its bottom-right corner to resize it, double-click its title to edit it (or use the Sections tab). Pair them with `meta.fixedLayout` so the nodes stay inside. They are part of the PNG export.
+Titled frames drawn behind the graph ("Incident response", "Sensors"…), for the picture only: they hold no nodes and edges don't point to them. Add one with *Draw → Section*; drag its title to move it, its bottom-right corner to resize it, double-click its title to edit it (or use the Sections tab). Pair them with `meta.fixedLayout` so the nodes stay inside. They are part of the PNG export.
 
 | Field | Type | Default | Description |
 |---|---|---|---|
@@ -174,7 +174,7 @@ Titled frames drawn behind the graph ("Incident response", "Sensors"…), for th
 
 ### arrows
 
-Arrows drawn by Pivograph, like sections, for diagrams: unlike an edge, an arrow can start or end on a **section** or on **a free point**, and each end can sit **anywhere** on its target. Add one with *Add → Arrow*; click it on the graph to select it, then drag its ends (onto a node, a section or empty space) and its label; Delete removes it, a double-click edits it. Arrows are part of the PNG export, not of the report.
+Arrows drawn by Pivograph, like sections, for diagrams: unlike an edge, an arrow can start or end on a **section** or on **a free point**, and each end can sit **anywhere** on its target. Draw one with *Draw → Connect* (click its two ends), or *Draw → Arrow…* for the form; click it on the graph to select it, then drag its ends (onto a node, a section or empty space) and its label; Delete removes it, a double-click edits it. Arrows are part of the PNG export, not of the report.
 
 | Field | Type | Default | Description |
 |---|---|---|---|
@@ -196,37 +196,33 @@ Arrows drawn by Pivograph, like sections, for diagrams: unlike an edge, an arrow
 
 ### notes
 
-Free text on the canvas: a **sticky note** (a coloured box with a shadow) or **bare text** (`"fill": "none"`) for a heading, a comment or an explanation next to a part of the diagram. Add one with *Add → Note*; drag it to move it, drag its bottom-right corner to set its width, double-click to edit it, click it and press Delete to remove it. Arrows can start or end on a note. Notes are part of the PNG and SVG pictures.
-
-The text takes a little Markdown: a line starting with `# ` is a heading, `- ` a bullet, `**bold**` is bold; `\n` starts a new line.
+Pivotick's notes: cards on the canvas, added with Pivotick's *Create → Add note* (or *+ Note* in the Drawing tab). A note can be **attached to a node or an edge** (Pivotick draws the link and moves it along), takes one of Pivotick's colours and a "terminal" look, and is edited in place. Arrows can start or end on a note. Pivograph saves them in the document, in Pivotick's terms.
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `text` | string | | **Required.** |
+| `content` | string | | The note's text. |
 | `x`, `y` | number | | **Required.** Top-left corner, in graph coordinates. |
-| `width` | number | the longest line | The text wraps inside it. |
-| `fill` | CSS colour or `"none"` | `#fff3bf` (yellow) | Background; `"none"` for bare text. |
-| `color` | CSS colour | `#3b3424` | Text colour. |
-| `borderColor` | CSS colour | | A border. |
-| `textSize` | number | `15` | Font size in pixels (headings are 1.3 × bigger). |
-| `font` | string | | As `labelFont`. |
-| `align` | string | `left` | `left`, `center` or `right`. |
-| `id` | string | from the text | Unique. |
+| `width`, `height` | number | `220`, `160` | Size. |
+| `color` | CSS colour | `#FDE68A` | The card's colour. |
+| `surface` | string | `jewel` | `jewel` (a full-colour card) or `terminal` (a neutral panel). |
+| `attachedTo` | object | | `{ "type": "node" \| "edge", "id": "…" }`. |
+| `id` | string | generated | Unique. |
 
 ```json
 "notes": [
-  { "text": "# Retention\n- alerts: **90 days**\n- cases: 5 years", "x": 820, "y": 40, "width": 220 },
-  { "text": "Draft — to be reviewed", "x": 0, "y": -60, "fill": "none", "textSize": 22, "font": "hand" }
+  { "content": "Rate limit: 100 req/s", "x": 150, "y": -40, "color": "#93C5FD", "attachedTo": { "type": "node", "id": "api" } }
 ]
 ```
 
+Older documents wrote notes as `{ "text", "fill", … }`: they are read as `content` and `color`, and a note with `"fill": "none"` (bare text) becomes a `text` shape.
+
 ### shapes
 
-Shapes drawn behind the graph — a zone, a callout, a cloud for "the Internet", a star, a picture, an icon — with text inside (or under a picture or an icon). Unlike nodes, they hold no data: they are for the drawing, and arrows connect to them (on their outline). Add one with the **◇ Shape** tool on the canvas or *Add → Shape…*; drag to move, drag the bottom-right corner to resize, double-click to edit, Delete to remove.
+Shapes drawn behind the graph — a zone, a callout, a cloud for "the Internet", a star, a picture, an icon — with text inside (or under a picture or an icon). Unlike nodes, they hold no data: they are for the drawing, and arrows connect to them (on their outline). Add one from the **Draw** mode on Pivotick's rail (D): its panel has a button per shape, and *Text*; drag to move, drag the bottom-right corner to resize, double-click to edit, Delete to remove.
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `kind` | string | `rounded` | `rect`, `rounded`, `ellipse`, `diamond`, `triangle`, `hexagon`, `star`, `cloud`, `cylinder`, `callout` (a speech bubble), `image`, `icon`. |
+| `kind` | string | `rounded` | `text` (bare text, no box), `rect`, `rounded`, `ellipse`, `diamond`, `triangle`, `hexagon`, `star`, `cloud`, `cylinder`, `callout` (a speech bubble), `image`, `icon`. |
 | `x`, `y` | number | | **Required.** Top-left corner, in graph coordinates. |
 | `width`, `height` | number | `160`, `90` (`80` × `80` for image and icon) | Size. |
 | `text` | string | | Inside the shape (as a caption under an image or an icon); same Markdown as notes. |
@@ -239,7 +235,7 @@ Shapes drawn behind the graph — a zone, a callout, a cloud for "the Internet",
 
 ### strokes
 
-Lines drawn **by hand** with the pen (**✎ Pen** on the canvas, or P): a circle around a group, an underline, a quick sketch. Drag to draw; each stroke is simplified and smoothed. Click one to select it (Delete removes it), drag it to move it, double-click to change its colour, width, dashes or opacity (a light, thick stroke makes a highlighter). Arrows can start or end on a drawing.
+Lines drawn **by hand** with the pen (*Draw → Pen*; its colour and width are in the Draw panel): a circle around a group, an underline, a quick sketch. Drag to draw; each stroke is simplified and smoothed. Click one to select it (Delete removes it), drag it to move it, double-click to change its colour, width, dashes or opacity (a light, thick stroke makes a highlighter). Arrows can start or end on a drawing.
 
 | Field | Type | Default | Description |
 |---|---|---|---|
@@ -248,11 +244,11 @@ Lines drawn **by hand** with the pen (**✎ Pen** on the canvas, or P): a circle
 
 ### Connecting everything
 
-Everything on the canvas can be linked: with **⤳ Connect** (or C), click a thing then another — or press on one and release on the other. Between two **nodes** this adds an *edge* (a relationship of the graph: types, filters, report). Between anything else — a node and a note, a shape and a drawing, a section and a free point… — it draws an *arrow*, attached to both ends so it follows them when they move. Escape leaves the mode.
+Everything on the canvas can be linked: with *Draw → Connect*, click a thing then another — or press on one and release on the other. Between two **nodes** this adds an *edge* (a relationship of the graph: types, filters, report). Between anything else — a node and a note, a shape and a drawing, a section and a free point… — it draws an *arrow*, attached to both ends so it follows them when they move. Escape leaves the mode.
 
 ### legend
 
-A box listing the **node and edge types in use** — each with its shape and colour, or its line, dash and arrow — so that a picture of the graph explains itself. *Add → Legend* shows it (in the top-left corner of the view) or hides it; drag it to move it, double-click to change its title. Types nobody uses are left out.
+A box listing the **node and edge types in use** — each with its shape and colour, or its line, dash and arrow — so that a picture of the graph explains itself. *Draw → Legend* shows it (in the top-left corner of the view) or hides it; drag it to move it, double-click to change its title. Types nobody uses are left out.
 
 | Field | Type | Default | Description |
 |---|---|---|---|

@@ -257,11 +257,10 @@
     },
     "notes": {
       "type": "array",
-      "description": "Free text on the canvas: a sticky note or bare text. The text takes a little Markdown: \"# \" a heading line, \"- \" a bullet, **bold**.",
+      "description": "Pivotick's notes: cards on the canvas, optionally attached to a node or an edge. Older documents' { text, fill } are read as { content, color }; fill \"none\" makes a text shape.",
       "items": {
         "type": "object",
         "required": [
-          "text",
           "x",
           "y"
         ],
@@ -269,9 +268,8 @@
           "id": {
             "type": "string"
           },
-          "text": {
-            "type": "string",
-            "description": "\\n starts a new line."
+          "content": {
+            "type": "string"
           },
           "x": {
             "type": "number",
@@ -283,34 +281,39 @@
           "width": {
             "type": "number",
             "minimum": 1,
-            "description": "Default: as wide as the longest line."
+            "description": "Default 220."
           },
-          "fill": {
-            "type": "string",
-            "description": "Background colour (default #fff3bf, a yellow sticky note), or \"none\" for bare text."
-          },
-          "color": {
-            "$ref": "#/$defs/color",
-            "description": "Text colour."
-          },
-          "borderColor": {
-            "type": "string"
-          },
-          "textSize": {
+          "height": {
             "type": "number",
             "minimum": 1,
-            "description": "Default 15."
+            "description": "Default 160."
           },
-          "font": {
-            "type": "string",
-            "description": "As labelFont."
+          "color": {
+            "$ref": "#/$defs/color"
           },
-          "align": {
+          "surface": {
             "enum": [
-              "left",
-              "center",
-              "right"
+              "jewel",
+              "terminal"
             ]
+          },
+          "attachedTo": {
+            "type": "object",
+            "required": [
+              "type",
+              "id"
+            ],
+            "properties": {
+              "type": {
+                "enum": [
+                  "node",
+                  "edge"
+                ]
+              },
+              "id": {
+                "type": "string"
+              }
+            }
           }
         }
       }
@@ -330,6 +333,7 @@
           },
           "kind": {
             "enum": [
+              "text",
               "rect",
               "rounded",
               "ellipse",
@@ -343,7 +347,7 @@
               "image",
               "icon"
             ],
-            "description": "Default rounded."
+            "description": "Default rounded. text: bare text, no box."
           },
           "x": {
             "type": "number",

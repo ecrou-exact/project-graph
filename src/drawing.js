@@ -4,8 +4,8 @@
 // - sections: titled frames behind the graph ("Incident response", "Sensors"…),
 //   for the picture only — they hold no nodes;
 // - arrows: from / to a node, a section, a note or a free point, each end
-//   placed anywhere on its target (`at`), with a label that can be moved;
-// - notes: free text, as a sticky note or bare (a heading, a comment);
+//   placed anywhere on its target (`at`), with a label that can be moved
+//   (notes are Pivotick's: arrows reach them through hooks.noteBox);
 // - the legend: the node and edge types in use, in a box;
 // - shapes: rectangles, ellipses, clouds, stars, pictures, icons… with text;
 // - strokes: lines drawn by hand with the pen.
@@ -27,7 +27,7 @@
 // dragged, its corner sets its width; click + Delete removes it. The legend
 // moves when dragged; a double-click edits its title.
 import {
-  DIRECTIONS, LABEL_FONTS, arrowEndTarget, noteBlocks, resolveArrow, resolveNote, resolveSection, resolveShape, resolveStroke, strokeBox,
+  DIRECTIONS, LABEL_FONTS, arrowEndTarget, noteBlocks, resolveArrow, resolveSection, resolveShape, resolveStroke, strokeBox,
 } from './model.js'
 import { outlinePath, simplify, smoothPath, textBox } from './shapes.js'
 import { badgeIconSvg } from './badgeIcons.js'
@@ -48,8 +48,7 @@ export class DrawingLayer {
    * @param {() => void} hooks.onChange after a section or an arrow was moved or resized
    * @param {(id: string) => void} hooks.onEditSection
    * @param {(id: string) => void} hooks.onEditArrow
-   * @param {() => object[]} [hooks.getNotes] the document's notes (mutated in place on drag)
-   * @param {(id: string) => void} [hooks.onEditNote]
+   * @param {() => {id: string, x, y, width, height}[]} [hooks.getNotes] Pivotick's notes, as boxes
    * @param {() => object|undefined} [hooks.getLegend] the document's legend (mutated in place on drag)
    * @param {() => {nodes: object[], edges: object[]}} [hooks.legendItems] the types in use
    * @param {() => void} [hooks.onEditLegend]
@@ -70,23 +69,28 @@ export class DrawingLayer {
     this.back = null // sections, then arrow lines
     this.front = null // arrow labels and handles
     this.selection = null // { kind: 'arrow' | 'note' | 'shape' | 'stroke', id }
-    this.noteBoxes = new Map() // note id -> its box as drawn, in graph coordinates
     this.frame = null
     this.mode = null // 'connect' | 'pen' | null
     this.pending = null // connect mode: the first end, waiting for the second
-    document.addEventListener('keydown', (event) => {
+    // On the window, before Pivotick's own keys (which take Escape for themselves).
+    window.addEventListener('keydown', (event) => {
       if (event.target.closest?.('input, textarea, select, [contenteditable], dialog')) return
-      if (event.key === 'Escape' && (this.mode || this.pending)) {
+      if (event.key === 'Escape' && this.pending) {
         event.preventDefault()
-        if (this.pending) this.cancelPending()
-        else this.setMode(null)
+        event.stopPropagation()
+        this.cancelPending()
+        return
+      }
+      if (event.key === 'Escape' && this.mode) {
+        event.preventDefault()
+        this.setMode(null)
         return
       }
       if (!this.hooks.editable() || !['Delete', 'Backspace'].includes(event.key) || !this.selection) return
       event.preventDefault()
       const { kind, id } = this.selection
       this.hooks.onDelete?.(kind, id)
-    })
+    }, true)
   }
 
   /** The selected arrow's id (its handles are shown), or null. */
@@ -94,9 +98,7 @@ export class DrawingLayer {
     return this.selection?.kind === 'arrow' ? this.selection.id : null
   }
 
-  get selectedNote() {
-    return this.selection?.kind === 'note' ? this.selection.id : null
-  }
+
 
   /** Draws into this zoom layer (Pivotick's). */
   attach(zoomLayer) {
@@ -138,10 +140,8 @@ export class DrawingLayer {
     this.shapeGroup.append(...(this.hooks.getShapes?.() ?? []).map((shape) => this.drawShape(shape, editable)))
     this.strokeGroup = svg('g', { class: 'pg-strokes' })
     this.strokeGroup.append(...(this.hooks.getStrokes?.() ?? []).map((stroke) => this.drawStroke(stroke, editable)))
-    this.noteGroup = svg('g', { class: 'pg-notes' })
     this.arrowGroup = svg('g', { class: 'pg-arrows' })
-    this.back.replaceChildren(markers(), this.sectionGroup, this.shapeGroup, this.strokeGroup, this.noteGroup, this.arrowGroup)
-    this.renderNotes()
+    this.back.replaceChildren(markers(), this.sectionGroup, this.shapeGroup, this.strokeGroup, this.arrowGroup)
     this.renderLegend()
     this.renderArrows()
   }
@@ -151,17 +151,13 @@ export class DrawingLayer {
     this.pick(id ? { kind: 'arrow', id } : null)
   }
 
-  selectNote(id) {
-    this.pick(id ? { kind: 'note', id } : null)
-  }
-
   /** Selects one thing ({ kind, id }) or nothing; Delete removes it. */
   pick(selection) {
     const same = (a, b) => a?.kind === b?.kind && a?.id === b?.id
     if (same(this.selection, selection)) return
     const hadArrow = this.selected
     this.selection = selection
-    for (const [kind, group] of [['note', this.noteGroup], ['shape', this.shapeGroup], ['stroke', this.strokeGroup]]) {
+    for (const [kind, group] of [['shape', this.shapeGroup], ['stroke', this.strokeGroup]]) {
       group?.querySelectorAll(':scope > g').forEach((g) => g.classList.toggle('is-selected', selection?.kind === kind && g.dataset.id === selection.id))
     }
     if (hadArrow || this.selected) this.renderArrows()
@@ -174,8 +170,10 @@ export class DrawingLayer {
     const selected = this.selection?.kind === 'shape' && this.selection.id === shape.id
     const g = svg('g', { class: `pg-shape${selected ? ' is-selected' : ''}`, 'data-id': shape.id, transform: `translate(${a.x},${a.y})` })
     if (a.opacity !== undefined) g.style.opacity = a.opacity
+    // The whole box takes the pointer, even where the outline is thin or empty (text, a star's tips).
+    const hit = svg('rect', { class: 'pg-shape-hit', width: a.width, height: a.height })
     const body = svg('g', { class: 'pg-shape-body' })
-    g.append(body)
+    g.append(hit, body)
     this.paintShape(body, a)
     if (editable) {
       const handle = svg('rect', { class: 'pg-shape-handle', x: a.width - HANDLE / 2, y: a.height - HANDLE / 2, width: HANDLE, height: HANDLE, rx: 3 })
@@ -197,6 +195,7 @@ export class DrawingLayer {
           shape.height = Math.round(Math.max(20, a.height + dy))
           body.replaceChildren()
           this.paintShape(body, resolveShape(shape))
+          set(hit, { width: shape.width, height: shape.height })
           set(handle, { x: shape.width - HANDLE / 2, y: shape.height - HANDLE / 2 })
           this.schedule()
         },
@@ -239,7 +238,7 @@ export class DrawingLayer {
         for (const [k, v] of Object.entries({ x: (w - side) / 2, y: (h - side) / 2, width: side, height: side })) icon.setAttribute(k, v)
         body.append(document.importNode(icon, true))
       }
-    } else {
+    } else if (a.kind !== 'text') {
       body.append(paint(svg('path', { class: 'pg-shape-outline', d: outlinePath(a.kind, w, h) })))
     }
     if (!a.text) return
@@ -260,6 +259,7 @@ export class DrawingLayer {
     const fo = svg('foreignObject', { x: box.x, y: box.y, width: box.width, height: box.height, class: 'pg-shape-fo' })
     const div = html('div', 'pg-shape-text')
     Object.assign(div.style, { color: a.textColor, fontSize: `${a.textSize}px`, width: `${box.width}px`, height: `${box.height}px` })
+    if (a.kind === 'text') div.classList.add('is-plain')
     if (a.font) div.style.fontFamily = LABEL_FONTS[a.font]?.css ?? a.font
     for (const block of noteBlocks(a.text)) {
       const line = html('div', `pg-note-${block.kind}`)
@@ -428,105 +428,6 @@ export class DrawingLayer {
     const end = this.dropTarget(clientX, clientY)
     const target = arrowEndTarget(end)
     return target ? { [target.kind]: target.id } : end
-  }
-
-  // --- notes ---------------------------------------------------------------------
-
-  renderNotes() {
-    if (!this.noteGroup) return
-    const editable = this.hooks.editable()
-    const notes = this.hooks.getNotes?.() ?? []
-    this.noteGroup.replaceChildren(...notes.map((note) => this.drawNote(note, editable)))
-    // Sized from the text, once it is in the document.
-    this.noteBoxes.clear()
-    this.fitNotes()
-  }
-
-  /** Measures every note; those not laid out yet (canvas still hidden) are tried again next frame. */
-  fitNotes(tries = 10) {
-    const missed = [...this.noteGroup.children].filter((g) => !this.fitNote(g))
-    if (missed.length && tries > 0) {
-      requestAnimationFrame(() => {
-        if (missed.some((g) => g.isConnected)) this.fitNotes(tries - 1)
-        this.renderArrows()
-      })
-    }
-  }
-
-  drawNote(note, editable) {
-    const n = resolveNote(note)
-    const g = svg('g', { class: `pg-note${this.selectedNote === note.id ? ' is-selected' : ''}`, 'data-id': note.id, transform: `translate(${n.x},${n.y})` })
-    // 1 × 1 until measured (fitNote): a big box would count in the graph's frame.
-    const fo = svg('foreignObject', { width: 1, height: 1, class: 'pg-note-fo' })
-    const box = html('div', `pg-note-box${n.fill === 'none' ? ' is-bare' : ''}`)
-    Object.assign(box.style, {
-      color: n.color,
-      fontSize: `${n.textSize}px`,
-      textAlign: n.align,
-      width: n.width ? `${n.width}px` : 'max-content',
-    })
-    if (n.fill !== 'none') box.style.backgroundColor = n.fill
-    if (n.borderColor && n.borderColor !== 'none') box.style.border = `1.5px solid ${n.borderColor}`
-    if (n.font) box.style.fontFamily = LABEL_FONTS[n.font]?.css ?? n.font
-    for (const block of noteBlocks(n.text)) {
-      const line = html('div', `pg-note-${block.kind}`)
-      // The bullet as text, not CSS ::before: the picture export copies no pseudo-elements.
-      if (block.kind === 'bullet') line.append('• ')
-      if (!block.parts.length) line.append(html('br'))
-      for (const part of block.parts) {
-        const span = html(part.bold ? 'strong' : 'span')
-        span.textContent = part.text
-        line.append(span)
-      }
-      box.append(line)
-    }
-    fo.append(box)
-    g.append(fo)
-    if (editable) {
-      const handle = svg('rect', { class: 'pg-note-handle', width: HANDLE, height: HANDLE, rx: 3 })
-      handle.append(title('Drag to set the width'))
-      g.append(handle)
-      this.drag(g, () => ({
-        move: (dx, dy) => {
-          note.x = Math.round(n.x + dx)
-          note.y = Math.round(n.y + dy)
-          g.setAttribute('transform', `translate(${note.x},${note.y})`)
-          this.noteBoxes.set(note.id, { ...this.noteBoxes.get(note.id), x: note.x, y: note.y })
-          this.schedule()
-        },
-        cancel: () => this.selectNote(note.id),
-      }))
-      this.drag(handle, () => {
-        const from = this.noteBoxes.get(note.id)?.width ?? 200
-        return {
-          move: (dx) => {
-            note.width = Math.round(Math.max(60, from + dx))
-            box.style.width = `${note.width}px`
-            this.fitNote(g)
-            this.schedule()
-          },
-        }
-      })
-      g.addEventListener('dblclick', (event) => {
-        event.stopPropagation()
-        this.hooks.onEditNote?.(note.id)
-      })
-    }
-    return g
-  }
-
-  /** The foreignObject takes the size of the text box; the handle goes to its corner. */
-  fitNote(g) {
-    const box = g.querySelector('.pg-note-box')
-    const fo = g.querySelector('foreignObject')
-    const width = Math.ceil(box.offsetWidth)
-    const height = Math.ceil(box.offsetHeight)
-    if (!width || !height) return false
-    set(fo, { width, height })
-    set(g.querySelector('.pg-note-handle'), { x: width - HANDLE / 2, y: height - HANDLE / 2 })
-    const note = (this.hooks.getNotes?.() ?? []).find((n) => n.id === g.dataset.id)
-    if (note) this.noteBoxes.set(note.id, { x: note.x, y: note.y, width, height })
-    return true
   }
 
   // --- legend ----------------------------------------------------------------------
@@ -706,7 +607,7 @@ export class DrawingLayer {
       const s = resolveSection(section)
       return { x: s.x, y: s.y, width: s.width, height: s.height }
     }
-    if (end.note !== undefined) return this.noteBoxes.get(end.note) ?? null
+    if (end.note !== undefined) return (this.hooks.getNotes?.() ?? []).find((n) => n.id === end.note) ?? null
     if (end.shape !== undefined) {
       const shape = (this.hooks.getShapes?.() ?? []).find((s) => s.id === end.shape)
       if (!shape) return null
@@ -825,8 +726,8 @@ export class DrawingLayer {
     if (box) return { node: nodeId, at: onBorder(box, p) }
     const inside = (b) => b && p.x >= b.x && p.x <= b.x + b.width && p.y >= b.y && p.y <= b.y + b.height
     // Topmost first: notes, then drawings and shapes (the last drawn is on top), then sections.
-    for (const [id, note] of [...this.noteBoxes].reverse()) {
-      if (inside(note)) return { note: id, at: onBorder(note, p) }
+    for (const note of [...(this.hooks.getNotes?.() ?? [])].reverse()) {
+      if (inside(note)) return { note: note.id, at: onBorder(note, p) }
     }
     for (const kind of ['stroke', 'shape']) {
       const list = kind === 'stroke' ? this.hooks.getStrokes?.() : this.hooks.getShapes?.()

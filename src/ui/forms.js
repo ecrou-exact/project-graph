@@ -1,7 +1,7 @@
 // Declarative forms for nodes, edges and types.
 import { h } from './dom.js'
 import {
-  CURVES, DEFAULT_CARD, DEFAULT_SHAPE, DEFAULT_STROKE, NOTE_COLORS, SHAPE_KINDS, DEFAULT_EDGE, DEFAULT_NODE, DIRECTIONS, IMAGE_FITS, LABEL_FONTS, SHAPES,
+  CURVES, DEFAULT_CARD, DEFAULT_SHAPE, DEFAULT_STROKE, SHAPE_KINDS, DEFAULT_EDGE, DEFAULT_NODE, DIRECTIONS, IMAGE_FITS, LABEL_FONTS, SHAPES,
   edgeLabelLook, parseDetails, parseGithub, parseLinks, parseTags, resolveEdge, resolveNode, slugify, tagLook, uniqueId,
 } from '../model.js'
 import { fetchRepo } from '../github.js'
@@ -1069,7 +1069,7 @@ export function arrowFields(container, values = {}, ctx) {
     ['point', 'A free point (drag it where you want)'],
     ...ctx.nodes.map((n) => [`node:${n.id}`, `Node · ${n.label}`]),
     ...ctx.sections.map((s) => [`section:${s.id}`, `Section · ${s.title || s.id}`]),
-    ...(ctx.notes ?? []).map((n) => [`note:${n.id}`, `Note · ${n.text.split('\n')[0].replace(/^#+\s*/, '').slice(0, 40)}`]),
+    ...(ctx.notes ?? []).map((n) => [`note:${n.id}`, `Note · ${(n.content || '(empty)').split('\n')[0].slice(0, 40)}`]),
     ...(ctx.shapes ?? []).map((sh) => [`shape:${sh.id}`, `Shape · ${SHAPE_LABELS_DRAWN[sh.kind] ?? sh.kind}${sh.text ? ` “${sh.text.split('\n')[0].slice(0, 30)}”` : ''}`]),
     ...(ctx.strokes ?? []).map((st, i) => [`stroke:${st.id}`, `Drawing ${i + 1}`]),
   ]
@@ -1108,43 +1108,6 @@ export function arrowFields(container, values = {}, ctx) {
   }
 }
 
-// --- note form ---------------------------------------------------------------------
-
-/** Free text on the canvas: a sticky note, or bare text (a heading, a comment). */
-export function noteFields(container, values = {}) {
-  const swatches = Object.entries(NOTE_COLORS)
-  const fill = values.fill ?? swatches[0][1]
-  const preset = fill === 'none' ? 'none' : swatches.some(([, c]) => c === fill) ? fill : 'custom'
-  const form = renderFields(container, [
-    {
-      key: 'text', label: 'Text', type: 'text', multiline: true, wide: true, required: true,
-      placeholder: '# Heading\n- a point\n- **bold** words',
-      hint: 'A line starting with "# " is a heading, "- " a bullet; **bold**. Drag the note to move it, its corner to set its width.',
-    },
-    {
-      key: 'style', label: 'Look', type: 'select',
-      options: [...swatches.map(([name, c]) => [c, `Sticky note · ${name}`]), ['none', 'Bare text (no background)'], ['custom', 'Sticky note · my colour']],
-    },
-    { key: 'customFill', label: 'My colour', type: 'color', inherited: '#fff3bf' },
-    { key: 'textSize', label: 'Text size', type: 'number', min: 8, max: 120, placeholder: '15' },
-    { key: 'color', label: 'Text colour', type: 'color', inherited: '#3b3424' },
-    { key: 'font', label: 'Font', type: 'select', options: fontOptions(undefined, 'Default', values.font) },
-    { key: 'align', label: 'Alignment', type: 'segmented', options: [['left', 'Left'], ['center', 'Centre'], ['right', 'Right']] },
-    { key: 'width', label: 'Width', type: 'number', min: 60, max: 2000, step: 10, placeholder: 'auto', hint: 'Empty: as wide as the longest line.' },
-    { key: 'borderColor', label: 'Border', type: 'colorChoice', inheritedLabel: 'None', fallback: '#c9a227' },
-  ], { ...values, style: preset, customFill: preset === 'custom' ? fill : undefined, align: values.align ?? 'left' })
-  return {
-    ...form,
-    values() {
-      const { style, customFill, ...v } = form.values()
-      v.fill = style === 'custom' ? customFill ?? '#fff3bf' : style
-      if (v.borderColor === 'none') delete v.borderColor
-      return v
-    },
-    validate: () => form.missingRequired(),
-  }
-}
-
 // --- legend form -------------------------------------------------------------------
 
 export function legendFields(container, values = {}) {
@@ -1165,7 +1128,7 @@ export function legendFields(container, values = {}) {
 // --- shape form --------------------------------------------------------------------
 
 export const SHAPE_LABELS_DRAWN = {
-  rect: 'Rectangle', rounded: 'Rounded rectangle', ellipse: 'Ellipse', diamond: 'Diamond', triangle: 'Triangle',
+  text: 'Text', rect: 'Rectangle', rounded: 'Rounded rectangle', ellipse: 'Ellipse', diamond: 'Diamond', triangle: 'Triangle',
   hexagon: 'Hexagon', star: 'Star', cloud: 'Cloud', cylinder: 'Cylinder', callout: 'Speech bubble', image: 'Picture', icon: 'Icon',
 }
 
@@ -1175,7 +1138,7 @@ export function shapeFields(container, values = {}) {
   const form = renderFields(container, [
     { key: 'kind', label: 'Shape', type: 'select', options: SHAPE_KINDS.map((k) => [k, SHAPE_LABELS_DRAWN[k]]) },
     {
-      key: 'text', label: 'Text', type: 'text', multiline: true, wide: true, placeholder: 'Inside the shape (under a picture or an icon)',
+      key: 'text', label: 'Text', type: 'text', multiline: true, wide: true, placeholder: 'Inside the shape (under a picture or an icon)', required: values.kind === 'text',
       hint: '"# " a heading, "- " a bullet, **bold**.',
     },
     { key: 'image', label: 'Picture', type: 'image', wide: true, hint: 'For the Picture shape: a URL, a file, or a bundled icon.' },
@@ -1205,6 +1168,7 @@ export function shapeFields(container, values = {}) {
     validate() {
       const v = form.values()
       if (v.kind === 'image' && !v.image) return 'Choose a picture for the Picture shape.'
+      if (v.kind === 'text' && !v.text) return 'Type the text.'
       return null
     },
   }

@@ -11,7 +11,7 @@ Pivograph can be shown inside another site with an `<iframe>`, without its top b
 | `mode=viewer` | Only the graph: pan, zoom and drag, no panels (Pivotick's `viewer` mode). Pair with `sidebar=0`. |
 | `theme=light` / `theme=dark` | Follow the host page's theme instead of the visitor's system setting. |
 | `bg=<colour>` | Background of the page and the graph (`#rrggbb` or `rgb(…)`), e.g. the host page's own background. |
-| `toolbar=1` | With `embed=1`: keeps the top bar (Graph and Add menus), for a host page that lets its users edit the map (see `pivograph:changed` below). |
+| `toolbar=1` | With `embed=1`: keeps the top bar (Arrange, Graph and Export menus), for a host page that lets its users edit the map (see `pivograph:changed` below). |
 | `tags=1` | Starts with the tag pills shown on the graph. They are hidden by default; the *# Tags* button shows them. |
 
 The map below is the app embedded in this page, loading the example with `?embed=1&sidebar=0&src=…`:

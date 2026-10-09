@@ -76,7 +76,7 @@ export function outlinePath(kind, w, h) {
 export function textBox(kind, w, h) {
   const inset = {
     diamond: [0.22, 0.22], triangle: [0.25, 0.42], star: [0.3, 0.38], ellipse: [0.13, 0.13],
-    cloud: [0.18, 0.2], hexagon: [0.18, 0.06],
+    cloud: [0.18, 0.2], hexagon: [0.18, 0.06], text: [0, 0],
   }[kind] ?? [0.04, 0.06]
   const top = kind === 'triangle' ? h * 0.42 : kind === 'cylinder' ? Math.min(h * 0.3, 44) : h * inset[1]
   const bottom = kind === 'callout' ? h * 0.2 + h * 0.04 : kind === 'triangle' ? h * 0.04 : h * inset[1]

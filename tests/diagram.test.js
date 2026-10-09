@@ -6,16 +6,23 @@ import { isMermaid, mermaidToDocument } from '../src/mermaid.js'
 const emptyGraph = { getNodes: () => [], getEdges: () => [] }
 
 describe('notes', () => {
-  it('keeps notes with text and a position, and round-trips them', () => {
+  it('keeps Pivotick notes, converts older ones, and round-trips them', () => {
     const { doc, warnings } = parseDocument({
+      nodes: [{ id: 'a' }],
       notes: [
-        { id: 'todo', text: '# To do\n- check **MISP**', x: 10.6, y: -4, width: 220.2, fill: 'none', align: 'middle' },
-        { text: 'no position' },
-        { text: '   ', x: 0, y: 0 },
+        { id: 'p', content: 'Check **MISP**', x: 10.6, y: -4, width: 220.2, height: 160, color: '#FCA5A5', surface: 'glass', attachedTo: { type: 'node', id: 'a' } },
+        { id: 'old', text: '# To do', fill: '#d3f9d8', color: '#333333', x: 0, y: 0, width: 200 },
+        { id: 'bare', text: 'A heading', fill: 'none', x: 5, y: 6, textSize: 30 },
+        { content: 'no position' },
       ],
     })
-    expect(warnings).toHaveLength(2)
-    expect(doc.notes).toEqual([{ id: 'todo', text: '# To do\n- check **MISP**', x: 11, y: -4, width: 220, fill: 'none' }])
+    expect(warnings).toHaveLength(1)
+    expect(doc.notes).toEqual([
+      { id: 'p', content: 'Check **MISP**', x: 11, y: -4, width: 220, height: 160, color: '#FCA5A5', attachedTo: { type: 'node', id: 'a' } },
+      { id: 'old', content: '# To do', color: '#d3f9d8', x: 0, y: 0, width: 200 },
+    ])
+    // An older bare note is a Text shape now.
+    expect(doc.shapes).toEqual([{ id: 'bare', kind: 'text', x: 5, y: 6, text: 'A heading', textSize: 30 }])
     expect(fromGraph(emptyGraph, doc).notes).toEqual(doc.notes)
   })
 

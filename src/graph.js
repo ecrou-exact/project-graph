@@ -5,7 +5,7 @@ import { Pivotick, Node, Edge } from 'pivotick'
 import 'pivotick/dist/pivotick.css'
 import {
   MARKER_END, MARKER_START, NODE_FIELDS, EDGE_FIELDS,
-  cardLook, compact, edgeLabel, isCardShape, resolveEdge, edgeLabelLook, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, resolveNode, toRawEdge, toRawNode,
+  cardLook, compact, edgeLabel, isCardShape, noteToPivotick, resolveEdge, edgeLabelLook, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, resolveNode, toRawEdge, toRawNode,
 } from './model.js'
 import { badgeIconSvg } from './badgeIcons.js'
 import { faDiagramProject, faPenToSquare } from '@fortawesome/free-solid-svg-icons'
@@ -75,7 +75,8 @@ export class GraphView {
    * @param {() => void} [hooks.onDrawingChange] called after a section or an arrow was moved or resized
    * @param {(id: string) => void} [hooks.editSection] opens the section form
    * @param {(id: string) => void} [hooks.editArrow] opens the arrow form
-   * @param {(id: string) => void} [hooks.editNote] opens the note form
+   * @param {() => object[]} [hooks.railModes] modes added to Pivotick's rail (editable graphs only)
+   * @param {(state: object) => void} [hooks.onRailState] Pivotick's rail state changed (mode, armed tools)
    * @param {(id: string) => void} [hooks.editShape] opens the shape form
    * @param {(id: string) => void} [hooks.editStroke] opens the drawing form
    * @param {(kind: string, id: string) => void} [hooks.deleteDrawing] deletes an arrow, a note, a shape or a drawing
@@ -105,8 +106,7 @@ export class GraphView {
       onChange: () => this.hooks.onDrawingChange?.(),
       onEditSection: (id) => this.hooks.editSection?.(id),
       onEditArrow: (id) => this.hooks.editArrow?.(id),
-      getNotes: () => this.hooks.getTypes().notes ?? [],
-      onEditNote: (id) => this.hooks.editNote?.(id),
+      getNotes: () => this.noteBoxes(),
       getShapes: () => this.hooks.getTypes().shapes ?? [],
       getStrokes: () => this.hooks.getTypes().strokes ?? [],
       onEditShape: (id) => this.hooks.editShape?.(id),
@@ -168,6 +168,8 @@ export class GraphView {
         mode: this.uiMode || 'full',
         // 'light' / 'dark' forced by the host page (?theme=); undefined follows the OS.
         theme: this.uiTheme || undefined,
+        // Pivograph draws its own legend (drawing.js: shapes and lines, in the pictures): never a second one.
+        legend: false,
         // With every editor and notes off, Pivotick drops its Create section.
         editors: { nodeEditor: editable, nodeCreator: editable, edgeCreator: editable, edgeEditor: editable, deletion: editable },
         notes: editable,
@@ -238,6 +240,15 @@ export class GraphView {
       },
     })
 
+    // Pivograph's own modes on Pivotick's rail (Draw), next to Select, Create, View, Physics.
+    this.railDisposers = []
+    if (!readOnly && this.graph.UIManager?.addRailMode) {
+      for (const mode of this.hooks.railModes?.() ?? []) this.railDisposers.push(this.graph.UIManager.addRailMode(mode))
+    }
+    // Pivotick's mode state is the reference (its Escape, another mode, a click on
+    // the rail…): our modes follow what it has armed.
+    this.graph.UIManager?.modeStore?.subscribe((modeState) => this.hooks.onRailState?.(modeState))
+
     // Sections and arrows: see drawing.js.
     this.drawing.attach(this.graph.renderer.getZoomGroup())
     // Arrows follow the nodes they're attached to; edge labels go to the front.
@@ -277,7 +288,7 @@ export class GraphView {
     this.graph.on('nodeAdd', (node) => {
       if (hasLook(node)) this.restyleNode(node)
     })
-    for (const event of ['nodeAdd', 'nodeRemove', 'nodeChange', 'edgeAdd', 'edgeRemove', 'edgeChange']) {
+    for (const event of ['nodeAdd', 'nodeRemove', 'nodeChange', 'edgeAdd', 'edgeRemove', 'edgeChange', 'noteAdd', 'noteRemove', 'noteChange']) {
       this.graph.on(event, () => this.notifyChange())
     }
   }
@@ -421,6 +432,34 @@ export class GraphView {
   /** Frames the whole graph, once its nodes are drawn (after an arrangement). */
   fit() {
     requestAnimationFrame(() => requestAnimationFrame(() => this.graph?.renderer.fitAndCenter()))
+  }
+
+  /** Pivotick's notes as boxes in graph coordinates (where arrows attach). */
+  noteBoxes() {
+    return (this.graph?.getNotes() ?? []).filter((n) => n.visible !== false)
+      .map((n) => ({ id: String(n.id), x: n.x, y: n.y, width: n.width, height: n.height }))
+  }
+
+  notes() {
+    return this.graph?.getNotes() ?? []
+  }
+
+  /** A new Pivotick note (its NoteOptions), as Create → Add note makes. */
+  addNote(options) {
+    const note = Pivotick.normalizeNote(options)
+    this.graph.noteManager.addNote(note)
+    this.notifyChange()
+    return note
+  }
+
+  removeNote(id) {
+    this.graph.noteManager.removeNote(String(id))
+    this.notifyChange()
+  }
+
+  /** Leaves a tool armed in one of our rail modes (after Escape, say). */
+  disarm(mode) {
+    this.graph?.UIManager?.modeStore?.armTool(mode, null)
   }
 
   /** The node and edge types in use, as the legend shows them. */
@@ -786,8 +825,9 @@ export class GraphView {
    * field Pivotick's default renderer reads); images are left to the caller to inline.
    */
   toPivotickFile(doc) {
-    const { nodes, edges } = this.toPivotickData(doc)
+    const { nodes, edges, notes } = this.toPivotickData(doc)
     return {
+      notes,
       // A card is drawn by a function, which a file can't hold: a square with its label instead.
       nodes: nodes.map((n) => (n.style.html ? { ...n, style: nodeStyle({ ...n.data, shape: 'square' }, doc.nodeTypes) } : n)),
       edges: edges.map((e) => {
@@ -807,6 +847,7 @@ export class GraphView {
     return {
       nodes: doc.nodes.map((n) => pinned(this.withStyle(toRawNode(n, doc)), doc)),
       edges: doc.edges.map((e) => toRawEdge(e, doc)),
+      notes: (doc.notes ?? []).map(noteToPivotick),
     }
   }
 
@@ -1149,6 +1190,6 @@ function graphButton(data, openGraph) {
 }
 
 /** A Font Awesome icon as SVG markup in the current text colour (for Pivotick menus). */
-function faIconSvg({ icon: [width, height, , , path] }) {
+export function faIconSvg({ icon: [width, height, , , path] }) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}"><path fill="currentColor" d="${[].concat(path).join(' ')}"/></svg>`
 }

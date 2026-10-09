@@ -81,19 +81,17 @@ export const ROUTES = ['straight', 'elbow', 'curved']
 export const DEFAULT_ARROW = { color: '#343a40', width: 2, direction: 'forward', route: 'straight', labelSize: 14 }
 export const EDGE_TYPE_FIELDS = ['label', ...EDGE_LOOK]
 
-// Notes: free text on the canvas, as a sticky note or bare text (a heading, a
-// comment…). `text` takes a little Markdown: "# " a heading line, "- " a
-// bullet, **bold**. Without `width`, a note is as wide as its longest line.
-export const NOTE_FIELDS = ['text', 'x', 'y', 'width', 'color', 'fill', 'borderColor', 'textSize', 'font', 'align']
-export const NOTE_ALIGNS = ['left', 'center', 'right']
-export const DEFAULT_NOTE = { fill: '#fff3bf', color: '#3b3424', textSize: 15, align: 'left' }
-// Sticky-note colours offered in the form.
-export const NOTE_COLORS = { Yellow: '#fff3bf', Green: '#d3f9d8', Blue: '#d0ebff', Pink: '#ffdeeb', Violet: '#e5dbff', Grey: '#f1f3f5' }
+// Notes are Pivotick's own (Create → Add note): a card on the canvas, which
+// can be attached to a node or an edge. The document keeps them in Pivotick's
+// terms. Older documents wrote `text` and `fill`: they are read too, and a
+// note without a background (`fill: "none"`) becomes a Text shape.
+export const NOTE_FIELDS = ['content', 'x', 'y', 'width', 'height', 'color', 'surface', 'attachedTo']
+export const NOTE_SURFACES = ['jewel', 'terminal']
 
 // Shapes: drawn on the canvas, behind the graph — a zone, a callout, a cloud,
 // a picture, an icon — with text inside (or under a picture / icon). Unlike a
 // node they carry no data: they are for the drawing, and arrows connect them.
-export const SHAPE_KINDS = ['rect', 'rounded', 'ellipse', 'diamond', 'triangle', 'hexagon', 'star', 'cloud', 'cylinder', 'callout', 'image', 'icon']
+export const SHAPE_KINDS = ['text', 'rect', 'rounded', 'ellipse', 'diamond', 'triangle', 'hexagon', 'star', 'cloud', 'cylinder', 'callout', 'image', 'icon']
 export const SHAPE_FIELDS = ['kind', 'x', 'y', 'width', 'height', 'text', 'fill', 'borderColor', 'borderWidth', 'dashed', 'textColor', 'textSize', 'font', 'image', 'icon', 'opacity']
 export const DEFAULT_SHAPE = { kind: 'rounded', width: 160, height: 90, fill: '#e7f5ff', borderColor: '#1c7ed6', borderWidth: 2, textColor: '#1c2230', textSize: 15 }
 
@@ -246,20 +244,27 @@ export function parseDocument(raw) {
     }
   }
 
+  // Notes written by older versions as bare text are Text shapes now.
+  const legacyText = []
   if (raw.notes !== undefined) {
     if (!Array.isArray(raw.notes)) errors.push('"notes" must be an array.')
     else {
       const noteIds = new Set()
       raw.notes.forEach((input, i) => {
         if (!isPlainObject(input)) return warnings.push(`notes[${i}] is not an object, ignored.`)
+        if (input.fill === 'none' && typeof input.text === 'string') {
+          legacyText.push({ id: input.id, kind: 'text', x: input.x, y: input.y, width: input.width, text: input.text, textColor: input.color, textSize: input.textSize, font: input.font })
+          return
+        }
         const note = parseNote(input)
-        if (!note) return warnings.push(`notes[${i}] needs a "text" and numbers "x" and "y", ignored.`)
+        if (!note) return warnings.push(`notes[${i}] needs numbers "x" and "y", ignored.`)
         note.id = uniqueId(input.id ?? 'note', noteIds)
         noteIds.add(note.id)
         doc.notes.push(note)
       })
     }
   }
+  if (legacyText.length) raw = { ...raw, shapes: [...(Array.isArray(raw.shapes) ? raw.shapes : []), ...legacyText] }
 
   for (const [key, parse, what] of [['shapes', parseShape, 'numbers "x" and "y"'], ['strokes', parseStroke, 'at least two points [x, y]']]) {
     if (raw[key] === undefined) continue
@@ -428,25 +433,57 @@ export function parseSection(input) {
   return { id: input.id === undefined ? undefined : String(input.id), ...section }
 }
 
-/** A note with its fields cleaned up, or null without text or a position. */
+/**
+ * A note with its fields cleaned up (Pivotick's NoteOptions, `attachedTo` for
+ * its attachedElement), or null without a position. `text` / `fill` are read
+ * as `content` / `color`.
+ */
 export function parseNote(input) {
   const x = Number(input.x)
   const y = Number(input.y)
-  const text = typeof input.text === 'string' ? input.text : ''
-  if (!text.trim() || !Number.isFinite(x) || !Number.isFinite(y)) return null
-  const note = compact({ ...input, x: Math.round(x), y: Math.round(y) }, NOTE_FIELDS)
-  for (const key of ['width', 'textSize']) {
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null
+  // An older note: `text`, and `fill` for its card (its `color` was the text's).
+  const legacy = input.content === undefined && input.text !== undefined
+  const note = compact({
+    ...input,
+    content: legacy ? input.text : input.content,
+    color: legacy ? input.fill : input.color,
+    x: Math.round(x),
+    y: Math.round(y),
+  }, NOTE_FIELDS)
+  for (const key of ['width', 'height']) {
     const value = Number(note[key])
     if (Number.isFinite(value) && value > 0) note[key] = Math.round(value)
     else delete note[key]
   }
-  if (note.align && !NOTE_ALIGNS.includes(note.align)) delete note.align
+  if (note.surface && !NOTE_SURFACES.includes(note.surface)) delete note.surface
+  const attached = note.attachedTo
+  if (!(isPlainObject(attached) && (attached.type === 'node' || attached.type === 'edge') && attached.id !== undefined)) delete note.attachedTo
+  else note.attachedTo = { type: attached.type, id: String(attached.id) }
   return { id: input.id === undefined ? undefined : String(input.id), ...note }
 }
 
-/** Note attributes with the defaults filled in. */
-export function resolveNote(note) {
-  return { ...DEFAULT_NOTE, ...compact(note) }
+/** A Pivotick note (live) in the document's terms. */
+export function noteFromPivotick(note) {
+  return {
+    id: String(note.id),
+    ...compact({
+      content: note.content,
+      x: Math.round(note.x),
+      y: Math.round(note.y),
+      width: Math.round(note.width),
+      height: Math.round(note.height),
+      color: note.color,
+      surface: note.surface,
+      attachedTo: note.getAttachedElement?.() ? { ...note.getAttachedElement() } : undefined,
+    }),
+  }
+}
+
+/** A document note as Pivotick's NoteOptions. */
+export function noteToPivotick(note) {
+  const { attachedTo, ...rest } = note
+  return compact({ ...rest, attachedElement: attachedTo })
 }
 
 /**
@@ -491,12 +528,14 @@ export function parseShape(input) {
   return { id: input.id === undefined ? undefined : String(input.id), ...shape }
 }
 
-/** Shape attributes with the defaults filled in; a picture or an icon has no box by default. */
+/** Shape attributes with the defaults filled in; text, a picture or an icon has no box by default. */
 export function resolveShape(shape) {
   const bare = shape.kind === 'image' || shape.kind === 'icon'
-  const defaults = bare
-    ? { ...DEFAULT_SHAPE, width: 80, height: 80, fill: shape.kind === 'icon' ? '#1c7ed6' : 'none', borderWidth: 0 }
-    : DEFAULT_SHAPE
+  const defaults = shape.kind === 'text'
+    ? { ...DEFAULT_SHAPE, width: 240, height: 48, fill: 'none', borderWidth: 0, textSize: 22 }
+    : bare
+      ? { ...DEFAULT_SHAPE, width: 80, height: 80, fill: shape.kind === 'icon' ? '#1c7ed6' : 'none', borderWidth: 0 }
+      : DEFAULT_SHAPE
   return { ...defaults, ...compact(shape) }
 }
 
@@ -762,7 +801,8 @@ export function fromGraph(graph, base, withPositions = true) {
     // Sections are drawn by Pivograph, not Pivotick: they come from the base.
     sections: (base.sections ?? []).map((s) => ({ ...s })),
     arrows: (base.arrows ?? []).map((a) => structuredClone(a)),
-    notes: (base.notes ?? []).map((n) => ({ ...n })),
+    // Notes live in Pivotick, like nodes (a stand-in graph without them: the base's).
+    notes: graph.getNotes ? graph.getNotes().map(noteFromPivotick) : (base.notes ?? []).map((n) => ({ ...n })),
     shapes: (base.shapes ?? []).map((s) => ({ ...s })),
     strokes: (base.strokes ?? []).map((s) => structuredClone(s)),
     nodes: [],

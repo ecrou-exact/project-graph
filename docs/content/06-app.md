@@ -1,6 +1,6 @@
 ## Using the app
 
-**Top bar.** *Search the docs* finds a section of this guide as you type (↑ ↓ and Enter to open it). *Add* creates a node, an edge, a section, an arrow or a note, shows the legend, and arranges the nodes (see below). *Graph* starts a new graph, opens a file (a Pivograph document, an Open Contributions Descriptor or a Mermaid flowchart), imports an organization from its domain or a Mermaid flowchart from text, or loads an example. *Export* saves the graph (see [Reports](#reports)).
+**Top bar.** *Search the docs* finds a section of this guide as you type (↑ ↓ and Enter to open it). *Arrange* places the nodes (see below). *Graph* starts a new graph, opens a file (a Pivograph document, an Open Contributions Descriptor or a Mermaid flowchart), imports an organization from its domain or a Mermaid flowchart from text, or loads an example. *Export* saves the graph (see [Reports](#reports)).
 
 **Side panel** (left, resizable by dragging its edge):
 
@@ -26,11 +26,18 @@
 
 **Filtering.** Pivotick's *Filter Graph* panel filters by tags (every tag is offered), type, label, description and, for OCD projects, status and license; relationship types can be switched on and off. Filters set from the side panel and from *Filter Graph* are the same; active filters are listed at the top of the side panel with *Clear*.
 
-**Drawing tools.** Over the canvas, a toolbar: *Select* (V), *Connect* (C) — click two things, or drag from one to the other, to link them (two nodes get an edge, anything else an arrow) —, *Pen* (P) to draw by hand (colour and width next to it), *Shape* (rectangle, ellipse, diamond, triangle, hexagon, star, cloud, cylinder, speech bubble, icon, picture), *Note* (N) and *Text*. Escape leaves Connect or Pen. Click a shape, a drawing, a note or an arrow and press Delete to remove it.
+**The rail** (on the left of the canvas) is Pivotick's: *Select*, *Create* (add a node, an edge or a **note**; Pivotick's notes can be attached to a node or an edge), *View*, *Physics* — and Pivograph's **Draw** mode (D) under them:
 
-**Drawing a diagram.** Besides nodes and edges, *Add* draws what a diagram needs: *Section* (a titled frame), *Arrow* (between nodes, sections, notes or free points; straight, right-angled or curved), *Note* (a sticky note or bare text, with headings, bullets and bold), *Shape…*, *Connect things*, *Draw by hand* and *Legend* (the types in use, with their look). Nodes can take flowchart shapes with the text inside: card, pill, ellipse, diamond, cylinder, document, parallelogram (*Appearance → Shape*). The *Drawing* tab lists sections, notes, shapes, drawings and arrows.
+- *Connect* — click two things, or drag from one to the other, to link them: two nodes get an edge, anything else (a note, a shape, a drawing, a section, a point) an arrow;
+- *Pen* — drag to draw by hand (colour and width in the panel);
+- *Text*, *Section*, *Arrow…* (the arrow form), *Legend* (the types in use, with their look);
+- a button per shape: rectangle, rounded, ellipse, diamond, triangle, hexagon, star, cloud, cylinder, speech bubble, icon, picture.
 
-**Arranging.** *Add → Arrange the nodes* places every node once, then fixes the layout: *Tree, top to bottom* and *Tree, left to right* follow the edges like a flowchart (cycles are broken, crossings reduced), *Grid* puts them in rows grouped by type, *Circle* puts them in a ring (a hub goes in the middle), *Snap to grid* rounds the positions to 20 px to line nodes up. The new layout is centred where the graph was, so sections and notes stay around it. *Undo the last arrangement* puts the nodes back.
+Escape leaves Connect or Pen. Click a shape, a drawing or an arrow and press Delete to remove it.
+
+**Drawing a diagram.** Nodes can take flowchart shapes with the text inside: card, pill, ellipse, diamond, cylinder, document, parallelogram (*Appearance → Shape*). The *Drawing* tab lists sections, notes, shapes, drawings and arrows.
+
+**Arranging.** The *Arrange* menu places every node once, then fixes the layout: *Tree, top to bottom* and *Tree, left to right* follow the edges like a flowchart (cycles are broken, crossings reduced), *Grid* puts them in rows grouped by type, *Circle* puts them in a ring (a hub goes in the middle), *Snap to grid* rounds the positions to 20 px to line nodes up. The new layout is centred where the graph was, so sections and notes stay around it. *Undo the last arrangement* puts the nodes back.
 
 **Mermaid flowcharts.** *Graph → Import a Mermaid flowchart…* turns text into an editable diagram — the `flowchart LR` / `graph TD` syntax of GitHub, GitLab, Notion or Obsidian. Shapes (`A[box]`, `A(rounded)`, `A([pill])`, `A((circle))`, `A{decision}`, `A[(database)]`, `A>document]`, `A[/in-out/]`), links (`-->`, `---`, `-.->`, `==>`, `<-->`, with `|label|` or `-- label -->`), chains and `&` groups, `subgraph … end` (they become sections), and colours from `style`, `classDef`, `class` and `:::class` are read; the rest is skipped with a warning. Opening or dropping a `.mmd` file — or a Markdown file holding a ```` ```mermaid ```` block — does the same.
 
