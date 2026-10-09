@@ -4,7 +4,7 @@
 
 **Side panel** (left, resizable by dragging its edge):
 
-- *Nodes* and *Edges* list everything with its type and description. Click to select on the graph, double-click to edit. The filter box searches labels, types, descriptions and tags.
+- *Nodes* and *Edges* list everything with its type and description. Click to select on the graph, double-click to edit. On a read-only map, double-clicking a node (in the list or on the graph) opens its website in a new tab instead. The filter box searches labels, types, descriptions and tags.
 - *Tags* and *Types* list tags and types. Click one to **filter** the graph by it (click again to remove; several combine). Double-click to edit its colour, icon or style.
 - *JSON* shows the document; edit it and press *Apply*.
 

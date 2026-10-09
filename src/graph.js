@@ -769,9 +769,15 @@ export class GraphView {
   }
 
   async editNode(id) {
-    if (this.readOnly) return
     const node = this.nodes().find((n) => String(n.id) === id)
     if (!node) return
+    // A read-only map can't be edited: double-clicking a node (on the graph or
+    // in the side panel) opens its website instead, in a new tab.
+    if (this.readOnly) {
+      const { url } = node.getData()
+      if (typeof url === 'string' && /^https?:\/\//i.test(url)) window.open(url, '_blank', 'noopener')
+      return
+    }
     const values = await this.hooks.nodeForm({ mode: 'edit', values: { id, ...node.getData() } })
     if (values) this.updateNode(id, values)
   }
