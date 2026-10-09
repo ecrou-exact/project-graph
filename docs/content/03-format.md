@@ -12,6 +12,8 @@ A Pivograph document is a JSON object. All top-level keys are optional; unknown 
   "sections": [ { "title": "…", "x": 0, "y": 0, … } ],
   "arrows": [ { "from": { "node": "…" }, "to": { "section": "…" }, … } ],
   "notes": [ { "text": "…", "x": 0, "y": 0, … } ],
+  "shapes": [ { "kind": "cloud", "x": 0, "y": 0, "text": "…", … } ],
+  "strokes": [ { "points": [[0, 0], [40, 10], …] } ],
   "legend": { "x": 0, "y": 0, "title": "…" },
   "nodes": [ { "id": "…", … } ],
   "edges": [ { "from": "…", "to": "…", … } ]
@@ -176,7 +178,7 @@ Arrows drawn by Pivograph, like sections, for diagrams: unlike an edge, an arrow
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `from`, `to` | object | | **Required.** `{ "node": "id" }`, `{ "section": "id" }`, `{ "note": "id" }` or `{ "x": 0, "y": 0 }`. Add `"at": [u, v]` to place the end on the target's box: `[0, 0]` top-left, `[1, 1]` bottom-right, `[0.5, 1]` the middle of the bottom side. Without `at`, the end sits on the side facing the other end (straight up or down from a section). |
+| `from`, `to` | object | | **Required.** `{ "node": "id" }`, `{ "section": "id" }`, `{ "note": "id" }`, `{ "shape": "id" }`, `{ "stroke": "id" }` or `{ "x": 0, "y": 0 }`. Add `"at": [u, v]` to place the end on the target's box: `[0, 0]` top-left, `[1, 1]` bottom-right, `[0.5, 1]` the middle of the bottom side. Without `at`, the end sits on the side facing the other end (straight up or down from a section). |
 | `label` | string | | `\n` starts a new line. |
 | `description` | string | | Shown when the pointer is over the arrow. |
 | `direction` | string | `forward` | As for edges: `forward`, `backward`, `both`, `none`. |
@@ -217,6 +219,36 @@ The text takes a little Markdown: a line starting with `# ` is a heading, `- ` a
   { "text": "Draft — to be reviewed", "x": 0, "y": -60, "fill": "none", "textSize": 22, "font": "hand" }
 ]
 ```
+
+### shapes
+
+Shapes drawn behind the graph — a zone, a callout, a cloud for "the Internet", a star, a picture, an icon — with text inside (or under a picture or an icon). Unlike nodes, they hold no data: they are for the drawing, and arrows connect to them (on their outline). Add one with the **◇ Shape** tool on the canvas or *Add → Shape…*; drag to move, drag the bottom-right corner to resize, double-click to edit, Delete to remove.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `kind` | string | `rounded` | `rect`, `rounded`, `ellipse`, `diamond`, `triangle`, `hexagon`, `star`, `cloud`, `cylinder`, `callout` (a speech bubble), `image`, `icon`. |
+| `x`, `y` | number | | **Required.** Top-left corner, in graph coordinates. |
+| `width`, `height` | number | `160`, `90` (`80` × `80` for image and icon) | Size. |
+| `text` | string | | Inside the shape (as a caption under an image or an icon); same Markdown as notes. |
+| `fill` | CSS colour or `"none"` | light blue | Background. For an `icon`: the icon's colour. |
+| `borderColor`, `borderWidth`, `dashed` | | blue, `2`, `false` | Outline; `borderWidth: 0` removes it. |
+| `textColor`, `textSize`, `font` | | dark, `15` | Text. |
+| `image` | string | | For `image`: a URL, a relative path or a `data:` URL. |
+| `icon` | string | `star` | For `icon`: one of the bundled icons (as for tags). |
+| `opacity` | number | `1` | 0 to 1. |
+
+### strokes
+
+Lines drawn **by hand** with the pen (**✎ Pen** on the canvas, or P): a circle around a group, an underline, a quick sketch. Drag to draw; each stroke is simplified and smoothed. Click one to select it (Delete removes it), drag it to move it, double-click to change its colour, width, dashes or opacity (a light, thick stroke makes a highlighter). Arrows can start or end on a drawing.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `points` | [[x, y], …] | | **Required**, at least two, in graph coordinates. |
+| `color`, `width`, `dashed`, `opacity` | | `#343a40`, `3`, `false`, `1` | Line. |
+
+### Connecting everything
+
+Everything on the canvas can be linked: with **⤳ Connect** (or C), click a thing then another — or press on one and release on the other. Between two **nodes** this adds an *edge* (a relationship of the graph: types, filters, report). Between anything else — a node and a note, a shape and a drawing, a section and a free point… — it draws an *arrow*, attached to both ends so it follows them when they move. Escape leaves the mode.
 
 ### legend
 

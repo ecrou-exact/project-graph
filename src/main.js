@@ -4,9 +4,9 @@ import rulezetExample from '../examples/rulezet.json'
 import circlExample from '../examples/circl.json'
 import ngsotiExample from '../examples/ngsoti-soc-stack.json'
 import { GraphView } from './graph.js'
-import { DIRECTIONS, TAG_FIELDS, compact, parseArrow, parseLegend, parseNote, parseSection, uniqueId, emptyDocument, parseDocument, resolveEdge, resolveNode, starterDocument } from './model.js'
+import { ARROW_TARGETS, DIRECTIONS, TAG_FIELDS, arrowEndTarget, arrowTargets, compact, parseArrow, parseLegend, parseNote, parseSection, parseShape, parseStroke, uniqueId, emptyDocument, parseDocument, resolveEdge, resolveNode, starterDocument } from './model.js'
 import { h } from './ui/dom.js'
-import { arrowEndKey, arrowFields, edgeFields, legendFields, nodeFields, noteFields, sectionFields, tagFields, typeFields } from './ui/forms.js'
+import { SHAPE_LABELS_DRAWN, arrowEndKey, arrowFields, edgeFields, legendFields, nodeFields, noteFields, sectionFields, shapeFields, strokeFields, tagFields, typeFields } from './ui/forms.js'
 import { isMermaid, mermaidToDocument } from './mermaid.js'
 import { circleLayout, gridLayout, layeredLayout, snapToGrid } from './layout.js'
 import { tagPill } from './ui/pills.js'
@@ -66,8 +66,9 @@ const EMBED = {
 }
 
 // Document-level state. Nodes and edges live in Pivotick (see GraphView).
-const state = { meta: {}, nodeTypes: {}, edgeTypes: {}, tags: {}, sections: [], arrows: [], notes: [], legend: undefined }
-const ui = { tab: 'nodes', filter: '', jsonDirty: false, withPositions: true }
+const state = { meta: {}, nodeTypes: {}, edgeTypes: {}, tags: {}, sections: [], arrows: [], notes: [], shapes: [], strokes: [], legend: undefined }
+// pen: the look of the next lines drawn by hand.
+const ui = { tab: 'nodes', filter: '', jsonDirty: false, withPositions: true, pen: { color: '#343a40', width: 3 } }
 
 const view = new GraphView(document.getElementById('graph'), {
   getTypes: () => state,
@@ -89,10 +90,14 @@ const view = new GraphView(document.getElementById('graph'), {
   },
   editSection: (id) => editSection(id),
   editArrow: (id) => editArrow(id),
-  deleteArrow: (id) => removeArrow(id),
   editNote: (id) => editNote(id),
-  deleteNote: (id) => removeNote(id),
   editLegend: () => editLegend(),
+  editShape: (id) => editShape(id),
+  editStroke: (id) => editStroke(id),
+  deleteDrawing: (kind, id) => removeDrawing(kind, id),
+  connect: (from, to) => connect(from, to),
+  addStroke: (points) => addStroke(points),
+  onModeChange: () => renderDrawToolbar(),
 })
 
 let sidebarFrame = null
@@ -116,11 +121,14 @@ function loadDocument(doc) {
   state.sections = structuredClone(doc.sections ?? [])
   state.arrows = structuredClone(doc.arrows ?? [])
   state.notes = structuredClone(doc.notes ?? [])
+  state.shapes = structuredClone(doc.shapes ?? [])
+  state.strokes = structuredClone(doc.strokes ?? [])
   state.legend = doc.legend ? { ...doc.legend } : undefined
   ui.jsonDirty = false
   syncAddress(doc)
   view.load(doc)
   syncCanvasTheme()                     // Pivotick rebuilt its .pivotick element
+  if (!editable()) view.drawing.setMode(null)
   renderHeader()
   renderSidebar()
   persist()
@@ -454,15 +462,21 @@ function drawingTargets() {
       .sort((a, b) => a.label.localeCompare(b.label)),
     sections: state.sections,
     notes: state.notes,
+    shapes: state.shapes,
+    strokes: state.strokes,
   }
+}
+
+/** Everything an arrow can be attached to, by kind. */
+function currentTargets() {
+  return arrowTargets(state, new Set(view.nodes().map((n) => String(n.id))))
 }
 
 /** The end chosen in the form; unchanged ends keep their exact place. */
 function arrowEnd(key, previous, fallback) {
   if (previous && arrowEndKey(previous) === key) return previous
-  if (key.startsWith('node:')) return { node: key.slice(5) }
-  if (key.startsWith('section:')) return { section: key.slice(8) }
-  if (key.startsWith('note:')) return { note: key.slice(5) }
+  const [kind, ...rest] = key.split(':')
+  if (ARROW_TARGETS.includes(kind) && rest.length) return { [kind]: rest.join(':') }
   return fallback
 }
 
@@ -478,8 +492,7 @@ async function editArrow(id) {
   const c = view.drawing.viewCenter()
   const from = arrowEnd(values.from, current?.from, { x: Math.round(c.x - 120), y: Math.round(c.y) })
   const to = arrowEnd(values.to, current?.to, { x: Math.round(c.x + 120), y: Math.round(c.y) })
-  const ids = { nodes: new Set(view.nodes().map((n) => String(n.id))), sections: new Set(state.sections.map((s) => s.id)), notes: new Set(state.notes.map((n) => n.id)) }
-  const next = parseArrow({ ...values, from, to, labelOffset: current?.labelOffset }, ids.nodes, ids.sections, ids.notes)
+  const next = parseArrow({ ...values, from, to, labelOffset: current?.labelOffset }, currentTargets())
   if (typeof next === 'string') return toast(`This arrow can't be drawn: ${next}.`, 'error')
   if (current) {
     next.id = id
@@ -500,18 +513,166 @@ async function removeArrow(id) {
   sectionsChanged()
 }
 
-/** Arrows whose node, section or note was deleted go with it. */
+/** Arrows whose node, section, note, shape or drawing was deleted go with it. */
 function pruneArrows() {
-  const nodes = new Set(view.nodes().map((n) => String(n.id)))
-  const sections = new Set(state.sections.map((s) => s.id))
-  const notes = new Set(state.notes.map((n) => n.id))
-  const alive = (end) => (end.node !== undefined ? nodes.has(end.node)
-    : end.section !== undefined ? sections.has(end.section)
-    : end.note !== undefined ? notes.has(end.note) : true)
+  const targets = currentTargets()
+  const alive = (end) => {
+    const target = arrowEndTarget(end)
+    return !target || targets[target.kind].has(target.id)
+  }
   const kept = state.arrows.filter((a) => alive(a.from) && alive(a.to))
   if (kept.length === state.arrows.length) return
   state.arrows = kept
   view.drawing.render()
+}
+
+// --- shapes, drawings, and connecting everything ------------------------------------------
+
+/** A new shape of this kind in the middle of the view (a picture asks for its file first). */
+async function addShape(kind) {
+  if (!editable()) return
+  if (kind === 'image') return editShape(undefined, { kind })
+  const c = view.drawing.viewCenter()
+  const next = parseShape({ kind, x: c.x - 80, y: c.y - 45, ...(kind === 'icon' ? { icon: 'star', x: c.x - 40, y: c.y - 40 } : {}) })
+  next.id = uniqueId(kind, new Set(state.shapes.map((sh) => sh.id)))
+  state.shapes.push(next)
+  sectionsChanged()
+  view.drawing.pick({ kind: 'shape', id: next.id })
+}
+
+async function editShape(id, preset = {}) {
+  if (!editable()) return
+  const current = state.shapes.find((sh) => sh.id === id)
+  const values = await openFormModal({
+    title: current ? 'Edit shape' : 'New shape',
+    submitLabel: current ? 'Save' : 'Add',
+    build: (body) => shapeFields(body, current ?? preset),
+  })
+  if (!values) return
+  if (current) {
+    state.shapes[state.shapes.indexOf(current)] = parseShape({ ...values, id, x: current.x, y: current.y })
+  } else {
+    const c = view.drawing.viewCenter()
+    const next = parseShape({ ...values, x: c.x - (values.width ?? 120) / 2, y: c.y - (values.height ?? 90) / 2 })
+    next.id = uniqueId(values.kind, new Set(state.shapes.map((sh) => sh.id)))
+    state.shapes.push(next)
+  }
+  sectionsChanged()
+}
+
+async function editStroke(id) {
+  if (!editable()) return
+  const current = state.strokes.find((st) => st.id === id)
+  if (!current) return
+  const values = await openFormModal({ title: 'Edit drawing', submitLabel: 'Save', build: (body) => strokeFields(body, current) })
+  if (!values) return
+  state.strokes[state.strokes.indexOf(current)] = parseStroke({ ...values, id, points: current.points })
+  sectionsChanged()
+}
+
+/** Pen mode: a line drawn by hand, in the pen's colour and width. */
+function addStroke(points) {
+  const next = parseStroke({ points, ...ui.pen })
+  if (!next) return
+  next.id = uniqueId('drawing', new Set(state.strokes.map((st) => st.id)))
+  state.strokes.push(next)
+  sectionsChanged()
+}
+
+/**
+ * Connect mode: two nodes get an edge (a relationship of the graph: filters,
+ * report, types); anything else — notes, shapes, drawings, sections, points,
+ * or a node with one of those — gets an arrow.
+ */
+function connect(from, to) {
+  if (!editable()) return
+  if (from.node !== undefined && to.node !== undefined) {
+    view.addEdge({ from: from.node, to: to.node, id: view.freeEdgeId(from.node, to.node) })
+    return toast('Edge added between the two nodes — double-click it to name the relationship.')
+  }
+  const next = parseArrow({ from, to }, currentTargets())
+  if (typeof next === 'string') return toast(`This arrow can't be drawn: ${next}.`, 'error')
+  next.id = uniqueId('arrow', new Set(state.arrows.map((a) => a.id)))
+  state.arrows.push(next)
+  sectionsChanged()
+  view.drawing.select(next.id)
+}
+
+async function removeShape(id) {
+  const shape = state.shapes.find((sh) => sh.id === id)
+  if (!shape || !(await confirmModal(`Delete this ${(SHAPE_LABELS_DRAWN[shape.kind] ?? 'shape').toLowerCase()}?`))) return
+  state.shapes = state.shapes.filter((sh) => sh !== shape)
+  pruneArrows()
+  sectionsChanged()
+}
+
+/** A drawing goes at once (Delete on the canvas): it is quickly drawn again. */
+function removeStroke(id) {
+  state.strokes = state.strokes.filter((st) => st.id !== id)
+  pruneArrows()
+  sectionsChanged()
+}
+
+/** Delete pressed on the selected thing. */
+function removeDrawing(kind, id) {
+  if (!editable()) return
+  if (kind === 'arrow') removeArrow(id)
+  else if (kind === 'note') removeNote(id)
+  else if (kind === 'shape') removeShape(id)
+  else if (kind === 'stroke') removeStroke(id)
+}
+
+const SHAPE_MENU = ['rounded', 'rect', 'ellipse', 'diamond', 'triangle', 'hexagon', 'star', 'cloud', 'cylinder', 'callout', 'icon', 'image']
+
+/** The drawing tools floating over the canvas: select, connect, pen, shapes, note, text. */
+function renderDrawToolbar() {
+  const bar = document.getElementById('draw-toolbar')
+  if (!bar) return
+  bar.hidden = !editable() || EMBED.viewer
+  const mode = view.drawing.mode
+  const tool = (key, icon, label, shortcut, onclick, active) => h('button', {
+    type: 'button', class: `pg-tool${active ? ' is-active' : ''}`, title: `${label}${shortcut ? ` (${shortcut})` : ''}`, 'aria-pressed': String(Boolean(active)), onclick,
+  }, h('span', { class: 'pg-tool-icon', 'aria-hidden': 'true' }, icon), h('span', { class: 'pg-tool-label' }, label))
+  const shapes = menuButton({
+    label: '◇ Shape',
+    items: SHAPE_MENU.map((kind) => ({ label: SHAPE_LABELS_DRAWN[kind], onclick: () => addShape(kind) })),
+  })
+  shapes.button.classList.add('pg-tool')
+  const pen = mode === 'pen'
+    ? h('span', { class: 'pg-pen-style' },
+        h('input', { type: 'color', value: ui.pen.color, title: 'Pen colour', oninput: (e) => { ui.pen.color = e.target.value } }),
+        h('select', { title: 'Pen width', onchange: (e) => { ui.pen.width = Number(e.target.value) } },
+          [2, 3, 5, 8, 14].map((w) => h('option', { value: w, selected: w === ui.pen.width }, `${w} px`))))
+    : null
+  bar.replaceChildren(...[
+    tool('select', '➤', 'Select', 'V', () => view.drawing.setMode(null), !mode),
+    tool('connect', '⤳', 'Connect', 'C', () => view.drawing.setMode(mode === 'connect' ? null : 'connect'), mode === 'connect'),
+    tool('pen', '✎', 'Pen', 'P', () => view.drawing.setMode(mode === 'pen' ? null : 'pen'), pen),
+    pen,
+    shapes,
+    tool('note', '▤', 'Note', 'N', () => editNote()),
+    tool('text', 'T', 'Text', '', () => addText()),
+  ].filter(Boolean))
+  const hint = mode === 'connect'
+    ? (view.drawing.pending ? 'Now click where the arrow ends' : 'Click a node, note, shape, drawing, section or empty space, then another — or drag from one to the other. Esc to stop.')
+    : mode === 'pen' ? 'Drag to draw. Esc to stop.' : ''
+  if (hint) bar.append(h('span', { class: 'pg-tool-hint' }, hint))
+}
+
+/** Bare text, ready to type: a note without a background. */
+async function addText() {
+  if (!editable()) return
+  const values = await openFormModal({
+    title: 'New text',
+    submitLabel: 'Add',
+    build: (body) => noteFields(body, { fill: 'none', textSize: 22 }),
+  })
+  if (!values) return
+  const c = view.drawing.viewCenter()
+  const next = parseNote({ ...values, x: c.x - 60, y: c.y - 15 })
+  next.id = uniqueId(values.text.split('\n')[0].slice(0, 30) || 'text', new Set(state.notes.map((n) => n.id)))
+  state.notes.push(next)
+  sectionsChanged()
 }
 
 // --- notes (free text on the canvas) and the legend ------------------------------------
@@ -1020,6 +1181,7 @@ function renderHeader() {
   const add = document.getElementById('btn-add')
   add.disabled = !editable()
   add.closest('.pg-menu-wrap').hidden = !editable()
+  renderDrawToolbar()
   document.getElementById('footer-hint').textContent = editable() ? 'Saved in this browser only · double-click to edit' : 'Click a tag or a type to filter'
   // Read-only graphs (the example, imported descriptors, files marked
   // readOnly) can't be unlocked: to make a graph, start a new one.
@@ -1154,6 +1316,11 @@ function renderSections() {
     ? view.nodes().find((n) => String(n.id) === end.node)?.getData().label ?? end.node
     : end.section !== undefined ? state.sections.find((s) => s.id === end.section)?.title || end.section
     : end.note !== undefined ? `note “${(state.notes.find((n) => n.id === end.note)?.text ?? end.note).split('\n')[0].replace(/^#+\s*/, '').slice(0, 24)}”`
+    : end.shape !== undefined ? (() => {
+      const shape = state.shapes.find((sh) => sh.id === end.shape)
+      return shape?.text ? `“${shape.text.split('\n')[0].slice(0, 24)}”` : (SHAPE_LABELS_DRAWN[shape?.kind] ?? 'a shape').toLowerCase()
+    })()
+    : end.stroke !== undefined ? 'a drawing'
     : 'a point')
   return h('div', {},
     h('h3', { class: 'pg-drawing-heading' }, 'Sections'),
@@ -1181,7 +1348,33 @@ function renderSections() {
             h('span', { class: 'pg-item-title' }, note.text.split('\n')[0].replace(/^#+\s*/, '')),
             note.text.includes('\n') ? h('span', { class: 'pg-item-sub' }, note.text.split('\n').slice(1).join(' ').slice(0, 80)) : null),
           actionButtons(() => editNote(note.id), () => removeNote(note.id))))),
+    h('h3', { class: 'pg-drawing-heading' }, 'Shapes'),
+    h('div', { class: 'pg-toolbar' },
+      editable() ? h('button', { class: 'pg-btn pg-btn-primary', onclick: () => editShape() }, '+ Shape') : null),
+    state.shapes.length === 0
+      ? h('p', { class: 'pg-empty' }, 'No shapes. A shape — rectangle, ellipse, cloud, star, speech bubble, picture, icon… — is drawn behind the graph, with text inside. Drag it to move it, its corner to resize it; arrows connect to it.')
+      : h('ul', { class: 'pg-list' }, state.shapes.map((shape) => h('li', {
+          class: 'pg-item', onclick: () => view.drawing.pick({ kind: 'shape', id: shape.id }), ondblclick: () => editShape(shape.id),
+        },
+          h('span', { class: 'pg-swatch pg-shape-square', style: `--swatch:${shape.fill && shape.fill !== 'none' ? shape.fill : 'transparent'}` }),
+          h('span', { class: 'pg-item-main' },
+            h('span', { class: 'pg-item-title' }, shape.text ? shape.text.split('\n')[0].replace(/^#+\s*/, '') : SHAPE_LABELS_DRAWN[shape.kind]),
+            h('span', { class: 'pg-item-sub' }, `${SHAPE_LABELS_DRAWN[shape.kind]} · ${shape.width ?? ''}${shape.width ? ' × ' : ''}${shape.height ?? ''}`)),
+          actionButtons(() => editShape(shape.id), () => removeShape(shape.id))))),
+    h('h3', { class: 'pg-drawing-heading' }, 'Drawings'),
+    h('div', { class: 'pg-toolbar' },
+      editable() ? h('button', { class: 'pg-btn pg-btn-primary', onclick: () => view.drawing.setMode('pen') }, '✎ Draw') : null),
+    state.strokes.length === 0
+      ? h('p', { class: 'pg-empty' }, 'No drawings. Take the pen (P, or ✎ on the canvas) and drag to draw by hand: a circle around a group, an underline, a quick sketch.')
+      : h('ul', { class: 'pg-list' }, state.strokes.map((stroke, i) => h('li', {
+          class: 'pg-item', onclick: () => view.drawing.pick({ kind: 'stroke', id: stroke.id }), ondblclick: () => editStroke(stroke.id),
+        },
+          h('span', { class: `pg-edge-swatch${stroke.dashed ? ' pg-dashed' : ''}`, style: `--swatch:${stroke.color ?? '#343a40'}` }),
+          h('span', { class: 'pg-item-main' }, h('span', { class: 'pg-item-title' }, `Drawing ${i + 1}`),
+            h('span', { class: 'pg-item-sub' }, `${stroke.points.length} points`)),
+          actionButtons(() => editStroke(stroke.id), () => removeStroke(stroke.id))))),
     h('h3', { class: 'pg-drawing-heading' }, 'Arrows'),
+    h('p', { class: 'pg-muted pg-drawing-tip' }, 'Tip: with Connect (C, or ⤳ on the canvas), click any two things — nodes, notes, shapes, drawings, sections — to link them with an arrow.'),
     h('div', { class: 'pg-toolbar' },
       editable() ? h('button', { class: 'pg-btn pg-btn-primary', onclick: () => editArrow() }, '+ Arrow') : null),
     state.arrows.length === 0
@@ -1274,7 +1467,7 @@ const TABS = {
   nodes: { label: 'Nodes', render: renderNodes, count: () => view.nodes().length },
   edges: { label: 'Edges', render: renderEdges, count: () => view.edges().length },
   tags: { label: 'Tags', render: renderTags, count: () => knownTags().length },
-  sections: { label: 'Drawing', render: renderSections, count: () => state.sections.length + state.arrows.length + state.notes.length },
+  sections: { label: 'Drawing', render: renderSections, count: () => state.sections.length + state.arrows.length + state.notes.length + state.shapes.length + state.strokes.length },
   types: { label: 'Types', render: renderTypes, count: () => Object.keys(state.nodeTypes).length + Object.keys(state.edgeTypes).length },
   json: { label: 'JSON', render: renderJson },
 }
@@ -1390,6 +1583,9 @@ function bindHeader() {
         { label: 'Section', hint: 'A titled frame behind the graph, for the picture', onclick: () => editSection() },
         { label: 'Arrow', hint: 'Between nodes, sections, notes or free points; ends placed anywhere', onclick: () => editArrow() },
         { label: 'Note', hint: 'Free text: a sticky note, a heading, a comment', onclick: () => editNote() },
+        { label: 'Shape…', hint: 'Rectangle, ellipse, cloud, star, bubble, picture, icon…', onclick: () => editShape() },
+        { label: 'Connect things', hint: 'Click two things (nodes, notes, shapes…) to draw an arrow · C', onclick: () => view.drawing.setMode('connect') },
+        { label: 'Draw by hand', hint: 'The pen: drag on the canvas · P', onclick: () => view.drawing.setMode('pen') },
         {
           label: () => (state.legend && !state.legend.hidden ? 'Hide the legend' : 'Legend'),
           hint: 'A box listing the node and edge types in use',
@@ -1447,6 +1643,16 @@ function bindHeader() {
   document.getElementById('pivotick-version').textContent = `Pivotick ${pivotickPackage.version}`
   bindSidebarResizer()
   bindPillsToggle()
+
+  // Drawing shortcuts: V select, C connect, P pen, N note.
+  document.addEventListener('keydown', (event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey || !editable()) return
+    if (event.target.closest?.('input, textarea, select, [contenteditable], dialog')) return
+    const action = { v: () => view.drawing.setMode(null), c: () => view.drawing.setMode('connect'), p: () => view.drawing.setMode('pen'), n: () => editNote() }[event.key.toLowerCase()]
+    if (!action) return
+    event.preventDefault()
+    action()
+  })
 
   // Drop a JSON file anywhere to open it.
   window.addEventListener('dragover', (e) => e.preventDefault())

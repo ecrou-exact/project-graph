@@ -10,7 +10,8 @@ src/
   ocd.js         Open Contributions Descriptor → document
   mermaid.js     Mermaid flowchart → document (laid out with layout.js)
   layout.js      tree / grid / circle placements, pure (Arrange menu, Mermaid import)
-  drawing.js     sections, arrows, notes and the legend, drawn in Pivotick's zoom layer
+  drawing.js     sections, arrows, notes, shapes, strokes and the legend, drawn in Pivotick's zoom layer; connect and pen modes
+  shapes.js      shape outlines, freehand simplification and smoothing (pure)
   cards.js       card nodes and the other diagram shapes (pill, diamond, cylinder…)
   icons.js       node icons drawn on the node's colour
   badgeIcons.js  the bundled Font Awesome Free icons

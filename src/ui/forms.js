@@ -1,7 +1,7 @@
 // Declarative forms for nodes, edges and types.
 import { h } from './dom.js'
 import {
-  CURVES, DEFAULT_CARD, NOTE_COLORS, DEFAULT_EDGE, DEFAULT_NODE, DIRECTIONS, IMAGE_FITS, LABEL_FONTS, SHAPES,
+  CURVES, DEFAULT_CARD, DEFAULT_SHAPE, DEFAULT_STROKE, NOTE_COLORS, SHAPE_KINDS, DEFAULT_EDGE, DEFAULT_NODE, DIRECTIONS, IMAGE_FITS, LABEL_FONTS, SHAPES,
   edgeLabelLook, parseDetails, parseGithub, parseLinks, parseTags, resolveEdge, resolveNode, slugify, tagLook, uniqueId,
 } from '../model.js'
 import { fetchRepo } from '../github.js'
@@ -1054,17 +1054,15 @@ export function sectionFields(container, values = {}) {
 
 // --- arrow form ----------------------------------------------------------------------
 
-/** An end of an arrow as a select value: "node:<id>", "section:<id>", "note:<id>" or "point". */
+/** An end of an arrow as a select value: "node:<id>", "section:<id>", "note:<id>", "shape:<id>", "stroke:<id>" or "point". */
 export function arrowEndKey(end) {
-  if (end?.node !== undefined) return `node:${end.node}`
-  if (end?.section !== undefined) return `section:${end.section}`
-  if (end?.note !== undefined) return `note:${end.note}`
+  for (const kind of ['node', 'section', 'note', 'shape', 'stroke']) if (end?.[kind] !== undefined) return `${kind}:${end[kind]}`
   return 'point'
 }
 
 /**
  * Arrow drawn over the graph: its ends (a node, a section or a free point), label and line.
- * ctx: { nodes: [{ id, label }], sections: [{ id, title }], notes?: [{ id, text }] }
+ * ctx: { nodes: [{ id, label }], sections: [{ id, title }], notes?: [{ id, text }], shapes?: [{ id, kind, text }], strokes?: [{ id }] }
  */
 export function arrowFields(container, values = {}, ctx) {
   const ends = [
@@ -1072,6 +1070,8 @@ export function arrowFields(container, values = {}, ctx) {
     ...ctx.nodes.map((n) => [`node:${n.id}`, `Node · ${n.label}`]),
     ...ctx.sections.map((s) => [`section:${s.id}`, `Section · ${s.title || s.id}`]),
     ...(ctx.notes ?? []).map((n) => [`note:${n.id}`, `Note · ${n.text.split('\n')[0].replace(/^#+\s*/, '').slice(0, 40)}`]),
+    ...(ctx.shapes ?? []).map((sh) => [`shape:${sh.id}`, `Shape · ${SHAPE_LABELS_DRAWN[sh.kind] ?? sh.kind}${sh.text ? ` “${sh.text.split('\n')[0].slice(0, 30)}”` : ''}`]),
+    ...(ctx.strokes ?? []).map((st, i) => [`stroke:${st.id}`, `Drawing ${i + 1}`]),
   ]
   const directions = Object.entries(DIRECTIONS).map(([key, d]) => [key, `${d.symbol} ${d.label}`])
   const form = renderFields(container, [
@@ -1157,6 +1157,75 @@ export function legendFields(container, values = {}) {
     values() {
       const v = form.values()
       return { title: v.showTitle === 'false' ? '' : v.title }
+    },
+    validate: () => null,
+  }
+}
+
+// --- shape form --------------------------------------------------------------------
+
+export const SHAPE_LABELS_DRAWN = {
+  rect: 'Rectangle', rounded: 'Rounded rectangle', ellipse: 'Ellipse', diamond: 'Diamond', triangle: 'Triangle',
+  hexagon: 'Hexagon', star: 'Star', cloud: 'Cloud', cylinder: 'Cylinder', callout: 'Speech bubble', image: 'Picture', icon: 'Icon',
+}
+
+/** A shape drawn on the canvas: its kind, text, colours and size. */
+export function shapeFields(container, values = {}) {
+  const bare = (kind) => kind === 'image' || kind === 'icon'
+  const form = renderFields(container, [
+    { key: 'kind', label: 'Shape', type: 'select', options: SHAPE_KINDS.map((k) => [k, SHAPE_LABELS_DRAWN[k]]) },
+    {
+      key: 'text', label: 'Text', type: 'text', multiline: true, wide: true, placeholder: 'Inside the shape (under a picture or an icon)',
+      hint: '"# " a heading, "- " a bullet, **bold**.',
+    },
+    { key: 'image', label: 'Picture', type: 'image', wide: true, hint: 'For the Picture shape: a URL, a file, or a bundled icon.' },
+    { key: 'icon', label: 'Icon', type: 'icon', hint: 'For the Icon shape (its colour is the fill colour).' },
+    { section: 'Look' },
+    { key: 'fill', label: 'Fill', type: 'colorChoice', inheritedLabel: 'Default', fallback: DEFAULT_SHAPE.fill },
+    { key: 'borderColor', label: 'Border', type: 'colorChoice', inheritedLabel: 'Default', fallback: DEFAULT_SHAPE.borderColor },
+    { key: 'borderWidth', label: 'Border width', type: 'number', min: 0, max: 20, placeholder: String(DEFAULT_SHAPE.borderWidth), hint: '0 = no border' },
+    { key: 'dashed', label: 'Border line', type: 'select', options: [['false', 'Solid'], ['true', 'Dashed']] },
+    { key: 'opacity', label: 'Opacity', type: 'number', min: 0, max: 1, step: 0.1, placeholder: '1' },
+    { key: 'width', label: 'Width', type: 'number', min: 20, step: 10, placeholder: String(DEFAULT_SHAPE.width), hint: 'Or drag its bottom-right corner.' },
+    { key: 'height', label: 'Height', type: 'number', min: 20, step: 10, placeholder: String(DEFAULT_SHAPE.height) },
+    { section: 'Text' },
+    { key: 'textSize', label: 'Text size', type: 'number', min: 6, max: 120, placeholder: String(DEFAULT_SHAPE.textSize) },
+    { key: 'textColor', label: 'Text colour', type: 'color', inherited: DEFAULT_SHAPE.textColor },
+    { key: 'font', label: 'Font', type: 'select', options: fontOptions(undefined, 'Default', values.font) },
+  ], { kind: DEFAULT_SHAPE.kind, ...values, dashed: String(Boolean(values.dashed)) })
+  return {
+    ...form,
+    values() {
+      const v = form.values()
+      v.dashed = v.dashed === 'true' || undefined
+      if (!bare(v.kind)) delete v.image
+      if (v.kind !== 'icon') delete v.icon
+      return v
+    },
+    validate() {
+      const v = form.values()
+      if (v.kind === 'image' && !v.image) return 'Choose a picture for the Picture shape.'
+      return null
+    },
+  }
+}
+
+// --- stroke form -------------------------------------------------------------------
+
+/** A line drawn by hand: its colour, width and dashes (the pen uses the same). */
+export function strokeFields(container, values = {}) {
+  const form = renderFields(container, [
+    { key: 'color', label: 'Colour', type: 'color', inherited: DEFAULT_STROKE.color },
+    { key: 'width', label: 'Width', type: 'number', min: 1, max: 40, placeholder: String(DEFAULT_STROKE.width) },
+    { key: 'dashed', label: 'Line', type: 'select', options: [['false', 'Solid'], ['true', 'Dashed']] },
+    { key: 'opacity', label: 'Opacity', type: 'number', min: 0.1, max: 1, step: 0.1, placeholder: '1', hint: '0.4 or so for a highlighter.' },
+  ], { ...values, dashed: String(Boolean(values.dashed)) })
+  return {
+    ...form,
+    values() {
+      const v = form.values()
+      v.dashed = v.dashed === 'true' || undefined
+      return v
     },
     validate: () => null,
   }

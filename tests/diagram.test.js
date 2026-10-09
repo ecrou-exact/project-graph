@@ -159,3 +159,61 @@ flowchart LR
     expect(warnings[0]).toMatch(/Line 3/)
   })
 })
+
+describe('shapes and drawings', () => {
+  it('keep shapes and strokes, drop broken ones, and round-trip them', async () => {
+    const { parseShape, resolveShape, strokeBox } = await import('../src/model.js')
+    const { doc, warnings } = parseDocument({
+      shapes: [{ id: 'z', kind: 'cloud', x: 1.4, y: 2, width: 200, text: 'Internet', dashed: 'true', opacity: 3 }, { kind: 'blob', x: 0, y: 0 }, { kind: 'star' }],
+      strokes: [{ points: [[0, 0], [10.04, 5], 'x'] }, { points: [[1, 1]] }],
+    })
+    expect(warnings).toHaveLength(2)
+    expect(doc.shapes).toEqual([
+      { id: 'z', kind: 'cloud', x: 1, y: 2, width: 200, text: 'Internet', dashed: true, opacity: 1 },
+      { id: 'rounded', kind: 'rounded', x: 0, y: 0 },
+    ])
+    expect(doc.strokes).toEqual([{ id: 'drawing', points: [[0, 0], [10, 5]] }])
+    expect(strokeBox(doc.strokes[0])).toEqual({ x: 0, y: 0, width: 10, height: 5 })
+    expect(resolveShape(parseShape({ kind: 'icon', x: 0, y: 0 }))).toMatchObject({ width: 80, borderWidth: 0 })
+    const back = fromGraph(emptyGraph, doc)
+    expect(back.shapes).toEqual(doc.shapes)
+    expect(back.strokes).toEqual(doc.strokes)
+  })
+
+  it('arrows connect everything: nodes, notes, shapes, drawings, sections, points', () => {
+    const { doc, warnings } = parseDocument({
+      nodes: [{ id: 'a' }],
+      notes: [{ id: 'n', text: 'hi', x: 0, y: 0 }],
+      shapes: [{ id: 's', kind: 'star', x: 0, y: 0 }],
+      strokes: [{ id: 'd', points: [[0, 0], [5, 5]] }],
+      arrows: [
+        { from: { node: 'a' }, to: { shape: 's' } },
+        { from: { stroke: 'd' }, to: { note: 'n' } },
+        { from: { shape: 's' }, to: { x: 4, y: 4 } },
+        { from: { shape: 'nope' }, to: { node: 'a' } },
+      ],
+    })
+    expect(doc.arrows.map((a) => [a.from, a.to])).toEqual([
+      [{ node: 'a' }, { shape: 's' }],
+      [{ stroke: 'd' }, { note: 'n' }],
+      [{ shape: 's' }, { x: 4, y: 4 }],
+    ])
+    expect(warnings[0]).toMatch(/missing shape "nope"/)
+  })
+})
+
+describe('shape geometry', () => {
+  it('draws every kind inside its box, and simplifies hand-drawn lines', async () => {
+    const { outlinePath, simplify, smoothPath, textBox } = await import('../src/shapes.js')
+    for (const kind of ['rect', 'rounded', 'ellipse', 'diamond', 'triangle', 'hexagon', 'star', 'cloud', 'cylinder', 'callout']) {
+      const numbers = outlinePath(kind, 200, 100).match(/-?\d+(\.\d+)?/g).map(Number)
+      expect(numbers.length, kind).toBeGreaterThan(3)
+      const box = textBox(kind, 200, 100)
+      expect(box.x + box.width, kind).toBeLessThanOrEqual(200)
+      expect(box.y + box.height, kind).toBeLessThanOrEqual(100)
+    }
+    const line = Array.from({ length: 50 }, (_, i) => [i, i % 2 ? 0.3 : 0])
+    expect(simplify(line, 1)).toEqual([[0, 0], [49, 0.3]])
+    expect(smoothPath([[0, 0], [10, 10], [20, 0]])).toBe('M0,0Q10,10 20,0')
+  })
+})

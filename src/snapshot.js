@@ -19,7 +19,7 @@ const HTML_PROPS = ['flex-direction', 'align-items', 'justify-content', 'gap', '
 const XHTML = 'http://www.w3.org/1999/xhtml'
 
 // Pivotick's layers that are not part of the picture.
-const SKIP = '.selection-box, .shadow-edges, .pvt-shadow-edge, .pg-arrow-hit, .pg-arrow-handle, .pg-section-grip, .pg-section-handle, .pg-note-handle'
+const SKIP = '.selection-box, .shadow-edges, .pvt-shadow-edge, .pg-arrow-hit, .pg-arrow-handle, .pg-section-grip, .pg-section-handle, .pg-note-handle, .pg-shape-handle, .pg-stroke-hit, .pg-connect-preview, .pg-connect-from, .pg-stroke-preview'
 
 /**
  * The graph drawn in `container` as a PNG data URL (null when there is nothing

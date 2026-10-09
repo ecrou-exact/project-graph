@@ -90,6 +90,20 @@ export const DEFAULT_NOTE = { fill: '#fff3bf', color: '#3b3424', textSize: 15, a
 // Sticky-note colours offered in the form.
 export const NOTE_COLORS = { Yellow: '#fff3bf', Green: '#d3f9d8', Blue: '#d0ebff', Pink: '#ffdeeb', Violet: '#e5dbff', Grey: '#f1f3f5' }
 
+// Shapes: drawn on the canvas, behind the graph — a zone, a callout, a cloud,
+// a picture, an icon — with text inside (or under a picture / icon). Unlike a
+// node they carry no data: they are for the drawing, and arrows connect them.
+export const SHAPE_KINDS = ['rect', 'rounded', 'ellipse', 'diamond', 'triangle', 'hexagon', 'star', 'cloud', 'cylinder', 'callout', 'image', 'icon']
+export const SHAPE_FIELDS = ['kind', 'x', 'y', 'width', 'height', 'text', 'fill', 'borderColor', 'borderWidth', 'dashed', 'textColor', 'textSize', 'font', 'image', 'icon', 'opacity']
+export const DEFAULT_SHAPE = { kind: 'rounded', width: 160, height: 90, fill: '#e7f5ff', borderColor: '#1c7ed6', borderWidth: 2, textColor: '#1c2230', textSize: 15 }
+
+// Strokes: drawn by hand with the pen, as a list of points in graph coordinates.
+export const STROKE_FIELDS = ['points', 'color', 'width', 'dashed', 'opacity']
+export const DEFAULT_STROKE = { color: '#343a40', width: 3 }
+
+// What an arrow's end can be attached to (or a free point { x, y }).
+export const ARROW_TARGETS = ['node', 'section', 'note', 'shape', 'stroke']
+
 // The legend: a box listing the node and edge types in use, placed on the canvas.
 export const LEGEND_FIELDS = ['x', 'y', 'title', 'hidden']
 
@@ -116,6 +130,8 @@ export function emptyDocument() {
     sections: [],
     arrows: [],
     notes: [],
+    shapes: [],
+    strokes: [],
     nodes: [],
     edges: [],
   }
@@ -245,6 +261,23 @@ export function parseDocument(raw) {
     }
   }
 
+  for (const [key, parse, what] of [['shapes', parseShape, 'numbers "x" and "y"'], ['strokes', parseStroke, 'at least two points [x, y]']]) {
+    if (raw[key] === undefined) continue
+    if (!Array.isArray(raw[key])) {
+      errors.push(`"${key}" must be an array.`)
+      continue
+    }
+    const taken = new Set()
+    raw[key].forEach((input, i) => {
+      if (!isPlainObject(input)) return warnings.push(`${key}[${i}] is not an object, ignored.`)
+      const item = parse(input)
+      if (!item) return warnings.push(`${key}[${i}] needs ${what}, ignored.`)
+      item.id = uniqueId(input.id ?? (key === 'shapes' ? item.kind : 'drawing'), taken)
+      taken.add(item.id)
+      doc[key].push(item)
+    })
+  }
+
   if (raw.legend !== undefined) {
     const legend = parseLegend(raw.legend)
     if (legend) doc.legend = legend
@@ -307,12 +340,11 @@ export function parseDocument(raw) {
   if (raw.arrows !== undefined) {
     if (!Array.isArray(raw.arrows)) errors.push('"arrows" must be an array.')
     else {
-      const sectionIds = new Set(doc.sections.map((sec) => sec.id))
-      const noteIds = new Set(doc.notes.map((note) => note.id))
+      const targets = arrowTargets(doc, ids)
       const arrowIds = new Set()
       raw.arrows.forEach((input, i) => {
         if (!isPlainObject(input)) return warnings.push(`arrows[${i}] is not an object, ignored.`)
-        const arrow = parseArrow(input, ids, sectionIds, noteIds)
+        const arrow = parseArrow(input, targets)
         if (typeof arrow === 'string') return warnings.push(`arrows[${i}]: ${arrow}, ignored.`)
         arrow.id = uniqueId(input.id ?? 'arrow', arrowIds)
         arrowIds.add(arrow.id)
@@ -324,13 +356,20 @@ export function parseDocument(raw) {
   return { doc: errors.length ? null : doc, errors, warnings }
 }
 
+/** The ids an arrow can point to, by kind: { node: Set, section: Set, … }. */
+export function arrowTargets(doc, nodeIds = new Set(doc.nodes.map((n) => String(n.id)))) {
+  const ids = (list) => new Set((list ?? []).map((item) => item.id))
+  return { node: nodeIds, section: ids(doc.sections), note: ids(doc.notes), shape: ids(doc.shapes), stroke: ids(doc.strokes) }
+}
+
 /**
  * An arrow with its ends checked, or the reason it can't be drawn (a string).
- * An end is { node, at? }, { section, at? }, { note, at? } or { x, y }.
+ * An end is { node, at? }, { section, at? }, { note, at? }, { shape, at? },
+ * { stroke, at? } or { x, y }. `targets`: arrowTargets().
  */
-export function parseArrow(input, nodeIds, sectionIds, noteIds = new Set()) {
-  const from = parseArrowEnd(input.from, nodeIds, sectionIds, noteIds)
-  const to = parseArrowEnd(input.to, nodeIds, sectionIds, noteIds)
+export function parseArrow(input, targets) {
+  const from = parseArrowEnd(input.from, targets)
+  const to = parseArrowEnd(input.to, targets)
   if (typeof from === 'string') return `"from" ${from}`
   if (typeof to === 'string') return `"to" ${to}`
   const arrow = compact({ ...input, from, to }, ARROW_FIELDS)
@@ -343,25 +382,25 @@ export function parseArrow(input, nodeIds, sectionIds, noteIds = new Set()) {
   return { id: undefined, ...arrow }
 }
 
-function parseArrowEnd(end, nodeIds, sectionIds, noteIds) {
-  if (!isPlainObject(end)) return 'must be { node }, { section }, { note } or { x, y }'
+function parseArrowEnd(end, targets) {
+  const expected = 'must be { node }, { section }, { note }, { shape }, { stroke } or { x, y }'
+  if (!isPlainObject(end)) return expected
   const at = pair(end.at)
   const placed = (target) => (at ? { ...target, at: at.map((v) => Math.round(Math.min(1, Math.max(0, v)) * 1000) / 1000) } : target)
-  if (end.node !== undefined) {
-    const id = String(end.node)
-    return nodeIds.has(id) ? placed({ node: id }) : `points to the missing node "${id}"`
-  }
-  if (end.section !== undefined) {
-    const id = String(end.section)
-    return sectionIds.has(id) ? placed({ section: id }) : `points to the missing section "${id}"`
-  }
-  if (end.note !== undefined) {
-    const id = String(end.note)
-    return noteIds.has(id) ? placed({ note: id }) : `points to the missing note "${id}"`
+  for (const kind of ARROW_TARGETS) {
+    if (end[kind] === undefined) continue
+    const id = String(end[kind])
+    return targets[kind]?.has(id) ? placed({ [kind]: id }) : `points to the missing ${kind} "${id}"`
   }
   const x = Number(end.x)
   const y = Number(end.y)
-  return Number.isFinite(x) && Number.isFinite(y) ? { x: Math.round(x), y: Math.round(y) } : 'must be { node }, { section }, { note } or { x, y }'
+  return Number.isFinite(x) && Number.isFinite(y) ? { x: Math.round(x), y: Math.round(y) } : expected
+}
+
+/** The kind and id an arrow end is attached to, or null for a free point. */
+export function arrowEndTarget(end) {
+  const kind = ARROW_TARGETS.find((k) => end?.[k] !== undefined)
+  return kind ? { kind, id: end[kind] } : null
 }
 
 /** [a, b] of finite numbers, or null. */
@@ -428,6 +467,64 @@ export function noteBlocks(text) {
     const parts = body.split(/\*\*/).map((t, i) => ({ text: t, bold: i % 2 === 1 })).filter((p) => p.text)
     return { kind, parts }
   })
+}
+
+/** A shape with its fields cleaned up, or null without a position. */
+export function parseShape(input) {
+  const x = Number(input.x)
+  const y = Number(input.y)
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null
+  const shape = compact({ ...input, x: Math.round(x), y: Math.round(y) }, SHAPE_FIELDS)
+  if (!SHAPE_KINDS.includes(shape.kind)) shape.kind = DEFAULT_SHAPE.kind
+  for (const key of ['width', 'height', 'textSize']) {
+    const value = Number(shape[key])
+    if (Number.isFinite(value) && value > 0) shape[key] = Math.round(value)
+    else delete shape[key]
+  }
+  for (const key of ['borderWidth', 'opacity']) {
+    if (shape[key] === undefined) continue
+    const value = Number(shape[key])
+    if (Number.isFinite(value) && value >= 0) shape[key] = key === 'opacity' ? Math.min(1, value) : value
+    else delete shape[key]
+  }
+  if (shape.dashed !== undefined) shape.dashed = isTrue(shape.dashed)
+  return { id: input.id === undefined ? undefined : String(input.id), ...shape }
+}
+
+/** Shape attributes with the defaults filled in; a picture or an icon has no box by default. */
+export function resolveShape(shape) {
+  const bare = shape.kind === 'image' || shape.kind === 'icon'
+  const defaults = bare
+    ? { ...DEFAULT_SHAPE, width: 80, height: 80, fill: shape.kind === 'icon' ? '#1c7ed6' : 'none', borderWidth: 0 }
+    : DEFAULT_SHAPE
+  return { ...defaults, ...compact(shape) }
+}
+
+/** A stroke with its points rounded, or null with fewer than two. */
+export function parseStroke(input) {
+  const points = (Array.isArray(input.points) ? input.points : [])
+    .map(pair)
+    .filter(Boolean)
+    .map(([x, y]) => [Math.round(x * 10) / 10, Math.round(y * 10) / 10])
+  if (points.length < 2) return null
+  const stroke = compact({ ...input, points }, STROKE_FIELDS)
+  const width = Number(stroke.width)
+  if (stroke.width !== undefined && !(Number.isFinite(width) && width > 0)) delete stroke.width
+  if (stroke.dashed !== undefined) stroke.dashed = isTrue(stroke.dashed)
+  return { id: input.id === undefined ? undefined : String(input.id), ...stroke }
+}
+
+export function resolveStroke(stroke) {
+  return { ...DEFAULT_STROKE, ...compact(stroke) }
+}
+
+/** The box around a stroke's points. */
+export function strokeBox(stroke) {
+  const xs = stroke.points.map((p) => p[0])
+  const ys = stroke.points.map((p) => p[1])
+  const x = Math.min(...xs)
+  const y = Math.min(...ys)
+  return { x, y, width: Math.max(1, Math.max(...xs) - x), height: Math.max(1, Math.max(...ys) - y) }
 }
 
 /** The legend's place and title, or null without a position. */
@@ -666,6 +763,8 @@ export function fromGraph(graph, base, withPositions = true) {
     sections: (base.sections ?? []).map((s) => ({ ...s })),
     arrows: (base.arrows ?? []).map((a) => structuredClone(a)),
     notes: (base.notes ?? []).map((n) => ({ ...n })),
+    shapes: (base.shapes ?? []).map((s) => ({ ...s })),
+    strokes: (base.strokes ?? []).map((s) => structuredClone(s)),
     nodes: [],
     edges: [],
   }

@@ -75,9 +75,13 @@ export class GraphView {
    * @param {() => void} [hooks.onDrawingChange] called after a section or an arrow was moved or resized
    * @param {(id: string) => void} [hooks.editSection] opens the section form
    * @param {(id: string) => void} [hooks.editArrow] opens the arrow form
-   * @param {(id: string) => void} [hooks.deleteArrow] deletes an arrow
    * @param {(id: string) => void} [hooks.editNote] opens the note form
-   * @param {(id: string) => void} [hooks.deleteNote] deletes a note
+   * @param {(id: string) => void} [hooks.editShape] opens the shape form
+   * @param {(id: string) => void} [hooks.editStroke] opens the drawing form
+   * @param {(kind: string, id: string) => void} [hooks.deleteDrawing] deletes an arrow, a note, a shape or a drawing
+   * @param {(from: object, to: object) => void} [hooks.connect] draws an arrow between two ends (connect mode)
+   * @param {(points: number[][]) => void} [hooks.addStroke] keeps a stroke drawn with the pen
+   * @param {(mode: string|null) => void} [hooks.onModeChange]
    * @param {() => void} [hooks.editLegend] opens the legend form
    */
   constructor(container, hooks) {
@@ -101,10 +105,16 @@ export class GraphView {
       onChange: () => this.hooks.onDrawingChange?.(),
       onEditSection: (id) => this.hooks.editSection?.(id),
       onEditArrow: (id) => this.hooks.editArrow?.(id),
-      onDeleteArrow: (id) => this.hooks.deleteArrow?.(id),
       getNotes: () => this.hooks.getTypes().notes ?? [],
       onEditNote: (id) => this.hooks.editNote?.(id),
-      onDeleteNote: (id) => this.hooks.deleteNote?.(id),
+      getShapes: () => this.hooks.getTypes().shapes ?? [],
+      getStrokes: () => this.hooks.getTypes().strokes ?? [],
+      onEditShape: (id) => this.hooks.editShape?.(id),
+      onEditStroke: (id) => this.hooks.editStroke?.(id),
+      onDelete: (kind, id) => this.hooks.deleteDrawing?.(kind, id),
+      onConnect: (from, to) => this.hooks.connect?.(from, to),
+      onStroke: (points) => this.hooks.addStroke?.(points),
+      onModeChange: (mode) => this.hooks.onModeChange?.(mode),
       getLegend: () => this.hooks.getTypes().legend,
       legendItems: () => this.legendItems(),
       onEditLegend: () => this.hooks.editLegend?.(),

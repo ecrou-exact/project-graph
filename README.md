@@ -12,6 +12,7 @@ Bundled examples: projects linked to **Rulezet** (`examples/rulezet.json`), and 
 - **Edges**, edited like nodes (tabs Content, Line, Label, Details, with a live preview): how the two are related (label, with suggestions from the graph and common relationship words), type, **arrow direction** (`→`, `←`, `↔` or none), source/target swap; colour, width, solid/dashed, shape (auto, straight, curved), moving dashes; label shown or hidden, text colour, background or none, size, font. Edge types provide all of these as defaults.
 - **Diagrams**: *card* nodes (a rounded box with the logo and the text inside, a subtitle, a size and inner space of their own), **sections** (titled frames behind the graph), **arrows** that start or end on a node, a section or a free point, at the exact spot you drag them to, a **fixed layout** (nodes stay where they are put) and Excalidraw's hand-drawn font. See `examples/ngsoti-soc-stack.json`.
 - **More diagram tools**: flowchart shapes with the text inside (**pill, ellipse, diamond, cylinder, document, parallelogram**), **notes** (sticky notes or bare text, with headings, bullets and bold; arrows can start or end on them), a **legend** drawn from the types in use, **curved** arrows, and **Arrange** (tree top-down or left-right, grid, circle, snap to grid, with undo).
+- **Draw and connect anything**: a toolbar on the canvas with *Connect* (click two things — nodes, notes, shapes, hand drawings, sections, points — to link them: an edge between two nodes, an arrow otherwise), a *Pen* to draw by hand, *Shapes* (rectangle, ellipse, diamond, star, cloud, cylinder, speech bubble, icon, picture… with text inside), *Note* and *Text*. Shortcuts V, C, P, N; Delete removes the selected thing.
 - **Mermaid import**: paste a `flowchart LR` / `graph TD` (or open a `.mmd` file, or a Markdown file with a ```` ```mermaid ```` block) and get an editable diagram: shapes, labelled links, subgraphs as sections, `style` / `classDef` colours, laid out as a flowchart.
 - **Tags**: `#tags` on a node become coloured pills under it, with a colour and an optional icon (a curated set of Font Awesome Free icons, picked from a grid) per tag, shared by every node with that tag. Existing tags are suggested when typing; pills can be hidden per node or per type. A Tags tab lists and edits them.
 - **Links**: a website, a GitHub repository and any number of other links per node. The GitHub API (60 unauthenticated requests per hour) is only called from the node form — when a repository is entered, or with *Refresh* — and the summary (description, stars, forks, open issues, language, licence, topics, last update) is saved with the node (`githubInfo`) and shown from there: displaying or importing a graph, a well-known file included, never calls it. When fetching, *Also add the repository topics as tags* adds the repository's GitHub topics to the node's tags (never removing any).
@@ -203,7 +204,8 @@ src/
   ocd.js       Open Contributions Descriptor import
   mermaid.js   Mermaid flowchart import
   layout.js    tree / grid / circle placements (Arrange menu, Mermaid import)
-  drawing.js   sections, arrows, notes and the legend, drawn over Pivotick
+  drawing.js   sections, arrows, notes, shapes, hand drawings and the legend, drawn over Pivotick; connect and pen modes
+  shapes.js    outlines of the shapes, smoothing of hand-drawn lines
   cards.js     card nodes and the other diagram shapes
   github.js    GitHub API client (cached)
   ui/          forms, modals, pills, GitHub card, DOM helpers

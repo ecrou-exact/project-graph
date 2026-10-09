@@ -6,7 +6,15 @@
 // - arrows: from / to a node, a section, a note or a free point, each end
 //   placed anywhere on its target (`at`), with a label that can be moved;
 // - notes: free text, as a sticky note or bare (a heading, a comment);
-// - the legend: the node and edge types in use, in a box.
+// - the legend: the node and edge types in use, in a box;
+// - shapes: rectangles, ellipses, clouds, stars, pictures, icons… with text;
+// - strokes: lines drawn by hand with the pen.
+//
+// Everything connects: an arrow's end can be attached to a node, a section, a
+// note, a shape or a stroke (or be a free point). Two modes help draw:
+// "connect" (click a thing, then another — or drag from one to the other — to
+// draw an arrow between them) and "pen" (drag to draw by hand). Escape leaves
+// a mode.
 //
 // Layers: sections, notes and arrow lines go first in the zoom layer (under
 // Pivotick's edges and nodes); arrow labels, handles and the legend go last
@@ -18,7 +26,11 @@
 // be dragged; Delete removes it, a double-click edits it. A note moves when
 // dragged, its corner sets its width; click + Delete removes it. The legend
 // moves when dragged; a double-click edits its title.
-import { DIRECTIONS, LABEL_FONTS, noteBlocks, resolveArrow, resolveNote, resolveSection } from './model.js'
+import {
+  DIRECTIONS, LABEL_FONTS, arrowEndTarget, noteBlocks, resolveArrow, resolveNote, resolveSection, resolveShape, resolveStroke, strokeBox,
+} from './model.js'
+import { outlinePath, simplify, smoothPath, textBox } from './shapes.js'
+import { badgeIconSvg } from './badgeIcons.js'
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
 const XHTML = 'http://www.w3.org/1999/xhtml'
@@ -36,13 +48,19 @@ export class DrawingLayer {
    * @param {() => void} hooks.onChange after a section or an arrow was moved or resized
    * @param {(id: string) => void} hooks.onEditSection
    * @param {(id: string) => void} hooks.onEditArrow
-   * @param {(id: string) => void} hooks.onDeleteArrow
    * @param {() => object[]} [hooks.getNotes] the document's notes (mutated in place on drag)
    * @param {(id: string) => void} [hooks.onEditNote]
-   * @param {(id: string) => void} [hooks.onDeleteNote]
    * @param {() => object|undefined} [hooks.getLegend] the document's legend (mutated in place on drag)
    * @param {() => {nodes: object[], edges: object[]}} [hooks.legendItems] the types in use
    * @param {() => void} [hooks.onEditLegend]
+   * @param {() => object[]} [hooks.getShapes] the document's shapes (mutated in place on drag)
+   * @param {() => object[]} [hooks.getStrokes] the document's strokes (mutated in place on drag)
+   * @param {(id: string) => void} [hooks.onEditShape]
+   * @param {(id: string) => void} [hooks.onEditStroke]
+   * @param {(kind: string, id: string) => void} [hooks.onDelete] the selected thing, on Delete
+   * @param {(from: object, to: object) => void} [hooks.onConnect] connect mode: draw an arrow between two ends
+   * @param {(points: number[][]) => void} [hooks.onStroke] pen mode: a stroke was drawn
+   * @param {(mode: string|null) => void} [hooks.onModeChange]
    * @param {(id: string) => {x, y, width, height}|null} hooks.nodeBox a node's box, in graph coordinates
    * @param {(clientX: number, clientY: number) => string|null} hooks.nodeAt the node under a screen point
    */
@@ -51,25 +69,40 @@ export class DrawingLayer {
     this.zoomLayer = null
     this.back = null // sections, then arrow lines
     this.front = null // arrow labels and handles
-    this.selected = null // selected arrow id
-    this.selectedNote = null
+    this.selection = null // { kind: 'arrow' | 'note' | 'shape' | 'stroke', id }
     this.noteBoxes = new Map() // note id -> its box as drawn, in graph coordinates
     this.frame = null
+    this.mode = null // 'connect' | 'pen' | null
+    this.pending = null // connect mode: the first end, waiting for the second
     document.addEventListener('keydown', (event) => {
-      if (!this.hooks.editable() || !['Delete', 'Backspace'].includes(event.key)) return
-      if (!this.selected && !this.selectedNote) return
-      if (event.target.closest?.('input, textarea, select, [contenteditable]')) return
+      if (event.target.closest?.('input, textarea, select, [contenteditable], dialog')) return
+      if (event.key === 'Escape' && (this.mode || this.pending)) {
+        event.preventDefault()
+        if (this.pending) this.cancelPending()
+        else this.setMode(null)
+        return
+      }
+      if (!this.hooks.editable() || !['Delete', 'Backspace'].includes(event.key) || !this.selection) return
       event.preventDefault()
-      if (this.selected) this.hooks.onDeleteArrow(this.selected)
-      else this.hooks.onDeleteNote?.(this.selectedNote)
+      const { kind, id } = this.selection
+      this.hooks.onDelete?.(kind, id)
     })
+  }
+
+  /** The selected arrow's id (its handles are shown), or null. */
+  get selected() {
+    return this.selection?.kind === 'arrow' ? this.selection.id : null
+  }
+
+  get selectedNote() {
+    return this.selection?.kind === 'note' ? this.selection.id : null
   }
 
   /** Draws into this zoom layer (Pivotick's). */
   attach(zoomLayer) {
     this.zoomLayer = zoomLayer
-    this.selected = null
-    this.selectedNote = null
+    this.selection = null
+    this.pending = null
     this.back = svg('g', { class: 'pg-drawing-back' })
     this.front = svg('g', { class: 'pg-drawing-front' })
     this.labelGroup = svg('g', { class: 'pg-arrow-labels' })
@@ -78,11 +111,9 @@ export class DrawingLayer {
     if (!zoomLayer) return
     zoomLayer.prepend(this.back)
     zoomLayer.append(this.front)
-    // A click on the canvas (not on an arrow or a note) unselects them.
-    zoomLayer.ownerSVGElement?.addEventListener('pointerdown', () => {
-      this.select(null)
-      this.selectNote(null)
-    })
+    // A click on the canvas (not on something of ours) unselects it.
+    zoomLayer.ownerSVGElement?.addEventListener('pointerdown', () => this.pick(null))
+    this.bindModes(zoomLayer.ownerSVGElement?.parentElement)
     this.render()
   }
 
@@ -103,26 +134,300 @@ export class DrawingLayer {
     const editable = this.hooks.editable()
     this.sectionGroup = svg('g', { class: 'pg-sections' })
     this.sectionGroup.append(...this.hooks.getSections().map((section) => this.drawSection(section, editable)))
+    this.shapeGroup = svg('g', { class: 'pg-shapes' })
+    this.shapeGroup.append(...(this.hooks.getShapes?.() ?? []).map((shape) => this.drawShape(shape, editable)))
+    this.strokeGroup = svg('g', { class: 'pg-strokes' })
+    this.strokeGroup.append(...(this.hooks.getStrokes?.() ?? []).map((stroke) => this.drawStroke(stroke, editable)))
     this.noteGroup = svg('g', { class: 'pg-notes' })
     this.arrowGroup = svg('g', { class: 'pg-arrows' })
-    this.back.replaceChildren(markers(), this.sectionGroup, this.noteGroup, this.arrowGroup)
+    this.back.replaceChildren(markers(), this.sectionGroup, this.shapeGroup, this.strokeGroup, this.noteGroup, this.arrowGroup)
     this.renderNotes()
     this.renderLegend()
     this.renderArrows()
   }
 
+  /** Selects an arrow (by id), or nothing. */
   select(id) {
-    if (this.selected === id) return
-    this.selected = id
-    if (id) this.selectNote(null)
-    this.renderArrows()
+    this.pick(id ? { kind: 'arrow', id } : null)
   }
 
   selectNote(id) {
-    if (this.selectedNote === id) return
-    this.selectedNote = id
-    if (id) this.select(null)
-    this.noteGroup?.querySelectorAll('.pg-note').forEach((g) => g.classList.toggle('is-selected', g.dataset.id === id))
+    this.pick(id ? { kind: 'note', id } : null)
+  }
+
+  /** Selects one thing ({ kind, id }) or nothing; Delete removes it. */
+  pick(selection) {
+    const same = (a, b) => a?.kind === b?.kind && a?.id === b?.id
+    if (same(this.selection, selection)) return
+    const hadArrow = this.selected
+    this.selection = selection
+    for (const [kind, group] of [['note', this.noteGroup], ['shape', this.shapeGroup], ['stroke', this.strokeGroup]]) {
+      group?.querySelectorAll(':scope > g').forEach((g) => g.classList.toggle('is-selected', selection?.kind === kind && g.dataset.id === selection.id))
+    }
+    if (hadArrow || this.selected) this.renderArrows()
+  }
+
+  // --- shapes ----------------------------------------------------------------------
+
+  drawShape(shape, editable) {
+    const a = resolveShape(shape)
+    const selected = this.selection?.kind === 'shape' && this.selection.id === shape.id
+    const g = svg('g', { class: `pg-shape${selected ? ' is-selected' : ''}`, 'data-id': shape.id, transform: `translate(${a.x},${a.y})` })
+    if (a.opacity !== undefined) g.style.opacity = a.opacity
+    const body = svg('g', { class: 'pg-shape-body' })
+    g.append(body)
+    this.paintShape(body, a)
+    if (editable) {
+      const handle = svg('rect', { class: 'pg-shape-handle', x: a.width - HANDLE / 2, y: a.height - HANDLE / 2, width: HANDLE, height: HANDLE, rx: 3 })
+      handle.append(title('Drag to resize'))
+      g.append(handle)
+      g.append(title(`${a.text ? `${a.text.split('\n')[0]}: ` : ''}drag to move, double-click to edit`))
+      this.drag(g, () => ({
+        move: (dx, dy) => {
+          shape.x = Math.round(a.x + dx)
+          shape.y = Math.round(a.y + dy)
+          g.setAttribute('transform', `translate(${shape.x},${shape.y})`)
+          this.schedule()
+        },
+        cancel: () => this.pick({ kind: 'shape', id: shape.id }),
+      }))
+      this.drag(handle, () => ({
+        move: (dx, dy) => {
+          shape.width = Math.round(Math.max(20, a.width + dx))
+          shape.height = Math.round(Math.max(20, a.height + dy))
+          body.replaceChildren()
+          this.paintShape(body, resolveShape(shape))
+          set(handle, { x: shape.width - HANDLE / 2, y: shape.height - HANDLE / 2 })
+          this.schedule()
+        },
+      }))
+      g.addEventListener('dblclick', (event) => {
+        event.stopPropagation()
+        this.hooks.onEditShape?.(shape.id)
+      })
+    }
+    return g
+  }
+
+  /** The shape's outline, picture or icon, and its text. */
+  paintShape(body, a) {
+    const w = a.width
+    const h = a.height
+    const stroke = Number(a.borderWidth) > 0 && a.borderColor && a.borderColor !== 'none' ? a.borderColor : 'none'
+    const paint = (el) => {
+      el.setAttribute('fill', a.fill ?? 'none')
+      el.setAttribute('stroke', stroke)
+      el.setAttribute('stroke-width', Number(a.borderWidth) || 0)
+      if (a.dashed) el.setAttribute('stroke-dasharray', `${(Number(a.borderWidth) || 2) * 3} ${(Number(a.borderWidth) || 2) * 2}`)
+      return el
+    }
+    const bare = a.kind === 'image' || a.kind === 'icon'
+    if (a.kind === 'image') {
+      if (stroke !== 'none' || (a.fill && a.fill !== 'none')) body.append(paint(svg('rect', { width: w, height: h, rx: 6 })))
+      if (a.image) body.append(svg('image', { href: a.image, width: w, height: h, preserveAspectRatio: 'xMidYMid meet' }))
+      else body.append(svg('rect', { class: 'pg-shape-placeholder', width: w, height: h, rx: 6 }))
+    } else if (a.kind === 'icon') {
+      if (stroke !== 'none') {
+        const frame = paint(svg('rect', { width: w, height: h, rx: 8 }))
+        frame.setAttribute('fill', 'none')
+        body.append(frame)
+      }
+      const markup = badgeIconSvg(a.icon || 'star', a.fill && a.fill !== 'none' ? a.fill : 'currentColor')
+      if (markup) {
+        const icon = new DOMParser().parseFromString(markup, 'image/svg+xml').documentElement
+        const side = Math.min(w, h) * 0.8
+        for (const [k, v] of Object.entries({ x: (w - side) / 2, y: (h - side) / 2, width: side, height: side })) icon.setAttribute(k, v)
+        body.append(document.importNode(icon, true))
+      }
+    } else {
+      body.append(paint(svg('path', { class: 'pg-shape-outline', d: outlinePath(a.kind, w, h) })))
+    }
+    if (!a.text) return
+    if (bare) {
+      // Under the picture or the icon, as a caption.
+      const text = svg('text', { class: 'pg-shape-caption', x: w / 2, y: h + 6, 'text-anchor': 'middle', 'font-size': a.textSize })
+      text.style.fill = a.textColor
+      if (a.font) text.style.fontFamily = LABEL_FONTS[a.font]?.css ?? a.font
+      a.text.split('\n').forEach((line, i) => {
+        const span = svg('tspan', { x: w / 2, dy: i === 0 ? '1em' : '1.25em' })
+        span.textContent = line
+        text.append(span)
+      })
+      body.append(text)
+      return
+    }
+    const box = textBox(a.kind, w, h)
+    const fo = svg('foreignObject', { x: box.x, y: box.y, width: box.width, height: box.height, class: 'pg-shape-fo' })
+    const div = html('div', 'pg-shape-text')
+    Object.assign(div.style, { color: a.textColor, fontSize: `${a.textSize}px`, width: `${box.width}px`, height: `${box.height}px` })
+    if (a.font) div.style.fontFamily = LABEL_FONTS[a.font]?.css ?? a.font
+    for (const block of noteBlocks(a.text)) {
+      const line = html('div', `pg-note-${block.kind}`)
+      if (block.kind === 'bullet') line.append('• ')
+      if (!block.parts.length) line.append(html('br'))
+      for (const part of block.parts) {
+        const span = html(part.bold ? 'strong' : 'span')
+        span.textContent = part.text
+        line.append(span)
+      }
+      div.append(line)
+    }
+    fo.append(div)
+    body.append(fo)
+  }
+
+  // --- strokes (drawn by hand) ------------------------------------------------------
+
+  drawStroke(stroke, editable) {
+    const a = resolveStroke(stroke)
+    const selected = this.selection?.kind === 'stroke' && this.selection.id === stroke.id
+    const g = svg('g', { class: `pg-stroke${selected ? ' is-selected' : ''}`, 'data-id': stroke.id })
+    if (a.opacity !== undefined) g.style.opacity = a.opacity
+    const d = smoothPath(a.points)
+    const line = svg('path', { class: 'pg-stroke-line', d })
+    Object.assign(line.style, { stroke: a.color, strokeWidth: `${Number(a.width) || 3}px` })
+    if (a.dashed) line.style.strokeDasharray = `${(Number(a.width) || 3) * 2.5} ${(Number(a.width) || 3) * 2.5}`
+    g.append(line)
+    if (editable) {
+      const hit = svg('path', { class: 'pg-stroke-hit', d })
+      hit.append(title('A drawing: drag to move, double-click to edit, Delete to remove'))
+      g.append(hit)
+      this.drag(g, () => {
+        const from = stroke.points.map((p) => [...p])
+        return {
+          move: (dx, dy) => {
+            stroke.points = from.map(([x, y]) => [Math.round((x + dx) * 10) / 10, Math.round((y + dy) * 10) / 10])
+            g.setAttribute('transform', `translate(${dx},${dy})`)
+            this.schedule()
+          },
+          cancel: () => this.pick({ kind: 'stroke', id: stroke.id }),
+        }
+      })
+      g.addEventListener('dblclick', (event) => {
+        event.stopPropagation()
+        this.hooks.onEditStroke?.(stroke.id)
+      })
+    }
+    return g
+  }
+
+  // --- modes: connect, pen ----------------------------------------------------------
+
+  /** 'connect', 'pen' or null (select / move). */
+  setMode(mode) {
+    if (!this.hooks.editable()) mode = null
+    this.cancelPending()
+    this.mode = mode
+    this.root?.classList.toggle('pg-mode-connect', mode === 'connect')
+    this.root?.classList.toggle('pg-mode-pen', mode === 'pen')
+    this.hooks.onModeChange?.(mode)
+  }
+
+  /**
+   * In a mode, gestures on the canvas are ours: they are caught on their way
+   * down (capture), before Pivotick pans the view or drags a node.
+   */
+  bindModes(root) {
+    this.root = root
+    if (!root) return
+    root.classList.toggle('pg-mode-connect', this.mode === 'connect')
+    root.classList.toggle('pg-mode-pen', this.mode === 'pen')
+    const ours = (event) => this.mode && event.button === 0 && event.target instanceof Element
+      && event.target.closest('svg') && !event.target.closest('.pvt-toolbar, .pvt-sidebar, button, a, input')
+    for (const type of ['mousedown', 'touchstart', 'click', 'dblclick']) {
+      root.addEventListener(type, (event) => {
+        if (this.mode && event.target instanceof Element && event.target.closest('svg')) event.stopPropagation()
+      }, true)
+    }
+    root.addEventListener('pointerdown', (event) => {
+      if (!ours(event)) return
+      event.stopPropagation()
+      event.preventDefault()
+      if (this.mode === 'pen') this.startStroke(event)
+      else this.connectAt(event)
+    }, true)
+  }
+
+  startStroke(event) {
+    const scale = this.zoomLayer.getScreenCTM()?.a || 1
+    const p = this.toGraph(event.clientX, event.clientY)
+    const points = [[p.x, p.y]]
+    const preview = svg('path', { class: 'pg-stroke-line pg-stroke-preview' })
+    const { color, width } = { ...resolveStroke({}), ...this.penStyle }
+    Object.assign(preview.style, { stroke: color, strokeWidth: `${width}px` })
+    this.labelGroup.append(preview)
+    const move = (e) => {
+      const q = this.toGraph(e.clientX, e.clientY)
+      const last = points.at(-1)
+      if (Math.hypot(q.x - last[0], q.y - last[1]) * scale < 2) return
+      points.push([q.x, q.y])
+      preview.setAttribute('d', smoothPath(points))
+    }
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', up)
+      preview.remove()
+      const simple = simplify(points, 1.2 / scale)
+      if (simple.length >= 2) this.hooks.onStroke?.(simple.map(([x, y]) => [Math.round(x * 10) / 10, Math.round(y * 10) / 10]))
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', up)
+  }
+
+  /**
+   * Connect mode: the first click picks where the arrow starts, the second
+   * where it ends — or press on a thing and release on another.
+   */
+  connectAt(event) {
+    const end = this.connectEnd(event.clientX, event.clientY)
+    if (this.pending) return this.finishConnect(end)
+    const start = this.toGraph(event.clientX, event.clientY)
+    const line = svg('line', { class: 'pg-connect-preview', x1: start.x, y1: start.y, x2: start.x, y2: start.y })
+    this.labelGroup.append(line)
+    const from = this.boxOf(end)
+    if (from) this.labelGroup.append(svg('rect', { class: 'pg-connect-from', x: from.x - 4, y: from.y - 4, width: from.width + 8, height: from.height + 8, rx: 6 }))
+    const move = (e) => {
+      const p = this.toGraph(e.clientX, e.clientY)
+      set(line, { x2: p.x, y2: p.y })
+    }
+    const up = (e) => {
+      window.removeEventListener('pointerup', up)
+      // Pressed on one thing and released on another: done.
+      if (Math.hypot(e.clientX - event.clientX, e.clientY - event.clientY) > 12 && this.pending) {
+        this.finishConnect(this.connectEnd(e.clientX, e.clientY))
+      }
+    }
+    this.pending = { end, line, move }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    this.hooks.onModeChange?.(this.mode)
+  }
+
+  finishConnect(to) {
+    const from = this.pending.end
+    this.cancelPending()
+    const a = arrowEndTarget(from)
+    const b = arrowEndTarget(to)
+    if (a && b && a.kind === b.kind && a.id === b.id) return // the same thing twice
+    if (!a && !b && Math.hypot(from.x - to.x, from.y - to.y) < 4) return
+    this.hooks.onConnect?.(from, to)
+  }
+
+  cancelPending() {
+    if (!this.pending) return
+    window.removeEventListener('pointermove', this.pending.move)
+    this.labelGroup?.querySelectorAll('.pg-connect-preview, .pg-connect-from').forEach((el) => el.remove())
+    this.pending = null
+    this.hooks.onModeChange?.(this.mode)
+  }
+
+  /** What a click connects to: a thing (its border facing the other end, so it follows when moved), or a point. */
+  connectEnd(clientX, clientY) {
+    const end = this.dropTarget(clientX, clientY)
+    const target = arrowEndTarget(end)
+    return target ? { [target.kind]: target.id } : end
   }
 
   // --- notes ---------------------------------------------------------------------
@@ -371,7 +676,8 @@ export class DrawingLayer {
     ends.forEach(({ end, box }, i) => {
       if (!box) points[i] = { x: end.x, y: end.y }
       else if (end.at) points[i] = { x: box.x + end.at[0] * box.width, y: box.y + end.at[1] * box.height }
-      else if (end.section !== undefined || end.note !== undefined) points[i] = facing(box, ref[1 - i])
+      else if (end.shape !== undefined) points[i] = shapeBorder(this.shapeKind(end.shape), box, ref[1 - i])
+      else if (end.node === undefined) points[i] = facing(box, ref[1 - i])
     })
     ends.forEach(({ box }, i) => {
       if (!points[i]) points[i] = border(box, points[1 - i] ?? ref[1 - i])
@@ -388,6 +694,10 @@ export class DrawingLayer {
     return { points, route, mid: middle(route) }
   }
 
+  shapeKind(id) {
+    return (this.hooks.getShapes?.() ?? []).find((s) => s.id === id)?.kind
+  }
+
   boxOf(end) {
     if (end.node !== undefined) return this.hooks.nodeBox(end.node)
     if (end.section !== undefined) {
@@ -397,6 +707,16 @@ export class DrawingLayer {
       return { x: s.x, y: s.y, width: s.width, height: s.height }
     }
     if (end.note !== undefined) return this.noteBoxes.get(end.note) ?? null
+    if (end.shape !== undefined) {
+      const shape = (this.hooks.getShapes?.() ?? []).find((s) => s.id === end.shape)
+      if (!shape) return null
+      const a = resolveShape(shape)
+      return { x: a.x, y: a.y, width: a.width, height: a.height }
+    }
+    if (end.stroke !== undefined) {
+      const stroke = (this.hooks.getStrokes?.() ?? []).find((s) => s.id === end.stroke)
+      return stroke ? strokeBox(stroke) : null
+    }
     return null
   }
 
@@ -481,7 +801,7 @@ export class DrawingLayer {
     return ['from', 'to'].map((key, i) => {
       const p = geometry.points[i]
       const handle = svg('circle', { class: 'pg-arrow-handle', cx: round(p.x), cy: round(p.y), r: 7 })
-      handle.append(title('Drag onto a node, a section, a note or empty space'))
+      handle.append(title('Drag onto a node, a section, a note, a shape, a drawing or empty space'))
       this.drag(handle, () => ({
         move: (_dx, _dy, event) => {
           // While dragging, the end follows the pointer.
@@ -503,8 +823,17 @@ export class DrawingLayer {
     const nodeId = this.hooks.nodeAt(clientX, clientY)
     const box = nodeId !== null ? this.hooks.nodeBox(nodeId) : null
     if (box) return { node: nodeId, at: onBorder(box, p) }
-    for (const [id, note] of this.noteBoxes) {
-      if (p.x >= note.x && p.x <= note.x + note.width && p.y >= note.y && p.y <= note.y + note.height) return { note: id, at: onBorder(note, p) }
+    const inside = (b) => b && p.x >= b.x && p.x <= b.x + b.width && p.y >= b.y && p.y <= b.y + b.height
+    // Topmost first: notes, then drawings and shapes (the last drawn is on top), then sections.
+    for (const [id, note] of [...this.noteBoxes].reverse()) {
+      if (inside(note)) return { note: id, at: onBorder(note, p) }
+    }
+    for (const kind of ['stroke', 'shape']) {
+      const list = kind === 'stroke' ? this.hooks.getStrokes?.() : this.hooks.getShapes?.()
+      for (const item of [...(list ?? [])].reverse()) {
+        const box = this.boxOf({ [kind]: item.id })
+        if (inside(kind === 'stroke' ? grow(box, 6) : box)) return { [kind]: item.id, at: onBorder(box, p) }
+      }
     }
     const sections = this.hooks.getSections()
       .map((section) => ({ section, s: resolveSection(section) }))
@@ -575,6 +904,10 @@ export class DrawingLayer {
 
 // --- geometry ------------------------------------------------------------------------------
 
+function grow(box, by) {
+  return box && { x: box.x - by, y: box.y - by, width: box.width + 2 * by, height: box.height + 2 * by }
+}
+
 function isPoint(end) {
   return Number.isFinite(end?.x) && Number.isFinite(end?.y)
 }
@@ -593,6 +926,27 @@ function facing(box, target) {
   if (inX && !inY) return { x: target.x, y: target.y < box.y ? box.y : box.y + box.height }
   if (inY && !inX) return { x: target.x < box.x ? box.x : box.x + box.width, y: target.y }
   return border(box, target)
+}
+
+/**
+ * Where the line from a shape's centre to `target` meets its outline: on the
+ * ellipse of round shapes (ellipse, cloud, star), on the rhombus of a diamond,
+ * on the box otherwise.
+ */
+function shapeBorder(kind, box, target) {
+  const c = center(box)
+  const dx = target.x - c.x
+  const dy = target.y - c.y
+  if (!dx && !dy) return c
+  const rx = box.width / 2
+  const ry = box.height / 2
+  let t
+  if (kind === 'ellipse' || kind === 'cloud' || kind === 'star') t = 1 / Math.hypot(dx / rx, dy / ry)
+  else if (kind === 'diamond') t = 1 / (Math.abs(dx) / rx + Math.abs(dy) / ry)
+  else return border(box, target)
+  // Stars and clouds: a little inside the ellipse, where the outline mostly is.
+  if (kind !== 'ellipse' && kind !== 'diamond') t *= kind === 'star' ? 0.75 : 0.95
+  return { x: c.x + dx * Math.min(t, 1), y: c.y + dy * Math.min(t, 1) }
 }
 
 /** Where the line from the box's centre to `target` crosses the box's border. */
