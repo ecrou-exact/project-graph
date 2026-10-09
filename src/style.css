@@ -421,6 +421,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* The copies in front are clickable: a label selects its edge (graph.js). */
 .pg-edge-labels .pg-edge-label { pointer-events: auto; cursor: pointer; transition: box-shadow .12s ease, border-color .12s ease; }
 .pg-edge-labels .pg-edge-label:hover { border-color: var(--primary); box-shadow: 0 0 0 2px rgb(59 99 243 / 0.25); }
+/* Near an edge on the empty canvas: it can be clicked (graph.js, moveNearEdge). */
+.pg-canvas.pg-near-edge svg { cursor: pointer; }
 /* Shown by a copy in front of the edges and nodes (graph.js, liftEdgeLabels). */
 .pvt-edge-group > .label-container { visibility: hidden; }
 

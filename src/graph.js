@@ -213,6 +213,9 @@ export class GraphView {
         onEdgeEdit: (session) => this.editEdgeSession(session),
         onNodeDbclick: (_event, node) => this.editNode(String(node.id)),
         onEdgeDbclick: (_event, edge) => this.editEdge(String(edge.id)),
+        // Pivotick's tooltip only follows nodes on its own: edges are wired to it.
+        onEdgeHoverIn: (event, edge) => this.showEdgeTip(edge, event),
+        onEdgeHoverOut: () => this.hideEdgeTip(),
       },
     })
 
@@ -231,6 +234,9 @@ export class GraphView {
     this.scheduleLabels()
     // Edges can be selected like nodes: by their label, or by a click near the line.
     mount.addEventListener('click', (event) => this.clickNearEdge(event))
+    mount.addEventListener('mousemove', (event) => this.moveNearEdge(event, mount))
+    mount.addEventListener('mouseleave', (event) => { this.hoverEdge(null, event); mount.classList.remove('pg-near-edge') })
+    this.hoveredEdge = null
 
     // Tag pills live inside each node's SVG group; Pivotick rebuilds that group's
     // content on every redraw, so draw them again whenever it does.
@@ -561,7 +567,16 @@ export class GraphView {
         const copy = event.target.closest?.('.label-container')
         if (!copy?.pgEdgeGroup) return
         event.stopPropagation()
-        this.selectEdge(this.edgeOfGroup(copy.pgEdgeGroup))
+        this.selectEdge(this.edgeOfGroup(copy.pgEdgeGroup), event)
+      })
+      // Hovering a label hovers its edge (tooltip, highlight), as for a node.
+      layer.addEventListener('mouseover', (event) => {
+        const copy = event.target.closest?.('.label-container')
+        if (copy?.pgEdgeGroup) this.hoverEdge(copy.pgEdgeGroup, event)
+      })
+      layer.addEventListener('mouseout', (event) => {
+        const copy = event.target.closest?.('.label-container')
+        if (copy && !copy.contains(event.relatedTarget)) this.hoverEdge(null, event)
       })
     }
     if (layer.nextSibling !== front) front.before(layer)
@@ -598,25 +613,40 @@ export class GraphView {
     return group.__data__ ?? this.graph?.getMutableEdges().find((e) => `edge-${e.domID}` === group.id) ?? null
   }
 
+  // --- edge tooltip ------------------------------------------------------------
+  // Pivotick's tooltip has everything for edges (edgeHovered / createEdgeTooltip,
+  // pin button included) but only subscribes to node hovers: edges are wired to
+  // it here, so they get exactly the nodes' tooltip.
+
+  get tooltip() {
+    return this.graph?.UIManager?.tooltip
+  }
+
+  showEdgeTip(edge, event) {
+    if (edge && event) this.tooltip?.edgeHovered?.(event, edge)
+  }
+
+  hideEdgeTip() {
+    this.tooltip?.delayedHide?.()
+  }
+
   /** Select an edge — Pivotick then shows its details, as for a node. */
-  selectEdge(edge) {
+  selectEdge(edge, event) {
     if (!edge) return
+    // No side panel in viewer mode: a click shows the edge's tooltip, as a hover does.
+    if (event && this.uiMode === 'viewer') this.showEdgeTip(edge, event)
     // after Pivotick's own handling of the click (which clears the selection on the canvas)
     setTimeout(() => this.graph.selectElement(edge), 0)
   }
 
   /**
-   * A click on the empty canvas within a few pixels of an edge selects it: lines
-   * are 1–2 px wide, too thin to aim at. Measured on the path as drawn (straight
-   * or curved), in screen pixels, the closest edge wins.
+   * The edge group drawn within a few pixels of a screen point, or null: lines
+   * are 1–2 px wide, too thin to aim at. Measured on the paths as drawn
+   * (straight or curved), the closest edge wins.
    */
-  clickNearEdge(event) {
-    const target = event.target
-    if (!(target instanceof Element) || !target.closest('svg')) return
-    if (target.closest('[id^="node-"], .pg-edge-labels, .pg-drawing-front, a, button')) return
-    const TOLERANCE = 8
+  edgeNear(svg, x, y, tolerance = 8) {
     let best = null
-    for (const group of target.closest('svg').querySelectorAll('g.pvt-edge-group')) {
+    for (const group of svg.querySelectorAll('g.pvt-edge-group')) {
       if (getComputedStyle(group).display === 'none') continue
       for (const path of group.querySelectorAll(':scope > path, :scope > g > path')) {
         if (!path.getTotalLength) continue
@@ -626,12 +656,59 @@ export class GraphView {
         const steps = Math.max(2, Math.ceil(length / 6))
         for (let i = 0; i <= steps; i++) {
           const p = path.getPointAtLength((length * i) / steps).matrixTransform(matrix)
-          const d = Math.hypot(p.x - event.clientX, p.y - event.clientY)
-          if (d <= TOLERANCE && (!best || d < best.d)) best = { d, group }
+          const d = Math.hypot(p.x - x, p.y - y)
+          if (d <= tolerance && (!best || d < best.d)) best = { d, group }
         }
       }
     }
-    if (best) this.selectEdge(this.edgeOfGroup(best.group))
+    return best?.group ?? null
+  }
+
+  /** Is this the empty canvas (not a node, a label, a drawing, a control)? */
+  onEmptyCanvas(target) {
+    return target instanceof Element && !!target.closest('svg')
+      && !target.closest('[id^="node-"], g.pvt-edge-group, .pg-edge-labels, .pg-drawing-front, a, button')
+  }
+
+  /** A click on the empty canvas near an edge selects it. */
+  clickNearEdge(event) {
+    if (!this.onEmptyCanvas(event.target)) return
+    const edge = this.edgeOfGroup(this.edgeNear(event.target.closest('svg'), event.clientX, event.clientY))
+    if (edge) this.selectEdge(edge, event)
+  }
+
+  /**
+   * Hover, as Pivotick does it for an edge under the pointer (tooltip, highlight),
+   * replayed on the edge's own group: Pivotick listens to mouseenter / mouseleave there.
+   */
+  hoverEdge(group, event) {
+    if (group === this.hoveredEdge) return
+    const fire = (el, type) => el?.isConnected && el.dispatchEvent(new MouseEvent(type, {
+      clientX: event.clientX, clientY: event.clientY, screenX: event.screenX, screenY: event.screenY, view: window,
+    }))
+    fire(this.hoveredEdge, 'mouseleave')
+    this.hoveredEdge = group
+    fire(group, 'mouseenter')
+  }
+
+  /** Pointer moving on the empty canvas: hover the edge it is near (one check per frame). */
+  moveNearEdge(event, mount) {
+    if (this.nearFrame) return
+    this.nearFrame = requestAnimationFrame(() => {
+      this.nearFrame = null
+      // On the line itself Pivotick handles the hover: just forget ours.
+      if (event.target.closest?.('g.pvt-edge-group')) {
+        this.hoveredEdge = null
+        mount.classList.remove('pg-near-edge')
+        return
+      }
+      const svg = event.target instanceof Element ? event.target.closest('svg') : null
+      // Big graphs: no proximity hover (the edges' own hover still works).
+      const group = svg && this.onEmptyCanvas(event.target) && this.edges().length <= 600
+        ? this.edgeNear(svg, event.clientX, event.clientY) : null
+      if (!event.target.closest?.('.pg-edge-labels')) this.hoverEdge(group, event)
+      mount.classList.toggle('pg-near-edge', !!group)
+    })
   }
 
   /** Restyles once when a pending icon arrives — one redraw per batch, not per node. */
