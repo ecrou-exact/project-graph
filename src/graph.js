@@ -5,7 +5,7 @@ import { Pivotick, Node, Edge } from 'pivotick'
 import 'pivotick/dist/pivotick.css'
 import {
   MARKER_END, MARKER_START, NODE_FIELDS, EDGE_FIELDS,
-  compact, edgeLabel, edgeLabelLook, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, resolveNode, toRawEdge, toRawNode,
+  cardLook, compact, edgeLabel, isCardShape, resolveEdge, edgeLabelLook, edgeStyle, fromGraph, nodeLabelLook, nodePills, nodeStyle, resolveNode, toRawEdge, toRawNode,
 } from './model.js'
 import { badgeIconSvg } from './badgeIcons.js'
 import { faDiagramProject, faPenToSquare } from '@fortawesome/free-solid-svg-icons'
@@ -76,6 +76,9 @@ export class GraphView {
    * @param {(id: string) => void} [hooks.editSection] opens the section form
    * @param {(id: string) => void} [hooks.editArrow] opens the arrow form
    * @param {(id: string) => void} [hooks.deleteArrow] deletes an arrow
+   * @param {(id: string) => void} [hooks.editNote] opens the note form
+   * @param {(id: string) => void} [hooks.deleteNote] deletes a note
+   * @param {() => void} [hooks.editLegend] opens the legend form
    */
   constructor(container, hooks) {
     this.container = container
@@ -99,6 +102,12 @@ export class GraphView {
       onEditSection: (id) => this.hooks.editSection?.(id),
       onEditArrow: (id) => this.hooks.editArrow?.(id),
       onDeleteArrow: (id) => this.hooks.deleteArrow?.(id),
+      getNotes: () => this.hooks.getTypes().notes ?? [],
+      onEditNote: (id) => this.hooks.editNote?.(id),
+      onDeleteNote: (id) => this.hooks.deleteNote?.(id),
+      getLegend: () => this.hooks.getTypes().legend,
+      legendItems: () => this.legendItems(),
+      onEditLegend: () => this.hooks.editLegend?.(),
       nodeBox: (id) => this.nodeBox(id),
       nodeAt: (x, y) => this.nodeAt(x, y),
     })
@@ -399,6 +408,34 @@ export class GraphView {
     ]).concat(detailEntries(data.details))
   }
 
+  /** Frames the whole graph, once its nodes are drawn (after an arrangement). */
+  fit() {
+    requestAnimationFrame(() => requestAnimationFrame(() => this.graph?.renderer.fitAndCenter()))
+  }
+
+  /** The node and edge types in use, as the legend shows them. */
+  legendItems() {
+    const { nodeTypes, edgeTypes } = this.hooks.getTypes()
+    const used = (elements) => [...new Set(elements.map((el) => el.getData().type).filter(Boolean))]
+    const nodes = used(this.nodes()).filter((t) => nodeTypes[t]).map((type) => {
+      const a = resolveNode({ type }, nodeTypes)
+      const card = isCardShape(a.shape) ? cardLook({ type }, nodeTypes) : null
+      return {
+        label: nodeTypes[type].label || type,
+        shape: a.shape,
+        color: card ? card.color : a.color,
+        borderColor: card ? card.borderColor : undefined,
+        // An icon is a white glyph meant for the node's colour: the colour alone reads better this small.
+        image: a.image && a.imageFit !== 'icon' ? a.image : undefined,
+      }
+    })
+    const edges = used(this.edges()).filter((t) => edgeTypes[t]).map((type) => {
+      const a = resolveEdge({ type }, edgeTypes)
+      return { label: edgeTypes[type].label || type, color: a.color, width: a.width, dashed: a.dashed === true || a.dashed === 'true', direction: a.direction }
+    })
+    return { nodes, edges }
+  }
+
   nodes() {
     return this.graph?.getNodes() ?? []
   }
@@ -496,7 +533,7 @@ export class GraphView {
    */
   nodeStyleFor(data) {
     const style = nodeStyle(data, this.hooks.getTypes().nodeTypes)
-    if (resolveNode(data, this.hooks.getTypes().nodeTypes).shape === 'card') {
+    if (isCardShape(resolveNode(data, this.hooks.getTypes().nodeTypes).shape)) {
       // Read from the node, not `data`: the style outlives edits made through Pivotick.
       style.html = (node) => cardElement(node.getData(), this.hooks.getTypes().nodeTypes, () => this.scheduleRestyle())
       return style
@@ -528,6 +565,15 @@ export class GraphView {
     }
     const size = Number(node.getData().size) || 14
     return { x: node.x - size, y: node.y - size, width: size * 2, height: size * 2 }
+  }
+
+  /** The room a node takes, label and pills included (for the Arrange tools). */
+  nodeExtent(id) {
+    const node = this.liveNodes().find((n) => String(n.id) === String(id))
+    const box = node?.getGraphElement?.()?.getBBox?.()
+    if (box?.width && box?.height) return { width: Math.ceil(box.width), height: Math.ceil(box.height) }
+    const shape = this.nodeBox(id)
+    return shape ? { width: shape.width, height: shape.height + 24 } : { width: 60, height: 60 }
   }
 
   /** The id of the node under a screen point, or null. */

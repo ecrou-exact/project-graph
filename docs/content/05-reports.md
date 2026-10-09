@@ -1,6 +1,6 @@
 ## Reports
 
-*Export* offers five formats:
+*Export* offers six formats:
 
 | Menu entry | File | Content |
 |---|---|---|
@@ -9,6 +9,7 @@
 | Report (PDF) | via the print dialog | A picture of the graph, then a text written from every field. Choose *Save as PDF*. |
 | Report (Markdown) | `<title>.md` | The same report as Markdown, with the picture embedded. |
 | Picture (PNG) | `<title>.png` | The whole graph as drawn, whatever the zoom. |
+| Vector picture (SVG) | `<title>.svg` | The same picture as vectors: sharp at any size, editable in Inkscape or Illustrator, fit for slides and print. Images and fonts are embedded. |
 
 **Pivotick data.** The file is self-contained and loads in any page that has Pivotick:
 

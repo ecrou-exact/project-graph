@@ -1,4 +1,4 @@
-// A PNG picture of the whole graph as drawn, for exports: Pivotick's SVG is
+// A PNG or SVG picture of the whole graph as drawn, for exports: Pivotick's SVG is
 // cloned with the computed styles written inline (stylesheets don't follow the
 // SVG into an image) and its images turned into data URLs (an SVG drawn as an
 // image loads nothing), then drawn on a canvas.
@@ -14,11 +14,12 @@ const PROPS = [
 ]
 
 // Layout of the HTML inside <foreignObject> (card nodes): read only on HTML elements.
-const HTML_PROPS = ['flex-direction', 'align-items', 'justify-content', 'gap', 'width', 'height', 'max-width', 'object-fit', 'opacity']
+const HTML_PROPS = ['flex-direction', 'align-items', 'justify-content', 'gap', 'width', 'height', 'max-width', 'object-fit', 'opacity',
+  'background-image', 'background-size', 'background-repeat', 'background-position', 'font-weight', 'list-style', 'margin', 'display']
 const XHTML = 'http://www.w3.org/1999/xhtml'
 
 // Pivotick's layers that are not part of the picture.
-const SKIP = '.selection-box, .shadow-edges, .pvt-shadow-edge, .pg-arrow-hit, .pg-arrow-handle, .pg-section-grip, .pg-section-handle'
+const SKIP = '.selection-box, .shadow-edges, .pvt-shadow-edge, .pg-arrow-hit, .pg-arrow-handle, .pg-section-grip, .pg-section-handle, .pg-note-handle'
 
 /**
  * The graph drawn in `container` as a PNG data URL (null when there is nothing
@@ -26,6 +27,44 @@ const SKIP = '.selection-box, .shadow-edges, .pvt-shadow-edge, .pg-arrow-hit, .p
  * `maxSide` pixels.
  */
 export async function graphSnapshot(container, { scale = 2, maxSide = 4000, padding = 40 } = {}) {
+  const drawn = await drawnSvg(container, padding)
+  if (!drawn) return null
+  const { clone, view } = drawn
+  const ratio = Math.min(scale, maxSide / Math.max(view.width, view.height))
+  const width = Math.round(view.width * ratio)
+  const height = Math.round(view.height * ratio)
+  clone.setAttribute('width', width)
+  clone.setAttribute('height', height)
+
+  // A data URL, not a blob URL: Chrome taints the canvas for a blob SVG holding <foreignObject>.
+  const url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(clone))}`
+  const img = await loadImage(url)
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const g = canvas.getContext('2d')
+  g.fillStyle = background(container)
+  g.fillRect(0, 0, width, height)
+  g.drawImage(img, 0, 0, width, height)
+  return canvas.toDataURL('image/png')
+}
+
+/**
+ * The graph drawn in `container` as a standalone SVG file (text), at its
+ * natural size: styles, images and fonts inside, so it opens anywhere —
+ * a browser, Inkscape, a slide. Null when there is nothing to draw.
+ */
+export async function graphSvg(container, { padding = 40 } = {}) {
+  const drawn = await drawnSvg(container, padding)
+  if (!drawn) return null
+  const { clone, view } = drawn
+  clone.setAttribute('width', Math.round(view.width))
+  clone.setAttribute('height', Math.round(view.height))
+  return `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(clone)}`
+}
+
+/** A self-contained copy of Pivotick's SVG framing the whole graph, and its viewBox. */
+async function drawnSvg(container, padding) {
   const svg = mainSvg(container)
   const layer = svg?.querySelector('.zoom-layer')
   if (!layer || !layer.querySelector('.pvt-node')) return null
@@ -39,29 +78,13 @@ export async function graphSnapshot(container, { scale = 2, maxSide = 4000, padd
   zoom.removeAttribute('transform')
   zoom.style.removeProperty('transform')
   const view = { x: box.x - padding, y: box.y - padding, width: box.width + 2 * padding, height: box.height + 2 * padding }
-  const ratio = Math.min(scale, maxSide / Math.max(view.width, view.height))
-  const width = Math.round(view.width * ratio)
-  const height = Math.round(view.height * ratio)
   clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
   clone.setAttribute('viewBox', `${view.x} ${view.y} ${view.width} ${view.height}`)
-  clone.setAttribute('width', width)
-  clone.setAttribute('height', height)
   clone.removeAttribute('style')
   clone.style.background = background(container)
   await inlineImages(clone)
   await embedFonts(clone)
-
-  // A data URL, not a blob URL: Chrome taints the canvas for a blob SVG holding <foreignObject>.
-  const url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(clone))}`
-  const img = await loadImage(url)
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-  const g = canvas.getContext('2d')
-  g.fillStyle = background(container)
-  g.fillRect(0, 0, width, height)
-  g.drawImage(img, 0, 0, width, height)
-  return canvas.toDataURL('image/png')
+  return { clone, view }
 }
 
 /** Pivotick's canvas: the largest top-level <svg> (the neighbour preview and the minimap are smaller). */

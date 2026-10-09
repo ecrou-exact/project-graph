@@ -103,7 +103,7 @@
     },
     "arrows": {
       "type": "array",
-      "description": "Arrows drawn over the graph, from / to a node, a section or a free point.",
+      "description": "Arrows drawn over the graph, from / to a node, a section, a note or a free point.",
       "items": {
         "type": "object",
         "required": [
@@ -116,7 +116,7 @@
           },
           "from": {
             "type": "object",
-            "description": "{ node, at? }, { section, at? } or { x, y }. `at` = [0..1, 0..1] place on the target's box; without it, the side facing the other end.",
+            "description": "{ node, at? }, { section, at? }, { note, at? } or { x, y }. `at` = [0..1, 0..1] place on the target's box; without it, the side facing the other end.",
             "properties": {
               "node": {
                 "type": [
@@ -142,12 +142,16 @@
               },
               "y": {
                 "type": "number"
+              },
+              "note": {
+                "type": "string",
+                "description": "A note's id."
               }
             }
           },
           "to": {
             "type": "object",
-            "description": "{ node, at? }, { section, at? } or { x, y }. `at` = [0..1, 0..1] place on the target's box; without it, the side facing the other end.",
+            "description": "{ node, at? }, { section, at? }, { note, at? } or { x, y }. `at` = [0..1, 0..1] place on the target's box; without it, the side facing the other end.",
             "properties": {
               "node": {
                 "type": [
@@ -173,6 +177,10 @@
               },
               "y": {
                 "type": "number"
+              },
+              "note": {
+                "type": "string",
+                "description": "A note's id."
               }
             }
           },
@@ -194,7 +202,8 @@
           "route": {
             "enum": [
               "straight",
-              "elbow"
+              "elbow",
+              "curved"
             ]
           },
           "color": {
@@ -227,6 +236,90 @@
             "maxItems": 2,
             "description": "Shift of the label from the middle of the arrow."
           }
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "description": "Free text on the canvas: a sticky note or bare text. The text takes a little Markdown: \"# \" a heading line, \"- \" a bullet, **bold**.",
+      "items": {
+        "type": "object",
+        "required": [
+          "text",
+          "x",
+          "y"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string",
+            "description": "\\n starts a new line."
+          },
+          "x": {
+            "type": "number",
+            "description": "Top-left corner, in graph coordinates."
+          },
+          "y": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Default: as wide as the longest line."
+          },
+          "fill": {
+            "type": "string",
+            "description": "Background colour (default #fff3bf, a yellow sticky note), or \"none\" for bare text."
+          },
+          "color": {
+            "$ref": "#/$defs/color",
+            "description": "Text colour."
+          },
+          "borderColor": {
+            "type": "string"
+          },
+          "textSize": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Default 15."
+          },
+          "font": {
+            "type": "string",
+            "description": "As labelFont."
+          },
+          "align": {
+            "enum": [
+              "left",
+              "center",
+              "right"
+            ]
+          }
+        }
+      }
+    },
+    "legend": {
+      "type": "object",
+      "required": [
+        "x",
+        "y"
+      ],
+      "description": "A box listing the node and edge types in use.",
+      "properties": {
+        "x": {
+          "type": "number",
+          "description": "Top-left corner, in graph coordinates."
+        },
+        "y": {
+          "type": "number"
+        },
+        "title": {
+          "type": "string",
+          "description": "Default \"Legend\"; \"\" for no title."
+        },
+        "hidden": {
+          "type": "boolean"
         }
       }
     },
@@ -444,8 +537,15 @@
             "square",
             "triangle",
             "hexagon",
-            "card"
-          ]
+            "card",
+            "pill",
+            "ellipse",
+            "diamond",
+            "cylinder",
+            "document",
+            "parallelogram"
+          ],
+          "description": "circle, square, triangle, hexagon: a Pivotick shape, the label under it. card, pill, ellipse, diamond, cylinder, document, parallelogram: the text inside (diagram shapes)."
         },
         "size": {
           "type": "number",

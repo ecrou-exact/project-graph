@@ -1,6 +1,6 @@
 ## Using the app
 
-**Top bar.** *Search the docs* finds a section of this guide as you type (↑ ↓ and Enter to open it). *Add* creates a node or an edge. *Graph* starts a new graph, opens a file (a Pivograph document or an Open Contributions Descriptor), imports an organization from its domain, or loads the Rulezet example. *Export* saves the graph (see [Reports](#reports)).
+**Top bar.** *Search the docs* finds a section of this guide as you type (↑ ↓ and Enter to open it). *Add* creates a node, an edge, a section, an arrow or a note, shows the legend, and arranges the nodes (see below). *Graph* starts a new graph, opens a file (a Pivograph document, an Open Contributions Descriptor or a Mermaid flowchart), imports an organization from its domain or a Mermaid flowchart from text, or loads an example. *Export* saves the graph (see [Reports](#reports)).
 
 **Side panel** (left, resizable by dragging its edge):
 
@@ -25,6 +25,22 @@
 **GitHub details.** Entering a repository in a node's *Links* tab fetches its description, stars, forks, open issues, language, licence, topics and last update from the GitHub API, and saves them with the node (`githubInfo`). *Refresh from GitHub* fetches them again; *Also add the repository topics as tags* copies the topics into the node's tags. Nothing else calls the API: showing or importing a map never does, which keeps within the limit of 60 unauthenticated requests per hour.
 
 **Filtering.** Pivotick's *Filter Graph* panel filters by tags (every tag is offered), type, label, description and, for OCD projects, status and license; relationship types can be switched on and off. Filters set from the side panel and from *Filter Graph* are the same; active filters are listed at the top of the side panel with *Clear*.
+
+**Drawing a diagram.** Besides nodes and edges, *Add* draws what a diagram needs: *Section* (a titled frame), *Arrow* (between nodes, sections, notes or free points; straight, right-angled or curved), *Note* (a sticky note or bare text, with headings, bullets and bold) and *Legend* (the types in use, with their look). Nodes can take flowchart shapes with the text inside: card, pill, ellipse, diamond, cylinder, document, parallelogram (*Appearance → Shape*). The *Drawing* tab lists sections, notes and arrows.
+
+**Arranging.** *Add → Arrange the nodes* places every node once, then fixes the layout: *Tree, top to bottom* and *Tree, left to right* follow the edges like a flowchart (cycles are broken, crossings reduced), *Grid* puts them in rows grouped by type, *Circle* puts them in a ring (a hub goes in the middle), *Snap to grid* rounds the positions to 20 px to line nodes up. The new layout is centred where the graph was, so sections and notes stay around it. *Undo the last arrangement* puts the nodes back.
+
+**Mermaid flowcharts.** *Graph → Import a Mermaid flowchart…* turns text into an editable diagram — the `flowchart LR` / `graph TD` syntax of GitHub, GitLab, Notion or Obsidian. Shapes (`A[box]`, `A(rounded)`, `A([pill])`, `A((circle))`, `A{decision}`, `A[(database)]`, `A>document]`, `A[/in-out/]`), links (`-->`, `---`, `-.->`, `==>`, `<-->`, with `|label|` or `-- label -->`), chains and `&` groups, `subgraph … end` (they become sections), and colours from `style`, `classDef`, `class` and `:::class` are read; the rest is skipped with a warning. Opening or dropping a `.mmd` file — or a Markdown file holding a ```` ```mermaid ```` block — does the same.
+
+```
+flowchart LR
+  sensors([Sensors]) -->|alerts| triage{Relevant?}
+  triage -- yes --> misp[(MISP)]
+  triage -. no .-> archive[Archive]
+  subgraph ir [Incident response]
+    misp --> case[/Case in flowintel/]
+  end
+```
 
 **View.** *Tags on graph* shows or hides every tag pill. Pivotick's *View* and *Physics* tools change the layout; the minimap and zoom controls sit on the right.
 

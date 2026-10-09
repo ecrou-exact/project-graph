@@ -1,7 +1,7 @@
 // Declarative forms for nodes, edges and types.
 import { h } from './dom.js'
 import {
-  CURVES, DEFAULT_CARD, DEFAULT_EDGE, DEFAULT_NODE, DIRECTIONS, IMAGE_FITS, LABEL_FONTS, SHAPES,
+  CURVES, DEFAULT_CARD, NOTE_COLORS, DEFAULT_EDGE, DEFAULT_NODE, DIRECTIONS, IMAGE_FITS, LABEL_FONTS, SHAPES,
   edgeLabelLook, parseDetails, parseGithub, parseLinks, parseTags, resolveEdge, resolveNode, slugify, tagLook, uniqueId,
 } from '../model.js'
 import { fetchRepo } from '../github.js'
@@ -12,7 +12,12 @@ import { BADGE_ICONS, badgeIconSvg } from '../badgeIcons.js'
 export const BUNDLED_ICONS = ['project', 'platform', 'tool', 'data', 'organization', 'format', 'rule', 'code']
   .map((name) => `icons/${name}.svg`)
 
-const SHAPE_LABELS = { circle: 'Circle', square: 'Square', triangle: 'Triangle', hexagon: 'Hexagon', card: 'Card (image and text inside)' }
+const SHAPE_LABELS = {
+  circle: 'Circle', square: 'Square', triangle: 'Triangle', hexagon: 'Hexagon',
+  card: 'Card (image and text inside)', pill: 'Pill (text inside)', ellipse: 'Ellipse (text inside)',
+  diamond: 'Diamond — decision (text inside)', cylinder: 'Cylinder — database (text inside)',
+  document: 'Document (text inside)', parallelogram: 'Parallelogram — input / output (text inside)',
+}
 const FIT_LABELS = { cover: 'Cover', contain: 'Contain', icon: 'Icon', frame: 'Frame' }
 
 // --- field widgets -----------------------------------------------------------
@@ -559,7 +564,7 @@ function cardSpecs(inherited, word) {
   const hint = (key, fallback) => `${word} (${inherited[key] ?? fallback})`
   return [
     { section: 'Card' },
-    { key: 'width', label: 'Width', type: 'number', min: 20, max: 1000, step: 10, placeholder: hint('width', 'auto'), hint: 'Card shape only. Empty: as wide as its content.' },
+    { key: 'width', label: 'Width', type: 'number', min: 20, max: 1000, step: 10, placeholder: hint('width', 'auto'), hint: 'Shapes with the text inside only (card, pill, diamond…). Empty: as wide as its content.' },
     { key: 'height', label: 'Height', type: 'number', min: 20, max: 1000, step: 10, placeholder: hint('height', 'auto') },
     { key: 'padding', label: 'Inner space', type: 'number', min: 0, max: 100, placeholder: hint('padding', DEFAULT_CARD.padding), hint: 'Space between the border and the image / text.' },
     { key: 'imageSize', label: 'Image height', type: 'number', min: 8, max: 400, placeholder: hint('imageSize', DEFAULT_CARD.imageSize) },
@@ -1049,22 +1054,24 @@ export function sectionFields(container, values = {}) {
 
 // --- arrow form ----------------------------------------------------------------------
 
-/** An end of an arrow as a select value: "node:<id>", "section:<id>" or "point". */
+/** An end of an arrow as a select value: "node:<id>", "section:<id>", "note:<id>" or "point". */
 export function arrowEndKey(end) {
   if (end?.node !== undefined) return `node:${end.node}`
   if (end?.section !== undefined) return `section:${end.section}`
+  if (end?.note !== undefined) return `note:${end.note}`
   return 'point'
 }
 
 /**
  * Arrow drawn over the graph: its ends (a node, a section or a free point), label and line.
- * ctx: { nodes: [{ id, label }], sections: [{ id, title }] }
+ * ctx: { nodes: [{ id, label }], sections: [{ id, title }], notes?: [{ id, text }] }
  */
 export function arrowFields(container, values = {}, ctx) {
   const ends = [
     ['point', 'A free point (drag it where you want)'],
     ...ctx.nodes.map((n) => [`node:${n.id}`, `Node · ${n.label}`]),
     ...ctx.sections.map((s) => [`section:${s.id}`, `Section · ${s.title || s.id}`]),
+    ...(ctx.notes ?? []).map((n) => [`note:${n.id}`, `Note · ${n.text.split('\n')[0].replace(/^#+\s*/, '').slice(0, 40)}`]),
   ]
   const directions = Object.entries(DIRECTIONS).map(([key, d]) => [key, `${d.symbol} ${d.label}`])
   const form = renderFields(container, [
@@ -1074,7 +1081,7 @@ export function arrowFields(container, values = {}, ctx) {
     { key: 'description', label: 'Description', type: 'text', multiline: true, wide: true, hint: 'Shown when the pointer is over the arrow.' },
     { section: 'Line' },
     { key: 'direction', label: 'Arrow', type: 'select', options: directions },
-    { key: 'route', label: 'Route', type: 'select', options: [['straight', 'Straight'], ['elbow', 'Right angles']] },
+    { key: 'route', label: 'Route', type: 'select', options: [['straight', 'Straight'], ['elbow', 'Right angles'], ['curved', 'Curved']] },
     { key: 'color', label: 'Colour', type: 'color', inherited: '#343a40' },
     { key: 'width', label: 'Width', type: 'number', min: 1, max: 12, placeholder: '2' },
     { key: 'dashed', label: 'Line', type: 'select', options: [['false', 'Solid'], ['true', 'Dashed']] },
@@ -1096,6 +1103,60 @@ export function arrowFields(container, values = {}, ctx) {
     values() {
       const v = form.values()
       return { ...v, dashed: v.dashed === 'true' || undefined }
+    },
+    validate: () => null,
+  }
+}
+
+// --- note form ---------------------------------------------------------------------
+
+/** Free text on the canvas: a sticky note, or bare text (a heading, a comment). */
+export function noteFields(container, values = {}) {
+  const swatches = Object.entries(NOTE_COLORS)
+  const fill = values.fill ?? swatches[0][1]
+  const preset = fill === 'none' ? 'none' : swatches.some(([, c]) => c === fill) ? fill : 'custom'
+  const form = renderFields(container, [
+    {
+      key: 'text', label: 'Text', type: 'text', multiline: true, wide: true, required: true,
+      placeholder: '# Heading\n- a point\n- **bold** words',
+      hint: 'A line starting with "# " is a heading, "- " a bullet; **bold**. Drag the note to move it, its corner to set its width.',
+    },
+    {
+      key: 'style', label: 'Look', type: 'select',
+      options: [...swatches.map(([name, c]) => [c, `Sticky note · ${name}`]), ['none', 'Bare text (no background)'], ['custom', 'Sticky note · my colour']],
+    },
+    { key: 'customFill', label: 'My colour', type: 'color', inherited: '#fff3bf' },
+    { key: 'textSize', label: 'Text size', type: 'number', min: 8, max: 120, placeholder: '15' },
+    { key: 'color', label: 'Text colour', type: 'color', inherited: '#3b3424' },
+    { key: 'font', label: 'Font', type: 'select', options: fontOptions(undefined, 'Default', values.font) },
+    { key: 'align', label: 'Alignment', type: 'segmented', options: [['left', 'Left'], ['center', 'Centre'], ['right', 'Right']] },
+    { key: 'width', label: 'Width', type: 'number', min: 60, max: 2000, step: 10, placeholder: 'auto', hint: 'Empty: as wide as the longest line.' },
+    { key: 'borderColor', label: 'Border', type: 'colorChoice', inheritedLabel: 'None', fallback: '#c9a227' },
+  ], { ...values, style: preset, customFill: preset === 'custom' ? fill : undefined, align: values.align ?? 'left' })
+  return {
+    ...form,
+    values() {
+      const { style, customFill, ...v } = form.values()
+      v.fill = style === 'custom' ? customFill ?? '#fff3bf' : style
+      if (v.borderColor === 'none') delete v.borderColor
+      return v
+    },
+    validate: () => form.missingRequired(),
+  }
+}
+
+// --- legend form -------------------------------------------------------------------
+
+export function legendFields(container, values = {}) {
+  const form = renderFields(container, [
+    { key: 'title', label: 'Title', type: 'text', placeholder: 'Legend', wide: true, hint: 'The legend lists the node and edge types used in the graph. Drag it on the canvas to move it.' },
+    { key: 'showTitle', label: 'Show the title', type: 'select', options: [['true', 'Yes'], ['false', 'No']] },
+  ], { title: values.title || undefined, showTitle: String(values.title !== '') })
+  return {
+    ...form,
+    values() {
+      const v = form.values()
+      return { title: v.showTitle === 'false' ? '' : v.title }
     },
     validate: () => null,
   }

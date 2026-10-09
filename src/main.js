@@ -4,9 +4,11 @@ import rulezetExample from '../examples/rulezet.json'
 import circlExample from '../examples/circl.json'
 import ngsotiExample from '../examples/ngsoti-soc-stack.json'
 import { GraphView } from './graph.js'
-import { DIRECTIONS, TAG_FIELDS, compact, parseArrow, parseSection, uniqueId, emptyDocument, parseDocument, resolveEdge, resolveNode, starterDocument } from './model.js'
+import { DIRECTIONS, TAG_FIELDS, compact, parseArrow, parseLegend, parseNote, parseSection, uniqueId, emptyDocument, parseDocument, resolveEdge, resolveNode, starterDocument } from './model.js'
 import { h } from './ui/dom.js'
-import { arrowEndKey, arrowFields, edgeFields, nodeFields, sectionFields, tagFields, typeFields } from './ui/forms.js'
+import { arrowEndKey, arrowFields, edgeFields, legendFields, nodeFields, noteFields, sectionFields, tagFields, typeFields } from './ui/forms.js'
+import { isMermaid, mermaidToDocument } from './mermaid.js'
+import { circleLayout, gridLayout, layeredLayout, snapToGrid } from './layout.js'
 import { tagPill } from './ui/pills.js'
 import { isOcd, ocdToDocument, wellKnownUrl } from './ocd.js'
 import { confirmModal, openFormModal, toast } from './ui/modal.js'
@@ -43,7 +45,7 @@ const STORAGE_KEY = 'pivograph:document'
  * { type: 'pivograph:snapshot' } asks for a PNG of the graph as drawn —
  * answered with { type: 'pivograph:snapshot', image } (a data: URL, or null);
  * { type: 'pivograph:export', format } runs one of the app's exports:
- * json, pivotick, png, md or pdf (the report).
+ * json, pivotick, png, svg, md or pdf (the report).
  */
 const PARAMS = new URLSearchParams(location.search)
 const EMBED = {
@@ -64,7 +66,7 @@ const EMBED = {
 }
 
 // Document-level state. Nodes and edges live in Pivotick (see GraphView).
-const state = { meta: {}, nodeTypes: {}, edgeTypes: {}, tags: {}, sections: [], arrows: [] }
+const state = { meta: {}, nodeTypes: {}, edgeTypes: {}, tags: {}, sections: [], arrows: [], notes: [], legend: undefined }
 const ui = { tab: 'nodes', filter: '', jsonDirty: false, withPositions: true }
 
 const view = new GraphView(document.getElementById('graph'), {
@@ -75,6 +77,7 @@ const view = new GraphView(document.getElementById('graph'), {
   confirm: (message) => confirmModal(message),
   onChange: () => {
     pruneArrows()
+    view.drawing.renderLegend()           // the types in use may have changed
     renderSidebar()
     persist()
   },
@@ -87,6 +90,9 @@ const view = new GraphView(document.getElementById('graph'), {
   editSection: (id) => editSection(id),
   editArrow: (id) => editArrow(id),
   deleteArrow: (id) => removeArrow(id),
+  editNote: (id) => editNote(id),
+  deleteNote: (id) => removeNote(id),
+  editLegend: () => editLegend(),
 })
 
 let sidebarFrame = null
@@ -109,6 +115,8 @@ function loadDocument(doc) {
   state.tags = structuredClone(doc.tags ?? {})
   state.sections = structuredClone(doc.sections ?? [])
   state.arrows = structuredClone(doc.arrows ?? [])
+  state.notes = structuredClone(doc.notes ?? [])
+  state.legend = doc.legend ? { ...doc.legend } : undefined
   ui.jsonDirty = false
   syncAddress(doc)
   view.load(doc)
@@ -445,6 +453,7 @@ function drawingTargets() {
       .map((n) => ({ id: String(n.id), label: n.getData().label ?? String(n.id) }))
       .sort((a, b) => a.label.localeCompare(b.label)),
     sections: state.sections,
+    notes: state.notes,
   }
 }
 
@@ -453,6 +462,7 @@ function arrowEnd(key, previous, fallback) {
   if (previous && arrowEndKey(previous) === key) return previous
   if (key.startsWith('node:')) return { node: key.slice(5) }
   if (key.startsWith('section:')) return { section: key.slice(8) }
+  if (key.startsWith('note:')) return { note: key.slice(5) }
   return fallback
 }
 
@@ -468,8 +478,8 @@ async function editArrow(id) {
   const c = view.drawing.viewCenter()
   const from = arrowEnd(values.from, current?.from, { x: Math.round(c.x - 120), y: Math.round(c.y) })
   const to = arrowEnd(values.to, current?.to, { x: Math.round(c.x + 120), y: Math.round(c.y) })
-  const ids = { nodes: new Set(view.nodes().map((n) => String(n.id))), sections: new Set(state.sections.map((s) => s.id)) }
-  const next = parseArrow({ ...values, from, to, labelOffset: current?.labelOffset }, ids.nodes, ids.sections)
+  const ids = { nodes: new Set(view.nodes().map((n) => String(n.id))), sections: new Set(state.sections.map((s) => s.id)), notes: new Set(state.notes.map((n) => n.id)) }
+  const next = parseArrow({ ...values, from, to, labelOffset: current?.labelOffset }, ids.nodes, ids.sections, ids.notes)
   if (typeof next === 'string') return toast(`This arrow can't be drawn: ${next}.`, 'error')
   if (current) {
     next.id = id
@@ -490,15 +500,133 @@ async function removeArrow(id) {
   sectionsChanged()
 }
 
-/** Arrows whose node or section was deleted go with it. */
+/** Arrows whose node, section or note was deleted go with it. */
 function pruneArrows() {
   const nodes = new Set(view.nodes().map((n) => String(n.id)))
   const sections = new Set(state.sections.map((s) => s.id))
-  const alive = (end) => (end.node !== undefined ? nodes.has(end.node) : end.section !== undefined ? sections.has(end.section) : true)
+  const notes = new Set(state.notes.map((n) => n.id))
+  const alive = (end) => (end.node !== undefined ? nodes.has(end.node)
+    : end.section !== undefined ? sections.has(end.section)
+    : end.note !== undefined ? notes.has(end.note) : true)
   const kept = state.arrows.filter((a) => alive(a.from) && alive(a.to))
   if (kept.length === state.arrows.length) return
   state.arrows = kept
   view.drawing.render()
+}
+
+// --- notes (free text on the canvas) and the legend ------------------------------------
+
+async function editNote(id) {
+  if (!editable()) return
+  const current = state.notes.find((n) => n.id === id)
+  const values = await openFormModal({
+    title: current ? 'Edit note' : 'New note',
+    submitLabel: current ? 'Save' : 'Add',
+    build: (body) => noteFields(body, current ?? {}),
+  })
+  if (!values) return
+  if (current) {
+    state.notes[state.notes.indexOf(current)] = parseNote({ ...values, id, x: current.x, y: current.y })
+  } else {
+    // A new note lands in the middle of the view.
+    const c = view.drawing.viewCenter()
+    const next = parseNote({ ...values, x: c.x - 100, y: c.y - 40 })
+    next.id = uniqueId(values.text.split('\n')[0].replace(/^#+\s*/, '').slice(0, 30) || 'note', new Set(state.notes.map((n) => n.id)))
+    state.notes.push(next)
+  }
+  sectionsChanged()
+}
+
+async function removeNote(id) {
+  if (!editable()) return
+  const note = state.notes.find((n) => n.id === id)
+  if (!note || !(await confirmModal('Delete this note?'))) return
+  state.notes = state.notes.filter((n) => n !== note)
+  pruneArrows()
+  sectionsChanged()
+}
+
+/** Shows the legend (placed at the top-left of the view) or hides it. */
+function toggleLegend() {
+  if (!editable()) return
+  if (state.legend && !state.legend.hidden) {
+    state.legend = { ...state.legend, hidden: true }
+  } else if (state.legend) {
+    const { hidden, ...shown } = state.legend
+    state.legend = shown
+  } else {
+    const rect = document.getElementById('graph').getBoundingClientRect()
+    const corner = view.drawing.toGraph(rect.left + 24, rect.top + 24)
+    state.legend = parseLegend({ x: corner.x, y: corner.y })
+  }
+  sectionsChanged()
+  const items = view.legendItems()
+  if (!state.legend.hidden && !items.nodes.length && !items.edges.length) {
+    toast('The legend lists node and edge types: give your nodes and edges a type for it to show.', 'warning')
+  }
+}
+
+async function editLegend() {
+  if (!editable() || !state.legend) return
+  const values = await openFormModal({ title: 'Legend', build: (body) => legendFields(body, state.legend) })
+  if (!values) return
+  state.legend = parseLegend({ ...state.legend, title: values.title === undefined ? undefined : values.title })
+  if (values.title === '') state.legend.title = ''
+  sectionsChanged()
+}
+
+// --- arrange: automatic placements, then a fixed layout ---------------------------------
+
+let beforeArrange = null // the document before the last arrangement, for "Undo"
+
+const ARRANGEMENTS = {
+  'tree-down': { label: 'Tree, top to bottom', direction: 'TB' },
+  'tree-right': { label: 'Tree, left to right', direction: 'LR' },
+  grid: { label: 'Grid' },
+  circle: { label: 'Circle' },
+  snap: { label: 'Snap to grid' },
+}
+
+function arrange(kind) {
+  if (!editable()) return
+  const doc = view.toDocument(state, true)
+  if (!doc.nodes.length) return toast('Add some nodes first.', 'warning')
+  const ids = doc.nodes.map((n) => n.id)
+  const sizes = new Map(ids.map((id) => [id, view.nodeExtent(id)]))
+  const placed = new Map(doc.nodes.filter((n) => Number.isFinite(n.x)).map((n) => [n.id, { x: n.x, y: n.y }]))
+  let positions
+  const { direction } = ARRANGEMENTS[kind]
+  if (direction) positions = layeredLayout(ids, doc.edges, { direction, sizes, rankGap: 100, nodeGap: 50 })
+  else if (kind === 'grid') {
+    // Grouped by type, then by label: same-type nodes end up together.
+    const label = (n) => String(n.label ?? n.id)
+    const order = [...doc.nodes].sort((a, b) => String(a.type ?? '').localeCompare(String(b.type ?? '')) || label(a).localeCompare(label(b)))
+    positions = gridLayout(order.map((n) => n.id), { sizes })
+  } else if (kind === 'circle') positions = circleLayout(ids, doc.edges, { sizes })
+  else positions = snapToGrid(placed, 20)
+
+  // Centred where the graph was, so sections, notes and the legend stay around it.
+  if (kind !== 'snap' && placed.size) {
+    const mean = (map, axis) => [...map.values()].reduce((sum, p) => sum + p[axis], 0) / map.size
+    const dx = mean(placed, 'x') - mean(positions, 'x')
+    const dy = mean(placed, 'y') - mean(positions, 'y')
+    positions = new Map([...positions].map(([id, p]) => [id, { x: Math.round(p.x + dx), y: Math.round(p.y + dy) }]))
+  }
+  beforeArrange = doc
+  const next = structuredClone(doc)
+  for (const node of next.nodes) Object.assign(node, positions.get(node.id) ?? {})
+  next.meta = { ...next.meta, fixedLayout: true }
+  loadDocument(next)
+  view.fit()
+  toast(`${ARRANGEMENTS[kind].label}: done. The layout is now fixed — Add → Undo the last arrangement brings the previous one back.`)
+}
+
+function undoArrange() {
+  if (!beforeArrange || !editable()) return
+  const previous = beforeArrange
+  beforeArrange = null
+  loadDocument(previous)
+  view.fit()
 }
 
 function sectionsChanged() {
@@ -518,6 +646,7 @@ function toggleFixedLayout() {
 
 function typesChanged() {
   view.restyleAll()
+  view.drawing.render()
   renderSidebar()
   persist()
 }
@@ -598,10 +727,103 @@ async function exportReport(format) {
 
 async function importFile(file) {
   try {
-    loadRaw(JSON.parse(await file.text()), file.name)
+    const text = await file.text()
+    // A Mermaid flowchart (.mmd, or a Markdown file holding one) becomes a diagram.
+    const mermaid = mermaidSource(text)
+    if (mermaid) return loadMermaid(mermaid, file.name.replace(/\.[^.]+$/, ''))
+    loadRaw(JSON.parse(text), file.name)
   } catch (error) {
     toast(`Could not read ${file.name}: ${error.message}`, 'error')
   }
+}
+
+/** The Mermaid flowchart in a text: the text itself, or the first ```mermaid block of a Markdown file. */
+function mermaidSource(text) {
+  if (isMermaid(text)) return text
+  const block = /```mermaid\s*\n([\s\S]*?)```/.exec(text)?.[1]
+  return block && isMermaid(block) ? block : null
+}
+
+/** Loads a Mermaid flowchart as an editable diagram. Returns its errors. */
+function loadMermaid(text, title) {
+  const { doc, errors, warnings } = mermaidToDocument(text, { title })
+  if (!doc) {
+    toast(`Not a flowchart Pivograph can read: ${errors[0]}`, 'error')
+    return errors
+  }
+  const result = loadRaw(doc, 'Mermaid flowchart')
+  if (!result.errors.length) {
+    const skipped = warnings.length ? ` ${warnings.length} line(s) skipped: ${warnings[0]}` : ''
+    toast(`Mermaid flowchart imported: ${doc.nodes.length} nodes, ${doc.edges.length} edges, ${doc.sections.length} sections.${skipped}`, warnings.length ? 'warning' : undefined)
+  }
+  return result.errors
+}
+
+const MERMAID_SAMPLE = `flowchart LR
+  sensors([Sensors]) -->|alerts| triage{Relevant?}
+  triage -- yes --> misp[(MISP)]
+  triage -. no .-> archive[Archive]
+  subgraph ir [Incident response]
+    misp --> case[/Case in flowintel/]
+    case --> report>Report]
+  end
+  classDef hot fill:#ffe3e3,stroke:#c92a2a
+  class triage hot`
+
+/** Text → diagram: a Mermaid flowchart pasted or opened from a file. */
+async function importMermaid() {
+  const values = await openFormModal({
+    title: 'Import a Mermaid flowchart',
+    submitLabel: 'Import',
+    wide: true,
+    build: (body) => {
+      const textarea = h('textarea', {
+        class: 'pg-json pg-paste', spellcheck: false, rows: 16,
+        placeholder: 'flowchart LR\n  A[Start] --> B{Choice}\n  B -->|yes| C[(Database)]',
+      })
+      const error = h('div', { class: 'pg-form-error', role: 'alert', hidden: true })
+      const file = h('input', { type: 'file', accept: '.mmd,.mermaid,.md,.txt,text/plain,text/markdown', hidden: true })
+      file.addEventListener('change', async () => {
+        const chosen = file.files?.[0]
+        if (chosen) textarea.value = mermaidSource(await chosen.text()) ?? await chosen.text()
+      })
+      body.append(error,
+        h('p', { class: 'pg-muted pg-field-wide' },
+          'Write the diagram as text — the Mermaid flowchart syntax used by GitHub, GitLab, Notion or Obsidian — and get an editable diagram: shapes, labelled links, subgraphs as sections, colours from style / classDef. It is laid out as a flowchart, in a fixed layout.'),
+        h('div', { class: 'pg-row pg-wrap' },
+          h('button', { type: 'button', class: 'pg-btn', onclick: () => { textarea.value = MERMAID_SAMPLE } }, 'Example'),
+          h('button', { type: 'button', class: 'pg-btn', onclick: () => file.click() }, 'Open a .mmd / .md file…'),
+          file),
+        textarea)
+      return {
+        values: () => ({ text: textarea.value }),
+        validate() {
+          if (!textarea.value.trim()) return 'Write or paste a flowchart first.'
+          const { errors } = mermaidToDocument(textarea.value)
+          return errors[0] ?? null
+        },
+        showError(message) {
+          error.textContent = message ?? ''
+          error.hidden = !message
+        },
+      }
+    },
+  })
+  if (!values) return
+  if (view.nodes().length && !(await confirmModal('Replace the current graph with the flowchart?', { confirmLabel: 'Replace', danger: false }))) return
+  loadMermaid(values.text)
+}
+
+async function exportSvg() {
+  const { graphSvg } = await import('./snapshot.js')
+  let markup
+  try {
+    markup = await graphSvg(document.getElementById('graph'))
+  } catch (error) {
+    return toast(`The picture of the graph could not be made (${error.message}).`, 'error')
+  }
+  if (!markup) return toast('Nothing to draw yet.', 'warning')
+  download(`${fileBase(currentDocument())}.svg`, markup, 'image/svg+xml')
 }
 
 /** Opens a graph pasted as text: a Pivograph graph or an OCD file. */
@@ -628,7 +850,7 @@ async function pasteJson() {
           } catch (e) {
             return `Invalid JSON: ${e.message}`
           }
-          if (!isOcd(parsed) && !Array.isArray(parsed?.nodes)) return 'This is neither a Pivograph graph (no "nodes") nor an Open Contributions Descriptor.'
+          if (!isOcd(parsed) && !Array.isArray(parsed?.nodes)) return 'This is neither a Pivograph graph (no "nodes") nor an Open Contributions Descriptor. (A Mermaid flowchart? Use Graph → Import a Mermaid flowchart.)'
           return parseDocument(isOcd(parsed) ? ocdToDocument(parsed) : parsed).errors[0] ?? null
         },
         showError(message) {
@@ -644,7 +866,7 @@ async function pasteJson() {
 }
 
 function pickFile() {
-  const input = h('input', { type: 'file', accept: '.json,application/json' })
+  const input = h('input', { type: 'file', accept: '.json,application/json,.mmd,.mermaid,.md' })
   input.addEventListener('change', () => input.files?.[0] && importFile(input.files[0]))
   input.click()
 }
@@ -930,7 +1152,9 @@ function renderTags() {
 function renderSections() {
   const endName = (end) => (end.node !== undefined
     ? view.nodes().find((n) => String(n.id) === end.node)?.getData().label ?? end.node
-    : end.section !== undefined ? state.sections.find((s) => s.id === end.section)?.title || end.section : 'a point')
+    : end.section !== undefined ? state.sections.find((s) => s.id === end.section)?.title || end.section
+    : end.note !== undefined ? `note “${(state.notes.find((n) => n.id === end.note)?.text ?? end.note).split('\n')[0].replace(/^#+\s*/, '').slice(0, 24)}”`
+    : 'a point')
   return h('div', {},
     h('h3', { class: 'pg-drawing-heading' }, 'Sections'),
     h('div', { class: 'pg-toolbar' },
@@ -943,6 +1167,20 @@ function renderSections() {
             h('span', { class: 'pg-item-title' }, section.title || h('em', { class: 'pg-muted' }, 'untitled')),
             h('span', { class: 'pg-item-sub' }, `${section.width ?? 400} × ${section.height ?? 240} at ${section.x}, ${section.y}`)),
           actionButtons(() => editSection(section.id), () => removeSection(section.id))))),
+    h('h3', { class: 'pg-drawing-heading' }, 'Notes'),
+    h('div', { class: 'pg-toolbar' },
+      editable() ? h('button', { class: 'pg-btn pg-btn-primary', onclick: () => editNote() }, '+ Note') : null,
+      editable() ? h('button', { class: 'pg-btn', onclick: toggleLegend }, state.legend && !state.legend.hidden ? 'Hide the legend' : 'Show a legend') : null),
+    state.notes.length === 0
+      ? h('p', { class: 'pg-empty' }, 'No notes. A note is free text on the canvas: a sticky note, or bare text for a heading or a comment. Drag it to move it; arrows can start or end on it.')
+      : h('ul', { class: 'pg-list' }, state.notes.map((note) => h('li', {
+          class: 'pg-item', onclick: () => view.drawing.selectNote(note.id), ondblclick: () => editNote(note.id),
+        },
+          h('span', { class: 'pg-swatch pg-shape-square', style: `--swatch:${note.fill && note.fill !== 'none' ? note.fill : 'transparent'}` }),
+          h('span', { class: 'pg-item-main' },
+            h('span', { class: 'pg-item-title' }, note.text.split('\n')[0].replace(/^#+\s*/, '')),
+            note.text.includes('\n') ? h('span', { class: 'pg-item-sub' }, note.text.split('\n').slice(1).join(' ').slice(0, 80)) : null),
+          actionButtons(() => editNote(note.id), () => removeNote(note.id))))),
     h('h3', { class: 'pg-drawing-heading' }, 'Arrows'),
     h('div', { class: 'pg-toolbar' },
       editable() ? h('button', { class: 'pg-btn pg-btn-primary', onclick: () => editArrow() }, '+ Arrow') : null),
@@ -1036,7 +1274,7 @@ const TABS = {
   nodes: { label: 'Nodes', render: renderNodes, count: () => view.nodes().length },
   edges: { label: 'Edges', render: renderEdges, count: () => view.edges().length },
   tags: { label: 'Tags', render: renderTags, count: () => knownTags().length },
-  sections: { label: 'Drawing', render: renderSections, count: () => state.sections.length + state.arrows.length },
+  sections: { label: 'Drawing', render: renderSections, count: () => state.sections.length + state.arrows.length + state.notes.length },
   types: { label: 'Types', render: renderTypes, count: () => Object.keys(state.nodeTypes).length + Object.keys(state.edgeTypes).length },
   json: { label: 'JSON', render: renderJson },
 }
@@ -1150,7 +1388,21 @@ function bindHeader() {
         { label: 'Node', hint: 'A project, team, platform, dataset…', onclick: addNode },
         { label: 'Edge', hint: 'An arrow between two nodes', onclick: () => addEdge(), disabled: () => view.nodes().length === 0 },
         { label: 'Section', hint: 'A titled frame behind the graph, for the picture', onclick: () => editSection() },
-        { label: 'Arrow', hint: 'Between nodes, sections or free points; ends placed anywhere', onclick: () => editArrow() },
+        { label: 'Arrow', hint: 'Between nodes, sections, notes or free points; ends placed anywhere', onclick: () => editArrow() },
+        { label: 'Note', hint: 'Free text: a sticky note, a heading, a comment', onclick: () => editNote() },
+        {
+          label: () => (state.legend && !state.legend.hidden ? 'Hide the legend' : 'Legend'),
+          hint: 'A box listing the node and edge types in use',
+          onclick: toggleLegend,
+        },
+        'separator',
+        { heading: 'Arrange the nodes' },
+        { label: 'Tree, top to bottom', hint: 'Along the edges, as a flowchart', onclick: () => arrange('tree-down'), disabled: () => view.nodes().length === 0 },
+        { label: 'Tree, left to right', hint: 'The same, sideways', onclick: () => arrange('tree-right'), disabled: () => view.nodes().length === 0 },
+        { label: 'Grid', hint: 'Rows and columns, grouped by type', onclick: () => arrange('grid'), disabled: () => view.nodes().length === 0 },
+        { label: 'Circle', hint: 'A ring; a hub goes in the middle', onclick: () => arrange('circle'), disabled: () => view.nodes().length === 0 },
+        { label: 'Snap to grid', hint: 'Round every position to 20 px, to line nodes up', onclick: () => arrange('snap'), disabled: () => view.nodes().length === 0 },
+        { label: 'Undo the last arrangement', hint: 'Put the nodes back where they were', onclick: undoArrange, disabled: () => !beforeArrange },
         'separator',
         {
           label: () => (state.meta.fixedLayout ? 'Automatic layout' : 'Fixed layout'),
@@ -1167,6 +1419,7 @@ function bindHeader() {
         { label: 'Open a file…', hint: 'Pivograph JSON or open-contributions.json', onclick: pickFile },
         { label: 'Paste JSON…', hint: 'Paste a graph (or an OCD file) as text', onclick: pasteJson },
         { label: 'Import an organization…', hint: 'From its .well-known/open-contributions.json', onclick: importWellKnown },
+        { label: 'Import a Mermaid flowchart…', hint: 'Text → diagram: flowchart LR / graph TD', onclick: importMermaid },
         'separator',
         { label: 'Rulezet example', hint: 'Projects linked to Rulezet', onclick: () => loadExample('rulezet') },
         { label: 'CIRCL example', hint: 'The GitHub organisations of CIRCL', onclick: () => loadExample('circl') },
@@ -1184,6 +1437,7 @@ function bindHeader() {
         { label: 'Report (PDF)', hint: 'Picture of the graph + a written description', onclick: () => exportReport('pdf') },
         { label: 'Report (Markdown)', hint: 'The same report, as a .md file', onclick: () => exportReport('md') },
         { label: 'Picture (PNG)', hint: 'The whole graph as drawn', onclick: exportPicture },
+        { label: 'Vector picture (SVG)', hint: 'Sharp at any size; opens in Inkscape, slides, a browser', onclick: exportSvg },
       ],
     }))
   document.getElementById('search').addEventListener('input', (e) => {
@@ -1270,7 +1524,7 @@ if (inFrame) {
     else if (event.data?.type === 'pivograph:snapshot') {
       snapshot().then((image) => tellHost({ type: 'pivograph:snapshot', image }, event.origin))
     } else if (event.data?.type === 'pivograph:export') {
-      const exports = { json: exportJson, pivotick: exportPivotick, png: exportPicture,
+      const exports = { json: exportJson, pivotick: exportPivotick, png: exportPicture, svg: exportSvg,
                         md: () => exportReport('md'), pdf: () => exportReport('pdf') }
       exports[event.data.format]?.()
     }

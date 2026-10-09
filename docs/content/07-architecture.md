@@ -8,12 +8,16 @@ src/
   graph.js       GraphView: the Pivotick instance, styles, forms wired to Pivotick's tools, filters, tag pills
   model.js       the document format: parsing and validation, type inheritance, Pivotick styles
   ocd.js         Open Contributions Descriptor → document
+  mermaid.js     Mermaid flowchart → document (laid out with layout.js)
+  layout.js      tree / grid / circle placements, pure (Arrange menu, Mermaid import)
+  drawing.js     sections, arrows, notes and the legend, drawn in Pivotick's zoom layer
+  cards.js       card nodes and the other diagram shapes (pill, diamond, cylinder…)
   icons.js       node icons drawn on the node's colour
   badgeIcons.js  the bundled Font Awesome Free icons
   github.js      GitHub API client (cached, only used by the node form)
   report.js      the report protocol: document → English Markdown (pure, also used by scripts/report.mjs)
   reportPrint.js the report laid out for print (PDF)
-  snapshot.js    the graph as a PNG picture
+  snapshot.js    the graph as a PNG or SVG picture
   ui/            forms, modals, tag pills, GitHub card, details rendering, DOM helper
 examples/        example maps
 hugo/            the Hugo component (pivograph/: shortcode, partials that build the JSON,
@@ -33,6 +37,8 @@ tests/           Vitest tests
 
 - Node label looks (colour, background, size, font) go into a generated stylesheet keyed by each node's DOM id.
 - Tag pills are SVG groups added inside each node's group, redrawn by a `MutationObserver` whenever Pivotick redraws the node.
+- Sections, arrows, notes and the legend (drawing.js) are SVG and `<foreignObject>` HTML in Pivotick's zoom layer, so they pan, zoom and appear in the pictures; notes are measured once laid out.
+- Diagram shapes (diamond, cylinder, document, parallelogram) are card nodes whose outline is an SVG data: URL stretched as the card's background.
 - Icons with `imageFit: "icon"` are redrawn as data URLs on the node's colour, so they stay visible in Pivotick's tooltip and panels.
 
 **Pivotick 2.0.1 notes**, worked around in the code:

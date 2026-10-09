@@ -3,19 +3,25 @@
 //
 // - sections: titled frames behind the graph ("Incident response", "Sensors"…),
 //   for the picture only — they hold no nodes;
-// - arrows: from / to a node, a section or a free point, each end placed
-//   anywhere on its target (`at`), with a label that can be moved.
+// - arrows: from / to a node, a section, a note or a free point, each end
+//   placed anywhere on its target (`at`), with a label that can be moved;
+// - notes: free text, as a sticky note or bare (a heading, a comment);
+// - the legend: the node and edge types in use, in a box.
 //
-// Layers: sections and arrow lines go first in the zoom layer (under Pivotick's
-// edges and nodes); arrow labels and handles go last (over everything).
+// Layers: sections, notes and arrow lines go first in the zoom layer (under
+// Pivotick's edges and nodes); arrow labels, handles and the legend go last
+// (over everything).
 //
 // In an editable graph: a section's title band moves it, its corner resizes
 // it, a double-click edits it. A click on an arrow selects it: its ends can
-// then be dragged onto a node, a section or empty space; its label can be
-// dragged; Delete removes it, a double-click edits it.
-import { DIRECTIONS, LABEL_FONTS, resolveArrow, resolveSection } from './model.js'
+// then be dragged onto a node, a section, a note or empty space; its label can
+// be dragged; Delete removes it, a double-click edits it. A note moves when
+// dragged, its corner sets its width; click + Delete removes it. The legend
+// moves when dragged; a double-click edits its title.
+import { DIRECTIONS, LABEL_FONTS, noteBlocks, resolveArrow, resolveNote, resolveSection } from './model.js'
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
+const XHTML = 'http://www.w3.org/1999/xhtml'
 const PAD = 24
 const HANDLE = 14
 const MIN = { width: 80, height: 60 }
@@ -31,6 +37,12 @@ export class DrawingLayer {
    * @param {(id: string) => void} hooks.onEditSection
    * @param {(id: string) => void} hooks.onEditArrow
    * @param {(id: string) => void} hooks.onDeleteArrow
+   * @param {() => object[]} [hooks.getNotes] the document's notes (mutated in place on drag)
+   * @param {(id: string) => void} [hooks.onEditNote]
+   * @param {(id: string) => void} [hooks.onDeleteNote]
+   * @param {() => object|undefined} [hooks.getLegend] the document's legend (mutated in place on drag)
+   * @param {() => {nodes: object[], edges: object[]}} [hooks.legendItems] the types in use
+   * @param {() => void} [hooks.onEditLegend]
    * @param {(id: string) => {x, y, width, height}|null} hooks.nodeBox a node's box, in graph coordinates
    * @param {(clientX: number, clientY: number) => string|null} hooks.nodeAt the node under a screen point
    */
@@ -40,12 +52,16 @@ export class DrawingLayer {
     this.back = null // sections, then arrow lines
     this.front = null // arrow labels and handles
     this.selected = null // selected arrow id
+    this.selectedNote = null
+    this.noteBoxes = new Map() // note id -> its box as drawn, in graph coordinates
     this.frame = null
     document.addEventListener('keydown', (event) => {
-      if (!this.selected || !this.hooks.editable() || !['Delete', 'Backspace'].includes(event.key)) return
+      if (!this.hooks.editable() || !['Delete', 'Backspace'].includes(event.key)) return
+      if (!this.selected && !this.selectedNote) return
       if (event.target.closest?.('input, textarea, select, [contenteditable]')) return
       event.preventDefault()
-      this.hooks.onDeleteArrow(this.selected)
+      if (this.selected) this.hooks.onDeleteArrow(this.selected)
+      else this.hooks.onDeleteNote?.(this.selectedNote)
     })
   }
 
@@ -53,13 +69,20 @@ export class DrawingLayer {
   attach(zoomLayer) {
     this.zoomLayer = zoomLayer
     this.selected = null
+    this.selectedNote = null
     this.back = svg('g', { class: 'pg-drawing-back' })
     this.front = svg('g', { class: 'pg-drawing-front' })
+    this.labelGroup = svg('g', { class: 'pg-arrow-labels' })
+    this.legendGroup = svg('g', { class: 'pg-legend-layer' })
+    this.front.append(this.labelGroup, this.legendGroup)
     if (!zoomLayer) return
     zoomLayer.prepend(this.back)
     zoomLayer.append(this.front)
-    // A click on the canvas (not on an arrow) unselects the arrow.
-    zoomLayer.ownerSVGElement?.addEventListener('pointerdown', () => this.select(null))
+    // A click on the canvas (not on an arrow or a note) unselects them.
+    zoomLayer.ownerSVGElement?.addEventListener('pointerdown', () => {
+      this.select(null)
+      this.selectNote(null)
+    })
     this.render()
   }
 
@@ -80,15 +103,167 @@ export class DrawingLayer {
     const editable = this.hooks.editable()
     this.sectionGroup = svg('g', { class: 'pg-sections' })
     this.sectionGroup.append(...this.hooks.getSections().map((section) => this.drawSection(section, editable)))
+    this.noteGroup = svg('g', { class: 'pg-notes' })
     this.arrowGroup = svg('g', { class: 'pg-arrows' })
-    this.back.replaceChildren(markers(), this.sectionGroup, this.arrowGroup)
+    this.back.replaceChildren(markers(), this.sectionGroup, this.noteGroup, this.arrowGroup)
+    this.renderNotes()
+    this.renderLegend()
     this.renderArrows()
   }
 
   select(id) {
     if (this.selected === id) return
     this.selected = id
+    if (id) this.selectNote(null)
     this.renderArrows()
+  }
+
+  selectNote(id) {
+    if (this.selectedNote === id) return
+    this.selectedNote = id
+    if (id) this.select(null)
+    this.noteGroup?.querySelectorAll('.pg-note').forEach((g) => g.classList.toggle('is-selected', g.dataset.id === id))
+  }
+
+  // --- notes ---------------------------------------------------------------------
+
+  renderNotes() {
+    if (!this.noteGroup) return
+    const editable = this.hooks.editable()
+    const notes = this.hooks.getNotes?.() ?? []
+    this.noteGroup.replaceChildren(...notes.map((note) => this.drawNote(note, editable)))
+    // Sized from the text, once it is in the document.
+    this.noteBoxes.clear()
+    this.fitNotes()
+  }
+
+  /** Measures every note; those not laid out yet (canvas still hidden) are tried again next frame. */
+  fitNotes(tries = 10) {
+    const missed = [...this.noteGroup.children].filter((g) => !this.fitNote(g))
+    if (missed.length && tries > 0) {
+      requestAnimationFrame(() => {
+        if (missed.some((g) => g.isConnected)) this.fitNotes(tries - 1)
+        this.renderArrows()
+      })
+    }
+  }
+
+  drawNote(note, editable) {
+    const n = resolveNote(note)
+    const g = svg('g', { class: `pg-note${this.selectedNote === note.id ? ' is-selected' : ''}`, 'data-id': note.id, transform: `translate(${n.x},${n.y})` })
+    // 1 × 1 until measured (fitNote): a big box would count in the graph's frame.
+    const fo = svg('foreignObject', { width: 1, height: 1, class: 'pg-note-fo' })
+    const box = html('div', `pg-note-box${n.fill === 'none' ? ' is-bare' : ''}`)
+    Object.assign(box.style, {
+      color: n.color,
+      fontSize: `${n.textSize}px`,
+      textAlign: n.align,
+      width: n.width ? `${n.width}px` : 'max-content',
+    })
+    if (n.fill !== 'none') box.style.backgroundColor = n.fill
+    if (n.borderColor && n.borderColor !== 'none') box.style.border = `1.5px solid ${n.borderColor}`
+    if (n.font) box.style.fontFamily = LABEL_FONTS[n.font]?.css ?? n.font
+    for (const block of noteBlocks(n.text)) {
+      const line = html('div', `pg-note-${block.kind}`)
+      // The bullet as text, not CSS ::before: the picture export copies no pseudo-elements.
+      if (block.kind === 'bullet') line.append('• ')
+      if (!block.parts.length) line.append(html('br'))
+      for (const part of block.parts) {
+        const span = html(part.bold ? 'strong' : 'span')
+        span.textContent = part.text
+        line.append(span)
+      }
+      box.append(line)
+    }
+    fo.append(box)
+    g.append(fo)
+    if (editable) {
+      const handle = svg('rect', { class: 'pg-note-handle', width: HANDLE, height: HANDLE, rx: 3 })
+      handle.append(title('Drag to set the width'))
+      g.append(handle)
+      this.drag(g, () => ({
+        move: (dx, dy) => {
+          note.x = Math.round(n.x + dx)
+          note.y = Math.round(n.y + dy)
+          g.setAttribute('transform', `translate(${note.x},${note.y})`)
+          this.noteBoxes.set(note.id, { ...this.noteBoxes.get(note.id), x: note.x, y: note.y })
+          this.schedule()
+        },
+        cancel: () => this.selectNote(note.id),
+      }))
+      this.drag(handle, () => {
+        const from = this.noteBoxes.get(note.id)?.width ?? 200
+        return {
+          move: (dx) => {
+            note.width = Math.round(Math.max(60, from + dx))
+            box.style.width = `${note.width}px`
+            this.fitNote(g)
+            this.schedule()
+          },
+        }
+      })
+      g.addEventListener('dblclick', (event) => {
+        event.stopPropagation()
+        this.hooks.onEditNote?.(note.id)
+      })
+    }
+    return g
+  }
+
+  /** The foreignObject takes the size of the text box; the handle goes to its corner. */
+  fitNote(g) {
+    const box = g.querySelector('.pg-note-box')
+    const fo = g.querySelector('foreignObject')
+    const width = Math.ceil(box.offsetWidth)
+    const height = Math.ceil(box.offsetHeight)
+    if (!width || !height) return false
+    set(fo, { width, height })
+    set(g.querySelector('.pg-note-handle'), { x: width - HANDLE / 2, y: height - HANDLE / 2 })
+    const note = (this.hooks.getNotes?.() ?? []).find((n) => n.id === g.dataset.id)
+    if (note) this.noteBoxes.set(note.id, { x: note.x, y: note.y, width, height })
+    return true
+  }
+
+  // --- legend ----------------------------------------------------------------------
+
+  renderLegend() {
+    if (!this.legendGroup) return
+    const legend = this.hooks.getLegend?.()
+    const items = legend && !legend.hidden ? this.hooks.legendItems?.() : null
+    if (!items || (!items.nodes.length && !items.edges.length)) return this.legendGroup.replaceChildren()
+    const g = svg('g', { class: 'pg-legend', transform: `translate(${legend.x},${legend.y})` })
+    const fo = svg('foreignObject', { width: 1, height: 1, class: 'pg-note-fo' })
+    const box = html('div', 'pg-legend-box')
+    if (legend.title !== '') {
+      const heading = html('div', 'pg-legend-title')
+      heading.textContent = legend.title ?? 'Legend'
+      box.append(heading)
+    }
+    for (const item of items.nodes) box.append(legendRow(nodeSwatch(item), item.label))
+    for (const item of items.edges) box.append(legendRow(edgeSwatch(item), item.label))
+    fo.append(box)
+    g.append(fo)
+    this.legendGroup.replaceChildren(g)
+    const measure = (tries) => {
+      if (box.offsetWidth) set(fo, { width: Math.ceil(box.offsetWidth), height: Math.ceil(box.offsetHeight) })
+      else if (tries > 0 && box.isConnected) requestAnimationFrame(() => measure(tries - 1))
+    }
+    measure(10)
+    if (this.hooks.editable()) {
+      g.classList.add('is-movable')
+      g.append(title('Legend: drag to move, double-click to edit'))
+      this.drag(g, () => ({
+        move: (dx, dy) => g.setAttribute('transform', `translate(${Math.round(legend.x + dx)},${Math.round(legend.y + dy)})`),
+        end: () => {
+          const [, x, y] = /translate\(([-\d.]+),([-\d.]+)\)/.exec(g.getAttribute('transform')) ?? []
+          if (x !== undefined) Object.assign(legend, { x: Number(x), y: Number(y) })
+        },
+      }))
+      g.addEventListener('dblclick', (event) => {
+        event.stopPropagation()
+        this.hooks.onEditLegend?.()
+      })
+    }
   }
 
   // --- sections ------------------------------------------------------------------
@@ -181,7 +356,7 @@ export class DrawingLayer {
     }
     this.arrowGroup.replaceChildren(...lines)
     const handles = editable ? this.drawHandles() : []
-    this.front.replaceChildren(...labels, ...handles)
+    this.labelGroup.replaceChildren(...labels, ...handles)
     // Label backgrounds are sized from the text, once it is in the document.
     for (const label of labels) fitLabel(label)
   }
@@ -196,12 +371,19 @@ export class DrawingLayer {
     ends.forEach(({ end, box }, i) => {
       if (!box) points[i] = { x: end.x, y: end.y }
       else if (end.at) points[i] = { x: box.x + end.at[0] * box.width, y: box.y + end.at[1] * box.height }
-      else if (end.section !== undefined) points[i] = facing(box, ref[1 - i])
+      else if (end.section !== undefined || end.note !== undefined) points[i] = facing(box, ref[1 - i])
     })
     ends.forEach(({ box }, i) => {
       if (!points[i]) points[i] = border(box, points[1 - i] ?? ref[1 - i])
     })
     const a = resolveArrow(arrow)
+    if (a.route === 'curved') {
+      // A quadratic curve bowing to the left of the way it goes, by a fifth of its length.
+      const [p, q] = points
+      const control = { x: (p.x + q.x) / 2 - (q.y - p.y) * 0.2, y: (p.y + q.y) / 2 + (q.x - p.x) * 0.2 }
+      const mid = { x: 0.25 * p.x + 0.5 * control.x + 0.25 * q.x, y: 0.25 * p.y + 0.5 * control.y + 0.25 * q.y }
+      return { points, route: [p, q], control, mid }
+    }
     const route = a.route === 'elbow' ? elbow(points[0], points[1], ends[0].box) : [points[0], points[1]]
     return { points, route, mid: middle(route) }
   }
@@ -214,12 +396,16 @@ export class DrawingLayer {
       const s = resolveSection(section)
       return { x: s.x, y: s.y, width: s.width, height: s.height }
     }
+    if (end.note !== undefined) return this.noteBoxes.get(end.note) ?? null
     return null
   }
 
   drawArrowLine(arrow, a, geometry, editable) {
     const g = svg('g', { class: `pg-arrow${this.selected === arrow.id ? ' is-selected' : ''}`, 'data-id': arrow.id })
-    const d = `M${geometry.route.map((p) => `${round(p.x)},${round(p.y)}`).join('L')}`
+    const xy = (p) => `${round(p.x)},${round(p.y)}`
+    const d = geometry.control
+      ? `M${xy(geometry.route[0])}Q${xy(geometry.control)} ${xy(geometry.route[1])}`
+      : `M${geometry.route.map(xy).join('L')}`
     const direction = DIRECTIONS[a.direction] ? a.direction : 'forward'
     const line = svg('path', { class: 'pg-arrow-line', d })
     Object.assign(line.style, { stroke: a.color, strokeWidth: `${Number(a.width) || 2}px` })
@@ -295,7 +481,7 @@ export class DrawingLayer {
     return ['from', 'to'].map((key, i) => {
       const p = geometry.points[i]
       const handle = svg('circle', { class: 'pg-arrow-handle', cx: round(p.x), cy: round(p.y), r: 7 })
-      handle.append(title('Drag onto a node, a section or empty space'))
+      handle.append(title('Drag onto a node, a section, a note or empty space'))
       this.drag(handle, () => ({
         move: (_dx, _dy, event) => {
           // While dragging, the end follows the pointer.
@@ -311,12 +497,15 @@ export class DrawingLayer {
     })
   }
 
-  /** What is under the pointer: a node or a section (the end placed where it was dropped, on the border), or a free point. */
+  /** What is under the pointer: a node, a note or a section (the end placed where it was dropped, on the border), or a free point. */
   dropTarget(clientX, clientY) {
     const p = this.toGraph(clientX, clientY)
     const nodeId = this.hooks.nodeAt(clientX, clientY)
     const box = nodeId !== null ? this.hooks.nodeBox(nodeId) : null
     if (box) return { node: nodeId, at: onBorder(box, p) }
+    for (const [id, note] of this.noteBoxes) {
+      if (p.x >= note.x && p.x <= note.x + note.width && p.y >= note.y && p.y <= note.y + note.height) return { note: id, at: onBorder(note, p) }
+    }
     const sections = this.hooks.getSections()
       .map((section) => ({ section, s: resolveSection(section) }))
       .filter(({ s }) => p.x >= s.x && p.x <= s.x + s.width && p.y >= s.y && p.y <= s.y + s.height)
@@ -489,6 +678,56 @@ function fitLabel(g) {
 /** Keeps Pivotick (d3-zoom, selection box) from seeing a gesture on our elements. */
 function stopPivotick(el) {
   for (const type of ['mousedown', 'touchstart', 'click', 'dblclick']) el.addEventListener(type, (e) => e.stopPropagation())
+}
+
+/** An HTML element, for the text drawn inside a <foreignObject>. */
+function html(tag, className) {
+  const el = document.createElementNS(XHTML, tag)
+  if (className) el.className = className
+  return el
+}
+
+function legendRow(swatch, label) {
+  const row = html('div', 'pg-legend-row')
+  const text = html('span')
+  text.textContent = label
+  row.append(swatch, text)
+  return row
+}
+
+/** A node type's look, small: its shape in its colour (or its image). */
+function nodeSwatch(item) {
+  const box = svg('svg', { width: 22, height: 18, viewBox: '-11 -9 22 18', class: 'pg-legend-swatch' })
+  const paint = { fill: item.color, stroke: item.borderColor ?? 'none', 'stroke-width': item.borderColor ? 1.5 : 0 }
+  const shapes = {
+    square: () => svg('rect', { x: -7, y: -7, width: 14, height: 14, rx: 2, ...paint }),
+    triangle: () => svg('polygon', { points: '0,-8 8,6 -8,6', ...paint }),
+    hexagon: () => svg('polygon', { points: '-4,-7 4,-7 8,0 4,7 -4,7 -8,0', ...paint }),
+    diamond: () => svg('polygon', { points: '0,-8 10,0 0,8 -10,0', ...paint }),
+    parallelogram: () => svg('polygon', { points: '-6,-6 10,-6 6,6 -10,6', ...paint }),
+    pill: () => svg('rect', { x: -10, y: -6, width: 20, height: 12, rx: 6, ...paint }),
+    ellipse: () => svg('ellipse', { rx: 10, ry: 7, ...paint }),
+    card: () => svg('rect', { x: -10, y: -7, width: 20, height: 14, rx: 3, ...paint }),
+    document: () => svg('rect', { x: -9, y: -7, width: 18, height: 14, rx: 1, ...paint }),
+    cylinder: () => svg('rect', { x: -8, y: -8, width: 16, height: 16, rx: 4, ...paint }),
+  }
+  box.append((shapes[item.shape] ?? (() => svg('circle', { r: 7, ...paint })))())
+  if (item.image) {
+    const img = svg('image', { href: item.image, x: -6, y: -6, width: 12, height: 12, preserveAspectRatio: 'xMidYMid meet' })
+    box.append(img)
+  }
+  return box
+}
+
+/** An edge type's look, small: its line, dashed or not, with its arrow. */
+function edgeSwatch(item) {
+  const box = svg('svg', { width: 30, height: 14, viewBox: '0 -7 30 14', class: 'pg-legend-swatch' })
+  const line = svg('line', { x1: 2, x2: 26, y1: 0, y2: 0, stroke: item.color, 'stroke-width': Math.min(Number(item.width) || 2, 4) })
+  if (item.dashed) line.setAttribute('stroke-dasharray', '4 3')
+  box.append(line)
+  if (item.direction === 'forward' || item.direction === 'both') box.append(svg('path', { d: 'M22,-4L29,0L22,4Z', fill: item.color }))
+  if (item.direction === 'backward' || item.direction === 'both') box.append(svg('path', { d: 'M8,-4L1,0L8,4Z', fill: item.color }))
+  return box
 }
 
 function svg(tag, attrs = {}) {

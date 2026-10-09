@@ -7,7 +7,16 @@
 export const FORMAT_VERSION = 1
 
 // `card`: a rounded box with the image and the label inside (as in a drawn diagram).
-export const SHAPES = ['circle', 'square', 'triangle', 'hexagon', 'card']
+// The other card shapes put the text inside too, in a flowchart's shapes:
+// pill (terminal), ellipse, diamond (decision), cylinder (database),
+// document, parallelogram (input / output).
+export const CARD_SHAPES = ['card', 'pill', 'ellipse', 'diamond', 'cylinder', 'document', 'parallelogram']
+export const SHAPES = ['circle', 'square', 'triangle', 'hexagon', ...CARD_SHAPES]
+
+/** Is this a shape drawn as a card (HTML, the text inside)? */
+export function isCardShape(shape) {
+  return CARD_SHAPES.includes(shape)
+}
 export const IMAGE_FITS = ['cover', 'contain', 'icon', 'frame']
 export const DIRECTIONS = {
   forward: { symbol: '→', label: 'Source → target' },
@@ -68,9 +77,21 @@ export const ARROW_FIELDS = [
   'from', 'to', 'label', 'description', 'direction', 'route',
   'color', 'width', 'dashed', 'labelColor', 'labelSize', 'labelFont', 'labelBackground', 'labelOffset',
 ]
-export const ROUTES = ['straight', 'elbow']
+export const ROUTES = ['straight', 'elbow', 'curved']
 export const DEFAULT_ARROW = { color: '#343a40', width: 2, direction: 'forward', route: 'straight', labelSize: 14 }
 export const EDGE_TYPE_FIELDS = ['label', ...EDGE_LOOK]
+
+// Notes: free text on the canvas, as a sticky note or bare text (a heading, a
+// comment…). `text` takes a little Markdown: "# " a heading line, "- " a
+// bullet, **bold**. Without `width`, a note is as wide as its longest line.
+export const NOTE_FIELDS = ['text', 'x', 'y', 'width', 'color', 'fill', 'borderColor', 'textSize', 'font', 'align']
+export const NOTE_ALIGNS = ['left', 'center', 'right']
+export const DEFAULT_NOTE = { fill: '#fff3bf', color: '#3b3424', textSize: 15, align: 'left' }
+// Sticky-note colours offered in the form.
+export const NOTE_COLORS = { Yellow: '#fff3bf', Green: '#d3f9d8', Blue: '#d0ebff', Pink: '#ffdeeb', Violet: '#e5dbff', Grey: '#f1f3f5' }
+
+// The legend: a box listing the node and edge types in use, placed on the canvas.
+export const LEGEND_FIELDS = ['x', 'y', 'title', 'hidden']
 
 // Edge shapes, and Pivotick's name for each ("auto" curves only parallel edges).
 export const CURVES = {
@@ -94,6 +115,7 @@ export function emptyDocument() {
     tags: {},
     sections: [],
     arrows: [],
+    notes: [],
     nodes: [],
     edges: [],
   }
@@ -208,6 +230,27 @@ export function parseDocument(raw) {
     }
   }
 
+  if (raw.notes !== undefined) {
+    if (!Array.isArray(raw.notes)) errors.push('"notes" must be an array.')
+    else {
+      const noteIds = new Set()
+      raw.notes.forEach((input, i) => {
+        if (!isPlainObject(input)) return warnings.push(`notes[${i}] is not an object, ignored.`)
+        const note = parseNote(input)
+        if (!note) return warnings.push(`notes[${i}] needs a "text" and numbers "x" and "y", ignored.`)
+        note.id = uniqueId(input.id ?? 'note', noteIds)
+        noteIds.add(note.id)
+        doc.notes.push(note)
+      })
+    }
+  }
+
+  if (raw.legend !== undefined) {
+    const legend = parseLegend(raw.legend)
+    if (legend) doc.legend = legend
+    else warnings.push('"legend" needs numbers "x" and "y", ignored.')
+  }
+
   if (raw.nodes !== undefined && !Array.isArray(raw.nodes)) errors.push('"nodes" must be an array.')
   if (raw.edges !== undefined && !Array.isArray(raw.edges)) errors.push('"edges" must be an array.')
   if (errors.length) return { doc: null, errors, warnings }
@@ -265,10 +308,11 @@ export function parseDocument(raw) {
     if (!Array.isArray(raw.arrows)) errors.push('"arrows" must be an array.')
     else {
       const sectionIds = new Set(doc.sections.map((sec) => sec.id))
+      const noteIds = new Set(doc.notes.map((note) => note.id))
       const arrowIds = new Set()
       raw.arrows.forEach((input, i) => {
         if (!isPlainObject(input)) return warnings.push(`arrows[${i}] is not an object, ignored.`)
-        const arrow = parseArrow(input, ids, sectionIds)
+        const arrow = parseArrow(input, ids, sectionIds, noteIds)
         if (typeof arrow === 'string') return warnings.push(`arrows[${i}]: ${arrow}, ignored.`)
         arrow.id = uniqueId(input.id ?? 'arrow', arrowIds)
         arrowIds.add(arrow.id)
@@ -282,11 +326,11 @@ export function parseDocument(raw) {
 
 /**
  * An arrow with its ends checked, or the reason it can't be drawn (a string).
- * An end is { node, at? }, { section, at? } or { x, y }.
+ * An end is { node, at? }, { section, at? }, { note, at? } or { x, y }.
  */
-export function parseArrow(input, nodeIds, sectionIds) {
-  const from = parseArrowEnd(input.from, nodeIds, sectionIds)
-  const to = parseArrowEnd(input.to, nodeIds, sectionIds)
+export function parseArrow(input, nodeIds, sectionIds, noteIds = new Set()) {
+  const from = parseArrowEnd(input.from, nodeIds, sectionIds, noteIds)
+  const to = parseArrowEnd(input.to, nodeIds, sectionIds, noteIds)
   if (typeof from === 'string') return `"from" ${from}`
   if (typeof to === 'string') return `"to" ${to}`
   const arrow = compact({ ...input, from, to }, ARROW_FIELDS)
@@ -299,8 +343,8 @@ export function parseArrow(input, nodeIds, sectionIds) {
   return { id: undefined, ...arrow }
 }
 
-function parseArrowEnd(end, nodeIds, sectionIds) {
-  if (!isPlainObject(end)) return 'must be { node }, { section } or { x, y }'
+function parseArrowEnd(end, nodeIds, sectionIds, noteIds) {
+  if (!isPlainObject(end)) return 'must be { node }, { section }, { note } or { x, y }'
   const at = pair(end.at)
   const placed = (target) => (at ? { ...target, at: at.map((v) => Math.round(Math.min(1, Math.max(0, v)) * 1000) / 1000) } : target)
   if (end.node !== undefined) {
@@ -311,9 +355,13 @@ function parseArrowEnd(end, nodeIds, sectionIds) {
     const id = String(end.section)
     return sectionIds.has(id) ? placed({ section: id }) : `points to the missing section "${id}"`
   }
+  if (end.note !== undefined) {
+    const id = String(end.note)
+    return noteIds.has(id) ? placed({ note: id }) : `points to the missing note "${id}"`
+  }
   const x = Number(end.x)
   const y = Number(end.y)
-  return Number.isFinite(x) && Number.isFinite(y) ? { x: Math.round(x), y: Math.round(y) } : 'must be { node }, { section } or { x, y }'
+  return Number.isFinite(x) && Number.isFinite(y) ? { x: Math.round(x), y: Math.round(y) } : 'must be { node }, { section }, { note } or { x, y }'
 }
 
 /** [a, b] of finite numbers, or null. */
@@ -339,6 +387,59 @@ export function parseSection(input) {
   }
   if (section.underline !== undefined) section.underline = isTrue(section.underline)
   return { id: input.id === undefined ? undefined : String(input.id), ...section }
+}
+
+/** A note with its fields cleaned up, or null without text or a position. */
+export function parseNote(input) {
+  const x = Number(input.x)
+  const y = Number(input.y)
+  const text = typeof input.text === 'string' ? input.text : ''
+  if (!text.trim() || !Number.isFinite(x) || !Number.isFinite(y)) return null
+  const note = compact({ ...input, x: Math.round(x), y: Math.round(y) }, NOTE_FIELDS)
+  for (const key of ['width', 'textSize']) {
+    const value = Number(note[key])
+    if (Number.isFinite(value) && value > 0) note[key] = Math.round(value)
+    else delete note[key]
+  }
+  if (note.align && !NOTE_ALIGNS.includes(note.align)) delete note.align
+  return { id: input.id === undefined ? undefined : String(input.id), ...note }
+}
+
+/** Note attributes with the defaults filled in. */
+export function resolveNote(note) {
+  return { ...DEFAULT_NOTE, ...compact(note) }
+}
+
+/**
+ * A note's text as blocks: { kind: 'heading' | 'bullet' | 'line', parts }, where
+ * parts are [{ text, bold }] (from **bold**). Empty lines are kept (spacing).
+ */
+export function noteBlocks(text) {
+  return String(text ?? '').split('\n').map((line) => {
+    let kind = 'line'
+    let body = line
+    if (/^#{1,3}\s/.test(line)) {
+      kind = 'heading'
+      body = line.replace(/^#{1,3}\s+/, '')
+    } else if (/^\s*[-*]\s/.test(line)) {
+      kind = 'bullet'
+      body = line.replace(/^\s*[-*]\s+/, '')
+    }
+    const parts = body.split(/\*\*/).map((t, i) => ({ text: t, bold: i % 2 === 1 })).filter((p) => p.text)
+    return { kind, parts }
+  })
+}
+
+/** The legend's place and title, or null without a position. */
+export function parseLegend(input) {
+  if (!isPlainObject(input)) return null
+  const x = Number(input.x)
+  const y = Number(input.y)
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null
+  const legend = compact({ ...input, x: Math.round(x), y: Math.round(y) }, LEGEND_FIELDS)
+  if (legend.hidden !== undefined) legend.hidden = isTrue(legend.hidden)
+  if (!legend.hidden) delete legend.hidden
+  return legend
 }
 
 /** Section attributes with the defaults filled in. */
@@ -467,6 +568,7 @@ export function cardLook(data, nodeTypes) {
   return {
     ...a,
     hideLabel: isTrue(a.hideLabel),
+    shape: isCardShape(a.shape) ? a.shape : 'card',
     imagePosition: IMAGE_POSITIONS.includes(a.imagePosition) ? a.imagePosition : 'top',
     font: a.labelFont ? LABEL_FONTS[a.labelFont]?.css ?? a.labelFont : undefined,
     textColor: a.labelColor ?? readableOn(a.color),
@@ -476,7 +578,7 @@ export function cardLook(data, nodeTypes) {
 export function nodeStyle(data, nodeTypes) {
   const a = resolveNode(data, nodeTypes)
   // A card is HTML drawn by graph.js (Pivotick's `html` channel): no shape behind it.
-  if (a.shape === 'card') return { shape: 'none', color: cardLook(data, nodeTypes).color, size: 4 }
+  if (isCardShape(a.shape)) return { shape: 'none', color: cardLook(data, nodeTypes).color, size: 4 }
   const style = {
     color: a.color,
     shape: SHAPES.includes(a.shape) ? a.shape : DEFAULT_NODE.shape,
@@ -563,9 +665,11 @@ export function fromGraph(graph, base, withPositions = true) {
     // Sections are drawn by Pivograph, not Pivotick: they come from the base.
     sections: (base.sections ?? []).map((s) => ({ ...s })),
     arrows: (base.arrows ?? []).map((a) => structuredClone(a)),
+    notes: (base.notes ?? []).map((n) => ({ ...n })),
     nodes: [],
     edges: [],
   }
+  if (base.legend) doc.legend = { ...base.legend }
   for (const n of graph.getNodes()) {
     const node = { id: String(n.id), ...compact(n.getData(), NODE_FIELDS) }
     if (withPositions && Number.isFinite(n.x) && Number.isFinite(n.y)) {

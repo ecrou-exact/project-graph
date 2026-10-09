@@ -11,6 +11,8 @@ A Pivograph document is a JSON object. All top-level keys are optional; unknown 
   "tags": { "open-source": { … } },
   "sections": [ { "title": "…", "x": 0, "y": 0, … } ],
   "arrows": [ { "from": { "node": "…" }, "to": { "section": "…" }, … } ],
+  "notes": [ { "text": "…", "x": 0, "y": 0, … } ],
+  "legend": { "x": 0, "y": 0, "title": "…" },
   "nodes": [ { "id": "…", … } ],
   "edges": [ { "from": "…", "to": "…", … } ]
 }
@@ -53,7 +55,7 @@ Each node is an object. Only `id` is required.
 | Field | Type | Default | Description |
 |---|---|---|---|
 | `color` | CSS colour | `#4f7cff` | Fill colour. `transparent` works, e.g. for logos. |
-| `shape` | string | `circle` | `circle`, `square`, `triangle`, `hexagon`, or `card`: a rounded box with the image and the label **inside** (see below). |
+| `shape` | string | `circle` | `circle`, `square`, `triangle`, `hexagon` (the label under the shape), or a diagram shape with the text **inside**: `card`, `pill`, `ellipse`, `diamond`, `cylinder`, `document`, `parallelogram` (see below). |
 | `size` | number | `14` | Radius in pixels. |
 | `image` | string | | URL, path relative to the app (`icons/tool.svg`, `logos/misp.png`), or `data:` URL. |
 | `imageFit` | string | `cover` | `cover` (fills the shape), `contain` (whole image inside), `icon` (a glyph on the node's colour), `frame` (square shape framing the image). |
@@ -67,6 +69,8 @@ Each node is an object. Only `id` is required.
 | `hideBadges` | boolean | `false` | Hide the tag pills under the node. |
 
 **Card nodes** (`shape: "card"`) draw the box of a diagram: the image (if any), then the label and an optional `subtitle`, inside the box; edges and arrows end on its border. `color` is the background (default white), `borderColor` / `borderWidth` the border, `labelColor` / `labelSize` / `labelFont` the text (`\n` starts a new line). `size` and `imageFit` don't apply.
+
+The other diagram shapes work like cards, drawn as a flowchart's symbols: `pill` (start / end), `ellipse`, `diamond` (a decision; it grows around its text), `cylinder` (a database), `document` (a report, a file) and `parallelogram` (input / output). Edges end on the box around the shape.
 
 | Field | Type | Default | Description |
 |---|---|---|---|
@@ -172,11 +176,11 @@ Arrows drawn by Pivograph, like sections, for diagrams: unlike an edge, an arrow
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `from`, `to` | object | | **Required.** `{ "node": "id" }`, `{ "section": "id" }` or `{ "x": 0, "y": 0 }`. Add `"at": [u, v]` to place the end on the target's box: `[0, 0]` top-left, `[1, 1]` bottom-right, `[0.5, 1]` the middle of the bottom side. Without `at`, the end sits on the side facing the other end (straight up or down from a section). |
+| `from`, `to` | object | | **Required.** `{ "node": "id" }`, `{ "section": "id" }`, `{ "note": "id" }` or `{ "x": 0, "y": 0 }`. Add `"at": [u, v]` to place the end on the target's box: `[0, 0]` top-left, `[1, 1]` bottom-right, `[0.5, 1]` the middle of the bottom side. Without `at`, the end sits on the side facing the other end (straight up or down from a section). |
 | `label` | string | | `\n` starts a new line. |
 | `description` | string | | Shown when the pointer is over the arrow. |
 | `direction` | string | `forward` | As for edges: `forward`, `backward`, `both`, `none`. |
-| `route` | string | `straight` | `straight` or `elbow` (right angles). |
+| `route` | string | `straight` | `straight`, `elbow` (right angles) or `curved`. |
 | `color`, `width`, `dashed` | | `#343a40`, `2`, `false` | Line. |
 | `labelColor`, `labelSize`, `labelFont`, `labelBackground` | | line colour, `14` | Label; the background defaults to the page colour, `"none"` for none. |
 | `labelOffset` | [dx, dy] | `[0, 0]` | Shift of the label from the middle of the arrow (set by dragging it). |
@@ -188,12 +192,48 @@ Arrows drawn by Pivograph, like sections, for diagrams: unlike an edge, an arrow
 ]
 ```
 
+### notes
+
+Free text on the canvas: a **sticky note** (a coloured box with a shadow) or **bare text** (`"fill": "none"`) for a heading, a comment or an explanation next to a part of the diagram. Add one with *Add → Note*; drag it to move it, drag its bottom-right corner to set its width, double-click to edit it, click it and press Delete to remove it. Arrows can start or end on a note. Notes are part of the PNG and SVG pictures.
+
+The text takes a little Markdown: a line starting with `# ` is a heading, `- ` a bullet, `**bold**` is bold; `\n` starts a new line.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `text` | string | | **Required.** |
+| `x`, `y` | number | | **Required.** Top-left corner, in graph coordinates. |
+| `width` | number | the longest line | The text wraps inside it. |
+| `fill` | CSS colour or `"none"` | `#fff3bf` (yellow) | Background; `"none"` for bare text. |
+| `color` | CSS colour | `#3b3424` | Text colour. |
+| `borderColor` | CSS colour | | A border. |
+| `textSize` | number | `15` | Font size in pixels (headings are 1.3 × bigger). |
+| `font` | string | | As `labelFont`. |
+| `align` | string | `left` | `left`, `center` or `right`. |
+| `id` | string | from the text | Unique. |
+
+```json
+"notes": [
+  { "text": "# Retention\n- alerts: **90 days**\n- cases: 5 years", "x": 820, "y": 40, "width": 220 },
+  { "text": "Draft — to be reviewed", "x": 0, "y": -60, "fill": "none", "textSize": 22, "font": "hand" }
+]
+```
+
+### legend
+
+A box listing the **node and edge types in use** — each with its shape and colour, or its line, dash and arrow — so that a picture of the graph explains itself. *Add → Legend* shows it (in the top-left corner of the view) or hides it; drag it to move it, double-click to change its title. Types nobody uses are left out.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `x`, `y` | number | | **Required.** Top-left corner, in graph coordinates. |
+| `title` | string | `Legend` | `""` for no title. |
+| `hidden` | boolean | `false` | Kept in the document, not drawn. |
+
 ### Validation
 
 Loading a document reports:
 
 - **Errors** — the document is refused: the root is not an object; `nodes`, `edges`, `nodeTypes`, `edgeTypes` or `tags` has the wrong shape; a node has no id; two nodes share an id; an edge lacks `from` or `to`, or points to a node that does not exist.
-- **Warnings** — the document loads, the listed value is ignored: an unknown `shape` or `direction`; a `type` not declared in `nodeTypes` / `edgeTypes`; a `github` value that is not a repository; a duplicate edge id (renamed).
+- **Warnings** — the document loads, the listed value is ignored: an unknown `shape` or `direction`; a section, note or legend without a position; an arrow whose end is missing; a `type` not declared in `nodeTypes` / `edgeTypes`; a `github` value that is not a repository; a duplicate edge id (renamed).
 
 ## Examples
 
