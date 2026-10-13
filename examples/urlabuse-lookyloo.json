@@ -190,18 +190,20 @@
       "label": "MISP modules\n(later)",
       "type": "later",
       "x": 1255,
-      "y": 440,
+      "y": 450,
       "width": 230,
-      "height": 90,
+      "height": 120,
       "description": "Planned provider: expansion and enrichment modules of MISP.",
-      "github": "MISP/misp-modules"
+      "github": "MISP/misp-modules",
+      "image": "logos/misp.png",
+      "imageSize": 60
     },
     {
       "id": "other-services",
       "label": "Other services\n(DNS, WHOIS, reputation...)\n(later)",
       "type": "later",
       "x": 1255,
-      "y": 575,
+      "y": 590,
       "width": 260,
       "height": 110,
       "description": "Planned providers: a URL is a pivot towards many services; each one is plugged into the URL Abuse backend the same way."
