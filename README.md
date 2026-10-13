@@ -2,7 +2,7 @@
 
 Build a **graph of a project's connections** from a simple JSON file, then edit it with the mouse or through forms. Rendering and interaction are powered by the latest version of [Pivotick](https://pivotick.github.io/Pivotick/) (CIRCL).
 
-Bundled examples: projects linked to **Rulezet** (`examples/rulezet.json`), and the **GitHub organisations of CIRCL** (`examples/circl.json`, generated from the GitHub API by `node scripts/circl-example.mjs`), and the **NGSOTI SOC stack** with Rulezet, drawn as a diagram (`examples/ngsoti-soc-stack.json`). All three open read-only.
+Bundled examples: projects linked to **Rulezet** (`examples/rulezet.json`), and the **GitHub organisations of CIRCL** (`examples/circl.json`, generated from the GitHub API by `node scripts/circl-example.mjs`), the **NGSOTI SOC stack** with Rulezet, drawn as a diagram (`examples/ngsoti-soc-stack.json`), and the planned **URL Abuse × Lookyloo** architecture (`examples/urlabuse-lookyloo.json`, `?example=urlabuse`). All of them open read-only.
 
 **Documentation: [ecrou-exact.github.io/project-graph/docs](https://ecrou-exact.github.io/project-graph/docs/)** — the guide (format reference, a step-by-step procedure to map an organization, OCD import, embedding, architecture), plus [`llms.txt`](https://ecrou-exact.github.io/project-graph/llms.txt) and [`llms-full.txt`](https://ecrou-exact.github.io/project-graph/llms-full.txt) for AI agents.
 
@@ -82,7 +82,7 @@ The app can be embedded in an `<iframe>` without its top bar (logo and menus):
 |---|---|
 | `embed=1` | hide the top bar; start empty and read-only; never touch the visitor's saved graph |
 | `src=<url>` | load this JSON at start (a Pivograph graph or an OCD file; the server must allow CORS) |
-| `example=<name>` | open a bundled example: `rulezet`, `circl` or `ngsoti` — e.g. https://ecrou-exact.github.io/project-graph/?example=ngsoti (also without `embed`) |
+| `example=<name>` | open a bundled example: `rulezet`, `circl`, `ngsoti` or `urlabuse` — e.g. https://ecrou-exact.github.io/project-graph/?example=ngsoti (also without `embed`) |
 | `sidebar=0` | hide the side panel |
 | `tags=0` | start with the tag pills hidden |
 

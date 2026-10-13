@@ -3,6 +3,7 @@ import pivotickPackage from 'pivotick/package.json'
 import rulezetExample from '../examples/rulezet.json'
 import circlExample from '../examples/circl.json'
 import ngsotiExample from '../examples/ngsoti-soc-stack.json'
+import urlabuseExample from '../examples/urlabuse-lookyloo.json'
 import { GraphView, faIconSvg } from './graph.js'
 import { faFont, faImage, faLink, faList, faNoteSticky, faObjectUngroup, faPenNib, faPencil, faArrowRight, faStar } from '@fortawesome/free-solid-svg-icons'
 import { outlinePath } from './shapes.js'
@@ -1070,6 +1071,7 @@ const EXAMPLES = {
   rulezet: { name: 'the Rulezet example', doc: locked(rulezetExample) },
   circl: { name: 'the CIRCL example', doc: locked(circlExample) },
   ngsoti: { name: 'the NGSOTI SOC stack example', doc: locked(ngsotiExample) },
+  urlabuse: { name: 'the URL Abuse × Lookyloo example', doc: locked(urlabuseExample) },
 }
 const EXAMPLE = EXAMPLES.rulezet.doc
 
@@ -1632,6 +1634,7 @@ function bindHeader() {
         { label: 'Rulezet example', hint: 'Projects linked to Rulezet', onclick: () => loadExample('rulezet') },
         { label: 'CIRCL example', hint: 'The GitHub organisations of CIRCL', onclick: () => loadExample('circl') },
         { label: 'NGSOTI SOC stack example', hint: 'A drawn diagram: cards, sections, arrows', onclick: () => loadExample('ngsoti') },
+        { label: 'URL Abuse × Lookyloo example', hint: 'Planned architecture: URL Abuse orchestrates, Lookyloo is a provider', onclick: () => loadExample('urlabuse') },
         { label: 'CIRCL organisations…', hint: 'One graph per organisation: its projects', onclick: pickCirclOrganisation },
       ],
     }),
