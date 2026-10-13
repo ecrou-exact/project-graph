@@ -2,7 +2,7 @@
   "version": 1,
   "meta": {
     "title": "URL Abuse × Lookyloo",
-    "description": "Planned architecture: URL Abuse is the single orchestrator (rebuilt backend, API and data stream kept), Lookyloo is one provider called through PyLookyloo, other providers come later. Arrows show the calls and the data flows.",
+    "description": "Planned architecture: URL Abuse is an API broker for URLs (rebuilt backend, web view, public API and incoming data stream kept): it forwards each URL to the providers and returns their answers; Lookyloo is one provider called through PyLookyloo; other providers come later. Arrows show the calls and the data flows.",
     "fixedLayout": true
   },
   "nodeTypes": {
@@ -81,7 +81,7 @@
     },
     {
       "id": "orchestrator",
-      "title": "URL Abuse: orchestrator",
+      "title": "URL Abuse: API broker for URLs",
       "x": 420,
       "y": 110,
       "width": 570,
@@ -133,7 +133,7 @@
       "y": 225,
       "width": 270,
       "height": 100,
-      "description": "URL Abuse (CIRCL): the single place where a URL is checked. Its backend is rebuilt; it orchestrates the providers and aggregates their results.",
+      "description": "URL Abuse (CIRCL): an API broker for URLs. It receives a URL, forwards it to the providers and returns their answers through one API. No analysis of its own: the logic stays in the providers.",
       "image": "logos/url-abuse.png",
       "imageSize": 220,
       "hideLabel": true,
@@ -162,13 +162,13 @@
     },
     {
       "id": "backend",
-      "label": "Backend (rebuilt)\norchestrates providers,\naggregates the results",
+      "label": "Broker (rebuilt)\nforwards the URL to the\nproviders, returns\ntheir answers",
       "type": "step",
       "x": 845,
       "y": 450,
       "width": 250,
-      "height": 130,
-      "description": "Almost nothing exists in the current URL Abuse backend: it is rewritten. It calls each provider through its own client library and builds one report per URL."
+      "height": 140,
+      "description": "The URL Abuse backend is rewritten as a broker: one call per provider through its client library (PyLookyloo, ...), answers returned as they are, side by side. No analysis logic of its own."
     },
     {
       "id": "lookyloo",
@@ -210,12 +210,12 @@
     },
     {
       "id": "decisions",
-      "label": "Decisions\n\n• One implementation: the logic lives in URL Abuse, not duplicated in Lookyloo.\n• Lookyloo stays a provider like any other, called with PyLookyloo (which has all the calls); no URL Abuse view or logic inside Lookyloo.\n• The URL Abuse API and the incoming data stream are kept for compatibility.\n• Other providers (MISP modules, pivot services) are added later in the same way.",
+      "label": "Decisions\n\n• URL Abuse is only an API broker for URLs: it forwards to the providers and returns their answers.\n• One implementation: the analysis lives in the providers (Lookyloo...), nothing is duplicated in URL Abuse.\n• Lookyloo stays a provider like any other, called with PyLookyloo (which has all the calls); no URL Abuse view or logic inside Lookyloo.\n• The URL Abuse API and the incoming data stream are kept for compatibility.\n• Other providers (MISP modules, pivot services) are added later in the same way.",
       "type": "note-card",
       "x": 750,
-      "y": 800,
+      "y": 810,
       "width": 1420,
-      "height": 190,
+      "height": 210,
       "description": "What was agreed for the URL Abuse / Lookyloo integration."
     }
   ],
