@@ -18,7 +18,7 @@
     "@fortawesome/free-brands-svg-icons": "^7.3.1",
     "@fortawesome/free-solid-svg-icons": "^7.3.1",
     "marked": "^18.0.14",
-    "pivotick": "latest"
+    "pivotick": "^3.0.0"
   },
   "devDependencies": {
     "highlight.js": "^11.12.0",
